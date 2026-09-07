@@ -20,6 +20,7 @@ body { font-family: 'Inter', sans-serif; }
 .blk:hover { transform: scale(1.03); box-shadow: 0 4px 10px rgba(0,0,0,0.25); z-index: 30 !important; }
 .blk.dragging { opacity: 0.35; }
 .day-col.drag-over { background: #dbeafe; outline: 2px dashed #2563eb; outline-offset: -3px; }
+.day-col.drag-over .slot:hover::after { content: ''; }
 .readonly .slot:hover { background: transparent; cursor: default; }
 .readonly .slot:hover::after { content: ''; }
 .readonly .blk { cursor: default; }
@@ -44,6 +45,7 @@ body { font-family: 'Inter', sans-serif; }
   </div>
 </div>
 
+<!-- ============ HEADER ============ -->
 <header class="text-white sticky top-0 z-50 shadow-lg" style="background: linear-gradient(135deg, #1a2744 0%, #2d4373 100%);">
   <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between flex-wrap gap-3">
     <div class="flex items-center gap-3">
@@ -233,31 +235,14 @@ body { font-family: 'Inter', sans-serif; }
 </section>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, set, update, remove, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-
 /* =====================================================
-   ⚠️ À PERSONNALISER : email qui devient ADMIN au 1er lancement
+   Import unique depuis firebase.js (config centralisée)
 ===================================================== */
-const ADMIN_EMAIL = 'votre.email@entreprise.com';
-
-/* Même projet Firebase que Pilotage_Projet / Ticket_GLPI */
-const firebaseConfig = {
-  apiKey: "AIzaSyDfFtIqMSOddPS6NG4AQqDJ2W3KaBfKzUE",
-  authDomain: "pilotage-gantt.firebaseapp.com",
-  databaseURL: "https://pilotage-gantt-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "pilotage-gantt",
-  storageBucket: "pilotage-gantt.firebasestorage.app",
-  messagingSenderId: "1064606456262",
-  appId: "1:1064606456262:web:39e19391518d3cab93fac7"
-};
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const auth = getAuth(app);
-/* App secondaire : permet à l'admin de créer des comptes SANS perdre sa session */
-const secondaryApp = initializeApp(firebaseConfig, 'secondary');
-const secondaryAuth = getAuth(secondaryApp);
+import {
+  db, auth, secondaryAuth, ADMIN_EMAIL, PATHS,
+  ref, set, update, remove, onValue, query, orderByChild, equalTo,
+  signInWithEmailAndPassword, signOut, onAuthStateChanged, createUserWithEmailAndPassword
+} from './firebase.js';
 
 const CATS = [
   { key: 'projet',     label: '🚀 Projets',         color: '#2563eb', trace: 'Pilotage_Projet' },
@@ -269,13 +254,12 @@ const JOURS = ['Lundi','Mardi','Mercredi','Jeudi','Vendredi'];
 const DAY_START = 8, DAY_END = 18, ROW_H = 46;
 const ROLE_STYLE = { agent: ['🟢','bg-green-100 text-green-700'], manager: ['🔵','bg-blue-100 text-blue-700'], admin: ['🔴','bg-red-100 text-red-700'] };
 
-let me = null;             // {uid, name, email, role}
-let allUsers = {};         // uid -> user
-let allBlocks = [];        // tous les blocs lisibles par mon rôle
+let me = null, allUsers = {}, allBlocks = [];
 let config = { hoursWeek: 35, weeks: 47, etp: 10, taux: 55 };
 let refs = { projet: [], mco: [], support: [], transverse: [] };
-let viewedUid = null;      // planning affiché
-let editingBlockId = null, draggedBlockId = null, chartAgents = null, bootstrapped = false;
+let viewedUid = null, editingBlockId = null, draggedBlockId = null;
+let chartAgents = null, bootstrapped = false, blocksListenerOn = false;
+let unsubs = [];
 
 const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
 const fmt = n => n.toFixed(1).replace('.0','');
@@ -299,34 +283,64 @@ onAuthStateChanged(auth, user => {
   if (user) {
     me = { uid: user.uid, email: user.email, name: user.email.split('@')[0], role: null };
     bootstrapped = false;
+    clearListeners();
     document.getElementById('login-screen').classList.add('hidden');
     startListeners();
   } else {
-    me = null; viewedUid = null;
+    clearListeners();
+    me = null; viewedUid = null; allBlocks = []; allUsers = {};
     document.getElementById('login-screen').classList.remove('hidden');
+    document.getElementById('session-badge').classList.add('hidden');
+    document.getElementById('session-badge').classList.remove('flex');
   }
 });
 
+function clearListeners() { unsubs.forEach(u => u()); unsubs = []; blocksListenerOn = false; }
+
 function startListeners() {
-  onValue(ref(db, 'cc_users'), snap => { allUsers = snap.val() || {}; ensureOwnRecord(); renderUsers(); renderUserSelect(); refreshAll(); });
-  onValue(ref(db, 'cc_blocks'), snap => { allBlocks = Object.values(snap.val() || {}).map(b => b); refreshAll(); });
-  onValue(ref(db, 'cc_config'), snap => { if (snap.val()) config = { ...config, ...snap.val() }; loadConfigInputs(); refreshAll(); });
-  onValue(ref(db, 'cc_refs'), snap => { const v = snap.val() || {}; CATS.forEach(c => refs[c.key] = v[c.key] ? Object.values(v[c.key]) : (refs[c.key] || [])); renderRefPanel(); });
+  unsubs.push(onValue(ref(db, PATHS.users), snap => {
+    allUsers = snap.val() || {};
+    ensureOwnRecord();
+    renderUsers(); renderUserSelect(); refreshAll();
+  }));
+  unsubs.push(onValue(ref(db, PATHS.config), snap => {
+    if (snap.val()) config = { ...config, ...snap.val() };
+    loadConfigInputs(); refreshAll();
+  }));
+  unsubs.push(onValue(ref(db, PATHS.refs), snap => {
+    const v = snap.val() || {};
+    CATS.forEach(c => refs[c.key] = v[c.key] ? Object.values(v[c.key]) : (refs[c.key] || []));
+    renderRefPanel();
+  }));
 }
 
-/* Création automatique du profil au 1er login (bootstrap admin) */
+/* Abonnement blocs SELON le rôle (confidentialité côté serveur) */
+function setupBlocksListener() {
+  if (blocksListenerOn || !me || !me.role) return;
+  blocksListenerOn = true;
+  const target = (me.role === 'agent')
+    ? query(ref(db, PATHS.blocks), orderByChild('owner'), equalTo(me.uid))
+    : ref(db, PATHS.blocks);
+  unsubs.push(onValue(target, snap => {
+    allBlocks = Object.values(snap.val() || {});
+    refreshAll();
+  }, err => console.warn('Accès blocs refusé :', err.code));
+}
+
+/* Création auto du profil au 1er login (bootstrap admin) */
 function ensureOwnRecord() {
   if (!me || bootstrapped) return;
   const rec = allUsers[me.uid];
   if (rec) {
     bootstrapped = true;
     me.name = rec.name || me.name; me.role = rec.role || 'agent';
-    if (rec.active === false) { alert(' Compte désactivé. Contactez votre administrateur.'); signOut(auth); return; }
+    if (rec.active === false) { alert('Compte désactivé. Contactez votre administrateur.'); signOut(auth); return; }
     enterApp();
-  } else if (Object.keys(allUsers).length || me.email === ADMIN_EMAIL) {
-    const role = (Object.keys(allUsers).length === 0 || me.email === ADMIN_EMAIL) ? 'admin' : 'agent';
+    setupBlocksListener();
+  } else {
     bootstrapped = true;
-    set(ref(db, 'cc_users/' + me.uid), { name: me.name, email: me.email, role, active: true, createdAt: Date.now() });
+    const role = (Object.keys(allUsers).length === 0 || me.email === ADMIN_EMAIL) ? 'admin' : 'agent';
+    set(ref(db, PATHS.users + '/' + me.uid), { name: me.name, email: me.email, role, active: true, createdAt: Date.now() });
   }
 }
 
@@ -370,10 +384,10 @@ function refreshAll() {
   if (!document.getElementById('view-users').classList.contains('hidden')) renderUsers();
 }
 
-/* ---------- SÉLECTEUR DE PLANNING (manager/admin) ---------- */
+/* ---------- SÉLECTEUR DE PLANNING ---------- */
 function renderUserSelect() {
-  const wrap = document.getElementById('agent-controls');
   if (!me) return;
+  const wrap = document.getElementById('agent-controls');
   if (!isPrivileged()) { wrap.classList.add('hidden'); wrap.classList.remove('flex'); viewedUid = me.uid; return; }
   wrap.classList.remove('hidden'); wrap.classList.add('flex');
   const sel = document.getElementById('agent-select');
@@ -456,7 +470,7 @@ window.onDrop = (e, day) => {
   const rect = e.currentTarget.getBoundingClientRect();
   let start = DAY_START + Math.floor(((e.clientY - rect.top) / ROW_H) * 2) / 2;
   start = Math.min(Math.max(start, DAY_START), DAY_END - b.duration);
-  update(ref(db, 'cc_blocks/' + id), { day, start });
+  update(ref(db, PATHS.blocks + '/' + id), { day, start });
 };
 
 /* ---------- MODAL BLOC ---------- */
@@ -489,11 +503,11 @@ window.saveBlock = () => {
   let dur = parseFloat(document.getElementById('m-dur').value);
   if (start + dur > DAY_END) dur = DAY_END - start;
   const data = { cat: document.getElementById('m-cat').value, label: document.getElementById('m-label').value.trim(), day: document.getElementById('m-day').value, start, duration: dur };
-  if (editingBlockId) update(ref(db, 'cc_blocks/' + editingBlockId), data);
-  else set(ref(db, 'cc_blocks/' + 'b' + Date.now()), { id: 'b' + Date.now(), owner: viewedUid, ...data });
+  if (editingBlockId) update(ref(db, PATHS.blocks + '/' + editingBlockId), data);
+  else { const id = 'b' + Date.now(); set(ref(db, PATHS.blocks + '/' + id), { id, owner: viewedUid, ...data }); }
   closeModal();
 };
-window.deleteBlock = () => { if (editingBlockId && canEdit()) remove(ref(db, 'cc_blocks/' + editingBlockId)); closeModal(); };
+window.deleteBlock = () => { if (editingBlockId && canEdit()) remove(ref(db, PATHS.blocks + '/' + editingBlockId)); closeModal(); };
 
 /* ---------- SYNTHÈSE ---------- */
 function totalsOf(uid) {
@@ -525,12 +539,12 @@ function renderRefPanel() {
   if (!editable) return;
   panel.querySelectorAll('[data-del-ref]').forEach(btn => btn.onclick = () => {
     const cat = btn.dataset.delRef, arr = [...refs[cat]]; arr.splice(parseInt(btn.dataset.idx), 1);
-    set(ref(db, 'cc_refs/' + cat), arr);
+    set(ref(db, PATHS.refs + '/' + cat), arr);
   });
   panel.querySelectorAll('[data-add-ref]').forEach(btn => btn.onclick = () => {
     const cat = btn.dataset.addRef, inp = document.getElementById('ref-input-' + cat), v = inp.value.trim();
     if (!v || refs[cat].includes(v)) return;
-    set(ref(db, 'cc_refs/' + cat), [...refs[cat], v]);
+    set(ref(db, PATHS.refs + '/' + cat), [...refs[cat], v]);
   });
 }
 
@@ -543,7 +557,7 @@ function loadConfigInputs() {
 }
 window.saveConfigFromInputs = () => {
   if (!isAdmin()) return;
-  set(ref(db, 'cc_config'), {
+  set(ref(db, PATHS.config), {
     hoursWeek: parseFloat(document.getElementById('cfg-hours-week').value) || 35,
     weeks: parseFloat(document.getElementById('cfg-weeks').value) || 47,
     etp: parseFloat(document.getElementById('cfg-etp').value) || 10,
@@ -552,8 +566,8 @@ window.saveConfigFromInputs = () => {
 };
 window.purgeBlocks = () => {
   if (!isAdmin() || !confirm('⚠️ Supprimer TOUS les blocs de TOUS les agents ?')) return;
-  if (!confirm('Confirmation finale : cette action est irréversible.')) return;
-  remove(ref(db, 'cc_blocks'));
+  if (!confirm('Confirmation finale : action irréversible.')) return;
+  remove(ref(db, PATHS.blocks));
 };
 
 /* ---------- UTILISATEURS (ADMIN) ---------- */
@@ -565,19 +579,19 @@ window.createUser = async () => {
   if (!name || !email || pass.length < 6) { alert('Nom, email et mot de passe (6 car. min) requis.'); return; }
   try {
     const cred = await createUserWithEmailAndPassword(secondaryAuth, email, pass);
-    await set(ref(db, 'cc_users/' + cred.user.uid), { name, email, role, active: true, createdAt: Date.now() });
-    await signOut(secondaryAuth);   // ← garde MA session admin intacte
+    await set(ref(db, PATHS.users + '/' + cred.user.uid), { name, email, role, active: true, createdAt: Date.now() });
+    await signOut(secondaryAuth);
     ['nu-name','nu-email','nu-pass'].forEach(id => document.getElementById(id).value = '');
     alert('✅ Compte créé pour ' + name + ' (rôle ' + role + ')');
   } catch (e) { alert('❌ ' + e.message); }
 };
-window.changeRole = (uid, role) => update(ref(db, 'cc_users/' + uid), { role });
-window.toggleActive = uid => update(ref(db, 'cc_users/' + uid), { active: allUsers[uid].active === false });
+window.changeRole = (uid, role) => update(ref(db, PATHS.users + '/' + uid), { role });
+window.toggleActive = uid => update(ref(db, PATHS.users + '/' + uid), { active: allUsers[uid].active === false });
 
 function renderUsers() {
   if (!isAdmin()) return;
-  const body = document.getElementById('users-table-body');
-  body.innerHTML = Object.entries(allUsers).sort((a,b) => (a[1].name||'').localeCompare(b[1].name||'')).map(([uid,u]) => `
+  document.getElementById('users-table-body').innerHTML = Object.entries(allUsers)
+    .sort((a,b) => (a[1].name||'').localeCompare(b[1].name||'')).map(([uid,u]) => `
     <tr class="border-b border-slate-100 hover:bg-slate-50">
       <td class="p-3 font-bold text-slate-800">${esc(u.name)} ${uid === me.uid ? '<span class="text-[10px] text-slate-400">(vous)</span>' : ''}</td>
       <td class="p-3 text-slate-500 text-xs">${esc(u.email)}</td>
@@ -619,7 +633,7 @@ function renderManager() {
       <td class="text-center p-3 font-black">${fmt(t.total)}h</td>
       <td class="text-center p-3 font-black">${taux}% <span class="text-[10px] font-bold text-slate-400">${badge}</span></td></tr>`;
   }).join('');
-  const tauxGlobal = Math.round(T.total / (config.hoursWeek * users.length) * 100) || 0;
+  const tauxGlobal = users.length ? Math.round(T.total / (config.hoursWeek * users.length) * 100) : 0;
   document.getElementById('manager-table-foot').innerHTML = `<tr><td class="p-3">TOTAL (${users.length})</td>
     <td class="text-center p-3">${fmt(T.projet)}h</td><td class="text-center p-3">${fmt(T.mco)}h</td><td class="text-center p-3">${fmt(T.support)}h</td><td class="text-center p-3">${fmt(T.transverse)}h</td>
     <td class="text-center p-3 text-lg">${fmt(T.total)}h</td><td class="text-center p-3"><span class="px-3 py-1.5 bg-slate-900 text-white rounded-lg font-black">${tauxGlobal}%</span></td></tr>`;
