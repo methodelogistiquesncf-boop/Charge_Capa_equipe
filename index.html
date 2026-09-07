@@ -13,22 +13,18 @@ body { font-family: 'Inter', sans-serif; }
 .bar-fill-load { transition: width 0.8s ease-out; }
 .fade-in { animation: fadeIn 0.4s ease-out; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-@media print {
-  .no-print { display: none !important; }
-  body { background: white; }
-}
+@media print { .no-print { display: none !important; } body { background: white; } }
 </style>
 </head>
 <body class="bg-slate-50 min-h-screen">
 
-<!-- ============ HEADER ============ -->
 <header class="text-white sticky top-0 z-50 shadow-lg" style="background: linear-gradient(135deg, #1a2744 0%, #2d4373 100%);">
   <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between flex-wrap gap-3">
     <div class="flex items-center gap-3">
       <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center font-black">C/C</div>
       <div>
         <h1 class="text-lg font-black">Semaine Type - Charge / Capacité</h1>
-        <p class="text-white/60 text-xs font-medium">MODE TEST LOCAL (localStorage) · <span id="save-indicator" class="text-emerald-300">💾 Prêt</span></p>
+        <p class="text-white/60 text-xs font-medium">MODE TEST LOCAL · <span id="save-indicator" class="text-emerald-300">💾 Prêt</span></p>
       </div>
     </div>
     <nav class="flex gap-1 bg-white/10 rounded-xl p-1 no-print">
@@ -45,7 +41,7 @@ body { font-family: 'Inter', sans-serif; }
     <div class="p-6 border-b border-slate-200 flex flex-wrap justify-between items-center gap-4">
       <div>
         <h2 class="text-xl font-black text-slate-800">📝 Saisie de la semaine type</h2>
-        <p class="text-sm text-slate-500 mt-1">Heures <strong>moyennes</strong> par jour · <span class="text-emerald-600 font-bold">Sauvegarde automatique activée</span></p>
+        <p class="text-sm text-slate-500 mt-1">Heures moyennes par jour · <span class="text-emerald-600 font-bold">Sauvegarde automatique</span></p>
       </div>
       <div class="flex gap-2 items-center">
         <select id="agent-select" onchange="selectAgent(this.value)" class="p-2.5 rounded-xl border border-slate-200 font-semibold text-sm outline-none focus:border-blue-500">
@@ -55,40 +51,36 @@ body { font-family: 'Inter', sans-serif; }
       </div>
     </div>
 
-    <!-- Légende -->
     <div class="p-6 bg-slate-50 border-b border-slate-200">
       <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
-        <div class="flex items-center gap-2 p-3 bg-white rounded-lg border border-slate-200">
-          <div class="w-3 h-3 rounded-full" style="background:#2563eb"></div>
-          <div><strong class="text-slate-800">🚀 Projets</strong><br><span class="text-slate-500">Lean, investissements, nouveaux process</span></div>
-        </div>
-        <div class="flex items-center gap-2 p-3 bg-white rounded-lg border border-slate-200">
-          <div class="w-3 h-3 rounded-full" style="background:#dc2626"></div>
-          <div><strong class="text-slate-800">🔧 MCO</strong><br><span class="text-slate-500">Standards, procédures, support N2/N3</span></div>
-        </div>
-        <div class="flex items-center gap-2 p-3 bg-white rounded-lg border border-slate-200">
-          <div class="w-3 h-3 rounded-full" style="background:#ea580c"></div>
-          <div><strong class="text-slate-800">🆘 Support terrain</strong><br><span class="text-slate-500">Urgences, audits, troubleshooting</span></div>
-        </div>
-        <div class="flex items-center gap-2 p-3 bg-white rounded-lg border border-slate-200">
-          <div class="w-3 h-3 rounded-full" style="background:#475569"></div>
-          <div><strong class="text-slate-800">📋 Transverse</strong><br><span class="text-slate-500">Réunions, reporting, formation</span></div>
-        </div>
+        <div class="flex items-center gap-2 p-3 bg-white rounded-lg border border-slate-200"><div class="w-3 h-3 rounded-full" style="background:#2563eb"></div><div><strong>🚀 Projets</strong><br><span class="text-slate-500">Lean, investissements, nouveaux process</span></div></div>
+        <div class="flex items-center gap-2 p-3 bg-white rounded-lg border border-slate-200"><div class="w-3 h-3 rounded-full" style="background:#dc2626"></div><div><strong>🔧 MCO</strong><br><span class="text-slate-500">Standards, procédures, support N2/N3</span></div></div>
+        <div class="flex items-center gap-2 p-3 bg-white rounded-lg border border-slate-200"><div class="w-3 h-3 rounded-full" style="background:#ea580c"></div><div><strong>🆘 Support terrain</strong><br><span class="text-slate-500">Urgences, audits, troubleshooting</span></div></div>
+        <div class="flex items-center gap-2 p-3 bg-white rounded-lg border border-slate-200"><div class="w-3 h-3 rounded-full" style="background:#475569"></div><div><strong>📋 Transverse</strong><br><span class="text-slate-500">Réunions, reporting, formation</span></div></div>
       </div>
     </div>
 
-    <!-- Grille -->
     <div class="p-6" id="saisie-grid">
-      <div class="text-center text-slate-400 py-16">
-        <div class="text-5xl mb-3">👤</div>
-        <p class="font-semibold">Sélectionnez ou créez un agent pour commencer</p>
-      </div>
+      <div class="text-center text-slate-400 py-16"><div class="text-5xl mb-3">👤</div><p class="font-semibold">Sélectionnez ou créez un agent pour commencer</p></div>
     </div>
 
-    <!-- Totaux -->
     <div id="agent-totals" class="hidden p-6 bg-slate-50 border-t border-slate-200">
       <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4" id="totals-cards"></div>
       <div id="agent-status" class="text-sm font-semibold text-center"></div>
+    </div>
+
+    <!-- ===== NOUVEAU : DÉTAIL DES ACTIVITÉS ===== -->
+    <div id="detail-section" class="hidden p-6 border-t-4 border-slate-200">
+      <div class="flex justify-between items-center mb-4 flex-wrap gap-3">
+        <div>
+          <h3 class="font-black text-slate-800 text-lg">🔎 Détail des activités</h3>
+          <p class="text-xs text-slate-500">Précisez <strong>sur quoi</strong> portent les heures : quel projet, quel type de MCO, quelle intervention terrain… (heures / semaine)</p>
+        </div>
+        <div class="flex gap-1 bg-slate-100 rounded-xl p-1" id="detail-tabs"></div>
+      </div>
+      <div id="detail-coherence" class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4"></div>
+      <div id="detail-table" class="overflow-x-auto"></div>
+      <button onclick="addDetailLine()" class="mt-3 bg-slate-800 hover:bg-slate-900 text-white px-4 py-2.5 rounded-xl font-bold text-sm">+ Ajouter une ligne de détail</button>
     </div>
   </div>
 </section>
@@ -101,49 +93,48 @@ body { font-family: 'Inter', sans-serif; }
         <h2 class="text-xl font-black text-slate-800">📋 Vue Manager - Consolidation</h2>
         <p class="text-sm text-slate-500 mt-1">Données locales du navigateur (mode test)</p>
       </div>
-      <button onclick="resetAll()" class="no-print bg-red-50 hover:bg-red-100 text-red-700 px-4 py-2.5 rounded-xl font-bold text-sm">🗑️ Réinitialiser les tests</button>
+      <button onclick="resetAll()" class="no-print bg-red-50 hover:bg-red-100 text-red-700 px-4 py-2.5 rounded-xl font-bold text-sm">🗑️ Réinitialiser</button>
     </div>
 
     <div class="p-6 bg-slate-50 border-b border-slate-200">
-      <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">⚙️ Paramètres de projection annuelle (sauvegarde auto)</h3>
+      <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">⚙️ Paramètres de projection annuelle</h3>
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1.5">Heures contrat / semaine</label>
-          <input type="number" id="cfg-hours-week" value="35" min="1" max="50" step="0.5" oninput="saveConfigFromInputs()" class="w-full p-2 rounded-lg border border-slate-200 text-sm font-bold text-center">
-        </div>
-        <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1.5">Semaines travaillées / an</label>
-          <input type="number" id="cfg-weeks" value="47" min="1" max="52" oninput="saveConfigFromInputs()" class="w-full p-2 rounded-lg border border-slate-200 text-sm font-bold text-center">
-        </div>
-        <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1.5">Effectif cible (ETP)</label>
-          <input type="number" id="cfg-etp" value="10" min="1" max="100" oninput="saveConfigFromInputs()" class="w-full p-2 rounded-lg border border-slate-200 text-sm font-bold text-center">
-        </div>
-        <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1.5">Taux horaire chargé (€)</label>
-          <input type="number" id="cfg-taux" value="55" min="1" oninput="saveConfigFromInputs()" class="w-full p-2 rounded-lg border border-slate-200 text-sm font-bold text-center">
-        </div>
+        <div><label class="block text-xs font-semibold text-slate-600 mb-1.5">Heures contrat / sem.</label><input type="number" id="cfg-hours-week" value="35" oninput="saveConfigFromInputs()" class="w-full p-2 rounded-lg border border-slate-200 text-sm font-bold text-center"></div>
+        <div><label class="block text-xs font-semibold text-slate-600 mb-1.5">Semaines / an</label><input type="number" id="cfg-weeks" value="47" oninput="saveConfigFromInputs()" class="w-full p-2 rounded-lg border border-slate-200 text-sm font-bold text-center"></div>
+        <div><label class="block text-xs font-semibold text-slate-600 mb-1.5">Effectif cible (ETP)</label><input type="number" id="cfg-etp" value="10" oninput="saveConfigFromInputs()" class="w-full p-2 rounded-lg border border-slate-200 text-sm font-bold text-center"></div>
+        <div><label class="block text-xs font-semibold text-slate-600 mb-1.5">Taux horaire (€)</label><input type="number" id="cfg-taux" value="55" oninput="saveConfigFromInputs()" class="w-full p-2 rounded-lg border border-slate-200 text-sm font-bold text-center"></div>
       </div>
+    </div>
+
+    <!-- ===== NOUVEAU : RÉFÉRENTIELS ===== -->
+    <div class="p-6 bg-slate-50 border-b border-slate-200">
+      <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">🏷️ Référentiels d'activités (suggestions proposées aux agents)</h3>
+      <div class="grid md:grid-cols-4 gap-4" id="ref-panel"></div>
     </div>
 
     <div class="overflow-x-auto">
       <table class="w-full text-sm">
-        <thead>
-          <tr class="bg-slate-800 text-white">
-            <th class="text-left p-3 font-bold text-xs uppercase">Agent</th>
-            <th class="text-center p-3 font-bold text-xs uppercase text-blue-300">🚀 Projets</th>
-            <th class="text-center p-3 font-bold text-xs uppercase text-red-300">🔧 MCO</th>
-            <th class="text-center p-3 font-bold text-xs uppercase text-orange-300">🆘 Support</th>
-            <th class="text-center p-3 font-bold text-xs uppercase text-slate-300">📋 Trans.</th>
-            <th class="text-center p-3 font-bold text-xs uppercase">Total/sem</th>
-            <th class="text-center p-3 font-bold text-xs uppercase">Annuel</th>
-            <th class="text-center p-3 font-bold text-xs uppercase">Taux C/C</th>
-            <th class="text-center p-3 font-bold text-xs uppercase no-print">Action</th>
-          </tr>
-        </thead>
+        <thead><tr class="bg-slate-800 text-white">
+          <th class="text-left p-3 font-bold text-xs uppercase">Agent</th>
+          <th class="text-center p-3 font-bold text-xs uppercase text-blue-300">🚀 Projets</th>
+          <th class="text-center p-3 font-bold text-xs uppercase text-red-300">🔧 MCO</th>
+          <th class="text-center p-3 font-bold text-xs uppercase text-orange-300">🆘 Support</th>
+          <th class="text-center p-3 font-bold text-xs uppercase text-slate-300">📋 Trans.</th>
+          <th class="text-center p-3 font-bold text-xs uppercase">Total/sem</th>
+          <th class="text-center p-3 font-bold text-xs uppercase">Cohérence détail</th>
+          <th class="text-center p-3 font-bold text-xs uppercase">Taux C/C</th>
+          <th class="text-center p-3 font-bold text-xs uppercase no-print">Action</th>
+        </tr></thead>
         <tbody id="manager-table-body"></tbody>
         <tfoot id="manager-table-foot" class="bg-slate-100 font-black"></tfoot>
       </table>
+    </div>
+
+    <!-- ===== NOUVEAU : AGRÉGAT PAR ACTIVITÉ ===== -->
+    <div class="p-6 border-t border-slate-200">
+      <h3 class="font-black text-slate-800 mb-1">🔎 Où partent les heures ? (agrégé tous agents)</h3>
+      <p class="text-xs text-slate-500 mb-4">Cumul des lignes de détail de toute l'équipe — permet de montrer quels projets / types d'activités consomment la capacité</p>
+      <div class="overflow-x-auto"><table class="w-full text-sm"><tbody id="agg-table-body"></tbody></table></div>
     </div>
   </div>
 </section>
@@ -163,26 +154,21 @@ body { font-family: 'Inter', sans-serif; }
     <div class="p-8">
       <div class="grid grid-cols-2 md:grid-cols-4 gap-5 mb-8" id="dash-kpis"></div>
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <div class="bg-slate-50 p-6 rounded-xl">
-          <h3 class="font-black text-slate-800 mb-4">Répartition de la charge par activité</h3>
-          <div id="dash-bars"></div>
-        </div>
-        <div class="bg-slate-50 p-6 rounded-xl">
-          <h3 class="font-black text-slate-800 mb-4">Charge vs Capacité par agent</h3>
-          <canvas id="chart-agents" height="250"></canvas>
-        </div>
+        <div class="bg-slate-50 p-6 rounded-xl"><h3 class="font-black text-slate-800 mb-4">Répartition par catégorie</h3><div id="dash-bars"></div></div>
+        <div class="bg-slate-50 p-6 rounded-xl"><h3 class="font-black text-slate-800 mb-4">Charge vs Capacité par agent</h3><canvas id="chart-agents" height="250"></canvas></div>
+      </div>
+      <!-- ===== NOUVEAU : TOP ACTIVITÉS ===== -->
+      <div class="bg-slate-50 p-6 rounded-xl mb-8">
+        <h3 class="font-black text-slate-800 mb-1">🔥 Top activités consommatrices (tous agents)</h3>
+        <p class="text-xs text-slate-500 mb-4">Heures/semaine cumulées, issues du détail saisi par chaque agent</p>
+        <div id="dash-top"></div>
       </div>
       <table class="w-full mb-6 border border-slate-200 rounded-lg overflow-hidden">
-        <thead>
-          <tr class="bg-slate-900 text-white">
-            <th class="text-left p-3 font-bold text-xs uppercase">Activité</th>
-            <th class="text-left p-3 font-bold text-xs uppercase">Traçabilité</th>
-            <th class="text-center p-3 font-bold text-xs uppercase">Volume/semaine</th>
-            <th class="text-center p-3 font-bold text-xs uppercase">Charge (h/an)</th>
-            <th class="text-center p-3 font-bold text-xs uppercase">% charge</th>
-            <th class="text-center p-3 font-bold text-xs uppercase">Statut</th>
-          </tr>
-        </thead>
+        <thead><tr class="bg-slate-900 text-white">
+          <th class="text-left p-3 font-bold text-xs uppercase">Activité</th><th class="text-left p-3 font-bold text-xs uppercase">Traçabilité</th>
+          <th class="text-center p-3 font-bold text-xs uppercase">Volume/sem</th><th class="text-center p-3 font-bold text-xs uppercase">Charge (h/an)</th>
+          <th class="text-center p-3 font-bold text-xs uppercase">% charge</th><th class="text-center p-3 font-bold text-xs uppercase">Statut</th>
+        </tr></thead>
         <tbody id="dash-detail"></tbody>
       </table>
       <div id="dash-recommandation" class="rounded-xl p-6 border-l-4"></div>
@@ -191,237 +177,308 @@ body { font-family: 'Inter', sans-serif; }
 </section>
 
 <script>
-/* =====================================================
-   VERSION TEST LOCAL - localStorage
-   Toute modification est sauvegardée automatiquement.
-===================================================== */
-const STORAGE_KEY = 'cc_semaine_type_v1';
+const STORAGE_KEY = 'cc_semaine_type_v2';
 const CATS = [
   { key: 'projet',     label: '🚀 Projets',         color: '#2563eb', trace: 'Pilotage_Projet' },
   { key: 'mco',        label: '🔧 MCO',             color: '#dc2626', trace: 'Ticket_GLPI' },
   { key: 'support',    label: '🆘 Support terrain', color: '#ea580c', trace: 'Non tracé' },
   { key: 'transverse', label: '📋 Transverse',      color: '#475569', trace: 'Estimation' }
 ];
-const JOURS = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi'];
+const JOURS = ['Lundi','Mardi','Mercredi','Jeudi','Vendredi'];
+const DEFAULT_REFS = {
+  projet: ["Amélioration continue / Lean", "Projets investissement", "Nouveaux process", "Études & chiffrages"],
+  mco: ["Procédures & standards", "Support N2/N3", "Résolution d'écarts", "Maintenance des outils"],
+  support: ["Urgences production", "Audits inopinés", "Troubleshooting terrain", "Assistance démarrages"],
+  transverse: ["Réunions", "Reporting", "Formation", "Veille"]
+};
 
 let state = loadState();
 let currentAgent = null;
+let currentDetailCat = 'projet';
 let chartAgents = null;
 let saveTimer = null;
 
 /* ---------- PERSISTANCE ---------- */
 function defaultState() {
-  return {
-    agents: {},
-    config: { hoursWeek: 35, weeks: 47, etp: 10, taux: 55 }
-  };
+  return { agents: {}, config: { hoursWeek: 35, weeks: 47, etp: 10, taux: 55 }, referentiels: JSON.parse(JSON.stringify(DEFAULT_REFS)) };
 }
 function loadState() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return defaultState();
-    const parsed = JSON.parse(raw);
-    // Fusion avec défauts (sécurité si structure incomplète)
-    return {
-      agents: parsed.agents || {},
-      config: { ...defaultState().config, ...(parsed.config || {}) }
+    const p = JSON.parse(raw);
+    const s = {
+      agents: p.agents || {},
+      config: { ...defaultState().config, ...(p.config || {}) },
+      referentiels: { ...JSON.parse(JSON.stringify(DEFAULT_REFS)), ...(p.referentiels || {}) }
     };
-  } catch (e) {
-    console.error('Erreur lecture localStorage', e);
-    return defaultState();
-  }
+    // Migration : garantir la structure details
+    Object.values(s.agents).forEach(ag => {
+      if (!ag.semaine) ag.semaine = emptyWeek();
+      if (!ag.details) ag.details = { projet: [], mco: [], support: [], transverse: [] };
+      CATS.forEach(c => { if (!Array.isArray(ag.details[c.key])) ag.details[c.key] = []; });
+    });
+    return s;
+  } catch (e) { return defaultState(); }
 }
-function saveState() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  flashSaved();
-}
+function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); flashSaved(); }
 function saveDebounced() {
   setIndicator('⏳ Enregistrement…', 'text-yellow-300');
-  clearTimeout(saveTimer);
-  saveTimer = setTimeout(saveState, 300);
+  clearTimeout(saveTimer); saveTimer = setTimeout(saveState, 300);
 }
-function setIndicator(txt, cls) {
-  const el = document.getElementById('save-indicator');
-  el.textContent = txt;
-  el.className = cls;
-}
-function flashSaved() {
-  setIndicator('💾 Enregistré à ' + new Date().toLocaleTimeString('fr-FR'), 'text-emerald-300');
-}
+function setIndicator(t, c) { const el = document.getElementById('save-indicator'); el.textContent = t; el.className = c; }
+function flashSaved() { setIndicator('💾 Enregistré à ' + new Date().toLocaleTimeString('fr-FR'), 'text-emerald-300'); }
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+const fmt = n => n.toFixed(1).replace('.0','');
 
 /* ---------- UTILITAIRES ---------- */
-function emptyWeek() {
-  const w = {};
-  JOURS.forEach(j => w[j] = { projet: 0, mco: 0, support: 0, transverse: 0 });
-  return w;
-}
+function emptyWeek() { const w = {}; JOURS.forEach(j => w[j] = { projet:0, mco:0, support:0, transverse:0 }); return w; }
 function agentTotals(ag) {
-  const t = { projet: 0, mco: 0, support: 0, transverse: 0 };
-  JOURS.forEach(j => CATS.forEach(c => { t[c.key] += parseFloat(ag.semaine[j]?.[c.key]) || 0; }));
+  const t = { projet:0, mco:0, support:0, transverse:0 };
+  JOURS.forEach(j => CATS.forEach(c => t[c.key] += parseFloat(ag.semaine[j]?.[c.key]) || 0));
   t.total = t.projet + t.mco + t.support + t.transverse;
   return t;
 }
+function detailTotal(ag, cat) { return (ag.details[cat] || []).reduce((s, l) => s + (parseFloat(l.hours) || 0), 0); }
+function aggregateDetails() {
+  const agg = {};
+  Object.values(state.agents).forEach(ag => {
+    CATS.forEach(c => (ag.details[c.key] || []).forEach(l => {
+      const label = (l.label || '').trim(); if (!label) return;
+      const k = c.key + '|' + label;
+      if (!agg[k]) agg[k] = { cat: c.key, label, hours: 0, agents: new Set() };
+      agg[k].hours += parseFloat(l.hours) || 0;
+      agg[k].agents.add(ag.name);
+    }));
+  });
+  return Object.values(agg).map(a => ({ ...a, nbAgents: a.agents.size })).sort((a, b) => b.hours - a.hours);
+}
 
 /* ---------- NAVIGATION ---------- */
-function switchView(view) {
-  ['agent', 'manager', 'dashboard'].forEach(v => {
-    document.getElementById('view-' + v).classList.toggle('hidden', v !== view);
-    document.getElementById('nav-' + v).classList.toggle('nav-active', v === view);
+function switchView(v) {
+  ['agent','manager','dashboard'].forEach(x => {
+    document.getElementById('view-' + x).classList.toggle('hidden', x !== v);
+    document.getElementById('nav-' + x).classList.toggle('nav-active', x === v);
   });
-  if (view === 'manager') renderManager();
-  if (view === 'dashboard') renderDashboard();
+  if (v === 'manager') renderManager();
+  if (v === 'dashboard') renderDashboard();
 }
 window.switchView = switchView;
 
 /* ---------- AGENTS ---------- */
 function populateSelect() {
-  const sel = document.getElementById('agent-select');
-  const prev = sel.value;
+  const sel = document.getElementById('agent-select'); const prev = sel.value;
   sel.innerHTML = '<option value="">-- Choisir un agent --</option>' +
-    Object.keys(state.agents)
-      .sort((a, b) => state.agents[a].name.localeCompare(state.agents[b].name))
-      .map(id => `<option value="${id}">${state.agents[id].name}</option>`).join('');
+    Object.keys(state.agents).sort((a,b) => state.agents[a].name.localeCompare(state.agents[b].name))
+    .map(id => `<option value="${id}">${esc(state.agents[id].name)}</option>`).join('');
   if (prev && state.agents[prev]) sel.value = prev;
 }
-
 function addAgent() {
   const name = prompt("Nom de l'agent (ex : Dupont Jean) :");
   if (!name || !name.trim()) return;
   const id = 'ag_' + Date.now();
-  state.agents[id] = { name: name.trim(), semaine: emptyWeek(), created: new Date().toISOString() };
-  saveState();
-  populateSelect();
+  state.agents[id] = { name: name.trim(), semaine: emptyWeek(), details: { projet: [], mco: [], support: [], transverse: [] }, created: new Date().toISOString() };
+  saveState(); populateSelect();
   document.getElementById('agent-select').value = id;
   selectAgent(id);
 }
 window.addAgent = addAgent;
-
 function selectAgent(id) {
   currentAgent = id || null;
   if (!currentAgent) {
-    document.getElementById('saisie-grid').innerHTML = `
-      <div class="text-center text-slate-400 py-16">
-        <div class="text-5xl mb-3">👤</div>
-        <p class="font-semibold">Sélectionnez ou créez un agent pour commencer</p>
-      </div>`;
+    document.getElementById('saisie-grid').innerHTML = '<div class="text-center text-slate-400 py-16"><div class="text-5xl mb-3">👤</div><p class="font-semibold">Sélectionnez ou créez un agent pour commencer</p></div>';
     document.getElementById('agent-totals').classList.add('hidden');
+    document.getElementById('detail-section').classList.add('hidden');
     return;
   }
   renderGrid();
   document.getElementById('agent-totals').classList.remove('hidden');
-  refreshTotals();
+  document.getElementById('detail-section').classList.remove('hidden');
+  refreshTotals(); renderDetailTabs(); renderDetailTable(); renderCoherence();
 }
 window.selectAgent = selectAgent;
-
 function deleteAgent(id) {
   if (!confirm('Supprimer "' + state.agents[id].name + '" et toutes ses saisies ?')) return;
-  delete state.agents[id];
-  saveState();
-  populateSelect();
+  delete state.agents[id]; saveState(); populateSelect();
   if (currentAgent === id) selectAgent(null);
   renderManager();
 }
 window.deleteAgent = deleteAgent;
 
-/* ---------- GRILLE DE SAISIE ---------- */
+/* ---------- GRILLE ---------- */
 function renderGrid() {
-  const ag = state.agents[currentAgent];
-  if (!ag) return;
-  let html = '<div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr class="bg-slate-100">';
-  html += '<th class="p-3 text-left font-bold">Jour</th>';
+  const ag = state.agents[currentAgent]; if (!ag) return;
+  let html = '<div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr class="bg-slate-100"><th class="p-3 text-left font-bold">Jour</th>';
   CATS.forEach(c => html += `<th class="p-3 text-center font-bold" style="color:${c.color}">${c.label}</th>`);
   html += '<th class="p-3 text-center font-bold bg-slate-200">Total jour</th></tr></thead><tbody>';
-
   JOURS.forEach(j => {
     html += `<tr class="border-b border-slate-100"><td class="p-3 font-bold text-slate-700">${j}</td>`;
     CATS.forEach(c => {
       const v = parseFloat(ag.semaine[j]?.[c.key]) || 0;
-      html += `<td class="p-2 text-center">
-        <input type="number" min="0" max="24" step="0.5" value="${v}"
-          data-jour="${j}" data-cat="${c.key}" oninput="updateCell(this)"
-          class="w-20 p-2 text-center font-bold rounded-lg border border-slate-200 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
-      </td>`;
+      html += `<td class="p-2 text-center"><input type="number" min="0" max="24" step="0.5" value="${v}" data-jour="${j}" data-cat="${c.key}" oninput="updateCell(this)" class="w-20 p-2 text-center font-bold rounded-lg border border-slate-200 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"></td>`;
     });
     html += `<td class="p-3 text-center font-black" id="total-jour-${j}">0h</td></tr>`;
   });
   html += '</tbody></table></div>';
   document.getElementById('saisie-grid').innerHTML = html;
 }
-
-/* CORRECTION DU BUG : mise à jour immédiate de l'état + totaux + sauvegarde auto */
 function updateCell(input) {
   if (!currentAgent) return;
-  const j = input.dataset.jour;
-  const c = input.dataset.cat;
-  let v = parseFloat(input.value);
-  if (isNaN(v) || v < 0) v = 0;
-  if (v > 24) v = 24;
-
-  state.agents[currentAgent].semaine[j][c] = v;   // 1. MAJ état mémoire
-  refreshTotals();                                 // 2. MAJ totaux affichés
-  saveDebounced();                                 // 3. Sauvegarde localStorage (300ms)
+  let v = parseFloat(input.value); if (isNaN(v) || v < 0) v = 0; if (v > 24) v = 24;
+  state.agents[currentAgent].semaine[input.dataset.jour][input.dataset.cat] = v;
+  refreshTotals(); renderCoherence(); saveDebounced();
 }
 window.updateCell = updateCell;
-
 function refreshTotals() {
-  const ag = state.agents[currentAgent];
-  if (!ag) return;
+  const ag = state.agents[currentAgent]; if (!ag) return;
   const t = agentTotals(ag);
-
-  // Totaux par jour
   JOURS.forEach(j => {
-    const dayTotal = CATS.reduce((s, c) => s + (parseFloat(ag.semaine[j]?.[c.key]) || 0), 0);
+    const d = CATS.reduce((s, c) => s + (parseFloat(ag.semaine[j]?.[c.key]) || 0), 0);
     const el = document.getElementById('total-jour-' + j);
-    if (el) {
-      el.textContent = dayTotal.toFixed(1).replace('.0', '') + 'h';
-      el.className = 'p-3 text-center font-black ' +
-        (dayTotal > state.config.hoursWeek / 5 + 2 ? 'text-red-600' :
-         dayTotal > state.config.hoursWeek / 5 ? 'text-orange-600' : 'text-green-600');
-    }
+    if (el) { el.textContent = fmt(d) + 'h';
+      el.className = 'p-3 text-center font-black ' + (d > state.config.hoursWeek/5 + 2 ? 'text-red-600' : d > state.config.hoursWeek/5 ? 'text-orange-600' : 'text-green-600'); }
   });
-
-  // Cartes totaux
-  document.getElementById('totals-cards').innerHTML = `
+  document.getElementById('totals-cards').innerHTML = CATS.map(c => `
     <div class="p-3 rounded-xl border border-slate-200 bg-white text-center">
-      <div class="text-xs font-bold text-slate-500 uppercase">🚀 Projets</div>
-      <div class="text-2xl font-black" style="color:#2563eb">${t.projet.toFixed(1).replace('.0','')}h</div>
-    </div>
-    <div class="p-3 rounded-xl border border-slate-200 bg-white text-center">
-      <div class="text-xs font-bold text-slate-500 uppercase">🔧 MCO</div>
-      <div class="text-2xl font-black" style="color:#dc2626">${t.mco.toFixed(1).replace('.0','')}h</div>
-    </div>
-    <div class="p-3 rounded-xl border border-slate-200 bg-white text-center">
-      <div class="text-xs font-bold text-slate-500 uppercase">🆘 Support</div>
-      <div class="text-2xl font-black" style="color:#ea580c">${t.support.toFixed(1).replace('.0','')}h</div>
-    </div>
-    <div class="p-3 rounded-xl border border-slate-200 bg-white text-center">
-      <div class="text-xs font-bold text-slate-500 uppercase">📋 Trans.</div>
-      <div class="text-2xl font-black" style="color:#475569">${t.transverse.toFixed(1).replace('.0','')}h</div>
-    </div>
+      <div class="text-xs font-bold text-slate-500 uppercase">${c.label}</div>
+      <div class="text-2xl font-black" style="color:${c.color}">${fmt(t[c.key])}h</div>
+    </div>`).join('') + `
     <div class="p-3 rounded-xl border-2 border-slate-800 bg-slate-800 text-white text-center">
-      <div class="text-xs font-bold uppercase">TOTAL SEMAINE</div>
-      <div class="text-2xl font-black">${t.total.toFixed(1).replace('.0','')}h</div>
+      <div class="text-xs font-bold uppercase">TOTAL SEMAINE</div><div class="text-2xl font-black">${fmt(t.total)}h</div>
     </div>`;
+  const hw = state.config.hoursWeek, st = document.getElementById('agent-status');
+  if (t.total > hw + 2) st.innerHTML = `⚠️ <span class="text-red-600">${fmt(t.total)}h déclarées pour ${hw}h contractuelles → Débordement</span>`;
+  else if (t.total >= hw - 1) st.innerHTML = `✅ <span class="text-green-600">Semaine cohérente (${fmt(t.total)}h / ${hw}h)</span>`;
+  else st.innerHTML = `ℹ️ <span class="text-slate-600">${fmt(t.total)}h déclarées / ${hw}h contractuelles</span>`;
+}
 
-  // Statut cohérence
-  const hw = state.config.hoursWeek;
-  const st = document.getElementById('agent-status');
-  if (t.total > hw + 2)      st.innerHTML = `⚠️ <span class="text-red-600">${t.total.toFixed(1)}h déclarées pour ${hw}h contractuelles → Débordement</span>`;
-  else if (t.total >= hw - 1) st.innerHTML = `✅ <span class="text-green-600">Semaine cohérente (${t.total.toFixed(1)}h / ${hw}h)</span>`;
-  else                        st.innerHTML = `ℹ️ <span class="text-slate-600">${t.total.toFixed(1)}h déclarées / ${hw}h contractuelles</span>`;
+/* ---------- DÉTAIL DES ACTIVITÉS ---------- */
+function renderDetailTabs() {
+  document.getElementById('detail-tabs').innerHTML = CATS.map(c => `
+    <button onclick="switchDetailCat('${c.key}')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition ${currentDetailCat === c.key ? 'text-white shadow' : 'text-slate-600 hover:bg-white'}"
+      style="${currentDetailCat === c.key ? 'background:' + c.color : ''}">${c.label}</button>`).join('');
+}
+window.switchDetailCat = function(cat) { currentDetailCat = cat; renderDetailTabs(); renderDetailTable(); };
+
+function renderDetailTable() {
+  const ag = state.agents[currentAgent]; if (!ag) return;
+  const lines = ag.details[currentDetailCat] || [];
+  const cat = CATS.find(c => c.key === currentDetailCat);
+  const refs = state.referentiels[currentDetailCat] || [];
+
+  let html = `<datalist id="dl-${currentDetailCat}">` + refs.map(r => `<option value="${esc(r)}">`).join('') + `</datalist>`;
+  html += `<table class="w-full text-sm"><thead><tr class="bg-slate-100">
+    <th class="p-3 text-left font-bold" style="color:${cat.color}">Activité précise (${cat.label})</th>
+    <th class="p-3 text-center font-bold w-32">Heures / semaine</th>
+    <th class="p-3 text-center font-bold w-24">Part</th>
+    <th class="p-3 w-16 no-print"></th></tr></thead><tbody>`;
+
+  if (lines.length === 0) {
+    html += `<tr><td colspan="4" class="p-6 text-center text-slate-400 italic">Aucune ligne de détail. Cliquez sur "+ Ajouter une ligne" pour préciser sur quoi portent vos heures ${cat.label}.</td></tr>`;
+  } else {
+    const tot = detailTotal(ag, currentDetailCat) || 1;
+    lines.forEach(l => {
+      const h = parseFloat(l.hours) || 0;
+      html += `<tr class="border-b border-slate-100">
+        <td class="p-2"><input type="text" list="dl-${currentDetailCat}" value="${esc(l.label)}" placeholder="Ex : ${esc(refs[0] || 'Nom du projet')}" oninput="updateDetailLine(this,'${l.id}','label')" class="w-full p-2 rounded-lg border border-slate-200 outline-none focus:border-blue-500 text-sm font-semibold"></td>
+        <td class="p-2 text-center"><input type="number" min="0" max="60" step="0.5" value="${h}" oninput="updateDetailLine(this,'${l.id}','hours')" class="w-24 p-2 text-center font-bold rounded-lg border border-slate-200 outline-none focus:border-blue-500"></td>
+        <td class="p-2 text-center font-bold text-slate-500">${Math.round(h / tot * 100)}%</td>
+        <td class="p-2 text-center no-print"><button onclick="deleteDetailLine('${l.id}')" class="text-red-500 hover:text-red-700 font-black">✕</button></td>
+      </tr>`;
+    });
+  }
+  html += `</tbody><tfoot><tr class="bg-slate-100 font-black">
+    <td class="p-3 text-right">TOTAL DÉTAILLÉ ${cat.label}</td>
+    <td class="p-3 text-center" id="detail-total-cell">${fmt(detailTotal(ag, currentDetailCat))}h</td>
+    <td class="p-3 text-center">100%</td><td class="no-print"></td></tr></tfoot></table>`;
+  document.getElementById('detail-table').innerHTML = html;
+}
+
+function addDetailLine() {
+  if (!currentAgent) return;
+  const ag = state.agents[currentAgent];
+  ag.details[currentDetailCat].push({ id: 'd' + Date.now() + Math.random().toString(36).slice(2, 6), label: '', hours: 0 });
+  saveState(); renderDetailTable(); renderCoherence();
+}
+window.addDetailLine = addDetailLine;
+
+function updateDetailLine(input, lineId, field) {
+  const ag = state.agents[currentAgent]; if (!ag) return;
+  const line = ag.details[currentDetailCat].find(l => l.id === lineId); if (!line) return;
+  if (field === 'hours') {
+    let v = parseFloat(input.value); if (isNaN(v) || v < 0) v = 0;
+    line.hours = v;
+    const tc = document.getElementById('detail-total-cell'); if (tc) tc.textContent = fmt(detailTotal(ag, currentDetailCat)) + 'h';
+  } else {
+    line.label = input.value;
+  }
+  renderCoherence(); saveDebounced();
+}
+window.updateDetailLine = updateDetailLine;
+
+function deleteDetailLine(lineId) {
+  const ag = state.agents[currentAgent]; if (!ag) return;
+  ag.details[currentDetailCat] = ag.details[currentDetailCat].filter(l => l.id !== lineId);
+  saveState(); renderDetailTable(); renderCoherence();
+}
+window.deleteDetailLine = deleteDetailLine;
+
+function renderCoherence() {
+  const ag = state.agents[currentAgent]; if (!ag) return;
+  const t = agentTotals(ag);
+  document.getElementById('detail-coherence').innerHTML = CATS.map(c => {
+    const g = t[c.key], d = detailTotal(ag, c.key);
+    const ok = Math.abs(g - d) < 0.01;
+    const empty = g === 0 && d === 0;
+    return `<div class="p-3 rounded-xl border text-xs font-bold ${empty ? 'bg-slate-50 border-slate-200 text-slate-400' : ok ? 'bg-green-50 border-green-200 text-green-700' : 'bg-orange-50 border-orange-200 text-orange-700'}">
+      <div class="flex justify-between items-center">
+        <span>${c.label}</span>
+        <span>${empty ? '—' : ok ? '✅' : '⚠️'}</span>
+      </div>
+      <div class="mt-1 font-black">${fmt(d)}h détaillées / ${fmt(g)}h grille</div>
+      ${!ok && !empty ? `<div class="font-semibold">Écart : ${fmt(Math.abs(g - d))}h à justifier</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+/* ---------- RÉFÉRENTIELS (MANAGER) ---------- */
+function renderRefPanel() {
+  const panel = document.getElementById('ref-panel');
+  panel.innerHTML = CATS.map(c => {
+    const refs = state.referentiels[c.key] || [];
+    return `<div class="bg-white rounded-xl border border-slate-200 p-3">
+      <div class="font-black text-xs mb-2" style="color:${c.color}">${c.label}</div>
+      <div class="flex flex-wrap gap-1 mb-2">
+        ${refs.map((r, i) => `<span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-100 text-slate-700 text-[11px] font-semibold">${esc(r)}<button data-del-ref="${c.key}" data-idx="${i}" class="text-red-400 hover:text-red-600 font-black no-print">✕</button></span>`).join('') || '<span class="text-[11px] text-slate-400 italic">Vide</span>'}
+      </div>
+      <div class="flex gap-1">
+        <input type="text" id="ref-input-${c.key}" placeholder="Nouvelle activité…" class="flex-1 min-w-0 p-1.5 rounded-lg border border-slate-200 text-[11px] outline-none focus:border-blue-500">
+        <button data-add-ref="${c.key}" class="bg-slate-800 text-white px-2 rounded-lg text-xs font-black">+</button>
+      </div>
+    </div>`;
+  }).join('');
+  panel.querySelectorAll('[data-del-ref]').forEach(btn => btn.onclick = () => {
+    state.referentiels[btn.dataset.delRef].splice(parseInt(btn.dataset.idx), 1);
+    saveState(); renderRefPanel(); if (currentAgent) renderDetailTable();
+  });
+  panel.querySelectorAll('[data-add-ref]').forEach(btn => btn.onclick = () => {
+    const cat = btn.dataset.addRef;
+    const inp = document.getElementById('ref-input-' + cat);
+    const v = inp.value.trim(); if (!v) return;
+    if (!state.referentiels[cat].includes(v)) state.referentiels[cat].push(v);
+    inp.value = ''; saveState(); renderRefPanel(); if (currentAgent) renderDetailTable();
+  });
 }
 
 /* ---------- CONFIG ---------- */
 function saveConfigFromInputs() {
   state.config.hoursWeek = parseFloat(document.getElementById('cfg-hours-week').value) || 35;
-  state.config.weeks     = parseFloat(document.getElementById('cfg-weeks').value) || 47;
-  state.config.etp       = parseFloat(document.getElementById('cfg-etp').value) || 10;
-  state.config.taux      = parseFloat(document.getElementById('cfg-taux').value) || 55;
-  saveDebounced();
-  renderManager();
+  state.config.weeks = parseFloat(document.getElementById('cfg-weeks').value) || 47;
+  state.config.etp = parseFloat(document.getElementById('cfg-etp').value) || 10;
+  state.config.taux = parseFloat(document.getElementById('cfg-taux').value) || 55;
+  saveDebounced(); renderManager();
 }
 window.saveConfigFromInputs = saveConfigFromInputs;
-
 function loadConfigInputs() {
   document.getElementById('cfg-hours-week').value = state.config.hoursWeek;
   document.getElementById('cfg-weeks').value = state.config.weeks;
@@ -429,227 +486,176 @@ function loadConfigInputs() {
   document.getElementById('cfg-taux').value = state.config.taux;
 }
 
-/* ---------- VUE MANAGER ---------- */
+/* ---------- MANAGER ---------- */
 function renderManager() {
-  loadConfigInputs();
-  const ids = Object.keys(state.agents);
+  loadConfigInputs(); renderRefPanel();
+  const ids = Object.keys(state.agents), cfg = state.config;
   const tbody = document.getElementById('manager-table-body');
   const tfoot = document.getElementById('manager-table-foot');
-  const cfg = state.config;
-
-  let T = { projet: 0, mco: 0, support: 0, transverse: 0, total: 0 };
+  let T = { projet:0, mco:0, support:0, transverse:0, total:0 };
 
   if (ids.length === 0) {
     tbody.innerHTML = '<tr><td colspan="9" class="p-8 text-center text-slate-400">Aucun agent. Créez-en un dans "Saisie Agent".</td></tr>';
-    tfoot.innerHTML = '';
+    tfoot.innerHTML = ''; document.getElementById('agg-table-body').innerHTML = '';
     return;
   }
 
   tbody.innerHTML = ids.map(id => {
-    const ag = state.agents[id];
-    const t = agentTotals(ag);
-    const annuel = t.total * cfg.weeks;
-    const taux = Math.round((t.total / cfg.hoursWeek) * 100);
+    const ag = state.agents[id], t = agentTotals(ag);
+    const annuel = t.total * cfg.weeks, taux = Math.round(t.total / cfg.hoursWeek * 100);
     ['projet','mco','support','transverse','total'].forEach(k => T[k] += t[k]);
-
+    const nbIncoherents = CATS.filter(c => Math.abs(t[c.key] - detailTotal(ag, c.key)) >= 0.01 && (t[c.key] || detailTotal(ag, c.key))).length;
+    const cohBadge = nbIncoherents === 0
+      ? '<span class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-bold">✅ Conforme</span>'
+      : `<span class="px-2 py-1 bg-orange-100 text-orange-700 rounded text-xs font-bold">⚠️ ${nbIncoherents} écart(s)</span>`;
     let badge;
-    if (taux > 110)      badge = '<span class="px-2 py-1 bg-red-100 text-red-700 rounded text-xs font-bold">🔴 Surcharge</span>';
+    if (taux > 110) badge = '<span class="px-2 py-1 bg-red-100 text-red-700 rounded text-xs font-bold">🔴 Surcharge</span>';
     else if (taux > 100) badge = '<span class="px-2 py-1 bg-orange-100 text-orange-700 rounded text-xs font-bold">🟠 Tendu</span>';
-    else if (taux > 80)  badge = '<span class="px-2 py-1 bg-yellow-100 text-yellow-700 rounded text-xs font-bold">🟡 Vigilance</span>';
-    else                 badge = '<span class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-bold">🟢 OK</span>';
-
+    else if (taux > 80) badge = '<span class="px-2 py-1 bg-yellow-100 text-yellow-700 rounded text-xs font-bold">🟡 Vigilance</span>';
+    else badge = '<span class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-bold">🟢 OK</span>';
     return `<tr class="border-b border-slate-100 hover:bg-slate-50">
-      <td class="p-3 font-bold text-slate-800">${ag.name}</td>
-      <td class="text-center p-3 font-semibold" style="color:#2563eb">${t.projet.toFixed(1).replace('.0','')}h</td>
-      <td class="text-center p-3 font-semibold" style="color:#dc2626">${t.mco.toFixed(1).replace('.0','')}h</td>
-      <td class="text-center p-3 font-semibold" style="color:#ea580c">${t.support.toFixed(1).replace('.0','')}h</td>
-      <td class="text-center p-3 font-semibold" style="color:#475569">${t.transverse.toFixed(1).replace('.0','')}h</td>
-      <td class="text-center p-3 font-black">${t.total.toFixed(1).replace('.0','')}h</td>
-      <td class="text-center p-3">${Math.round(annuel).toLocaleString('fr-FR')}h</td>
+      <td class="p-3 font-bold text-slate-800">${esc(ag.name)}</td>
+      <td class="text-center p-3 font-semibold" style="color:#2563eb">${fmt(t.projet)}h</td>
+      <td class="text-center p-3 font-semibold" style="color:#dc2626">${fmt(t.mco)}h</td>
+      <td class="text-center p-3 font-semibold" style="color:#ea580c">${fmt(t.support)}h</td>
+      <td class="text-center p-3 font-semibold" style="color:#475569">${fmt(t.transverse)}h</td>
+      <td class="text-center p-3 font-black">${fmt(t.total)}h</td>
+      <td class="text-center p-3">${cohBadge}</td>
       <td class="text-center p-3">${badge} <span class="ml-1 font-black">${taux}%</span></td>
-      <td class="text-center p-3 no-print"><button onclick="deleteAgent('${id}')" class="text-red-600 hover:text-red-800 font-bold text-xs">🗑️ Suppr.</button></td>
+      <td class="text-center p-3 no-print"><button onclick="deleteAgent('${id}')" class="text-red-600 hover:text-red-800 font-bold text-xs">🗑️</button></td>
     </tr>`;
   }).join('');
 
-  const tauxGlobal = Math.round((T.total / (cfg.hoursWeek * ids.length)) * 100);
-  tfoot.innerHTML = `<tr>
-    <td class="p-3">TOTAL (${ids.length} agents)</td>
-    <td class="text-center p-3">${T.projet.toFixed(1).replace('.0','')}h</td>
-    <td class="text-center p-3">${T.mco.toFixed(1).replace('.0','')}h</td>
-    <td class="text-center p-3">${T.support.toFixed(1).replace('.0','')}h</td>
-    <td class="text-center p-3">${T.transverse.toFixed(1).replace('.0','')}h</td>
-    <td class="text-center p-3 text-lg">${T.total.toFixed(1).replace('.0','')}h</td>
-    <td class="text-center p-3 text-lg">${Math.round(T.total * cfg.weeks).toLocaleString('fr-FR')}h</td>
+  const tauxGlobal = Math.round(T.total / (cfg.hoursWeek * ids.length) * 100);
+  tfoot.innerHTML = `<tr><td class="p-3">TOTAL (${ids.length} agents)</td>
+    <td class="text-center p-3">${fmt(T.projet)}h</td><td class="text-center p-3">${fmt(T.mco)}h</td>
+    <td class="text-center p-3">${fmt(T.support)}h</td><td class="text-center p-3">${fmt(T.transverse)}h</td>
+    <td class="text-center p-3 text-lg">${fmt(T.total)}h</td><td class="p-3"></td>
     <td class="text-center p-3"><span class="px-3 py-1.5 bg-slate-900 text-white rounded-lg font-black">${tauxGlobal}%</span></td>
-    <td class="p-3 no-print"></td>
-  </tr>`;
+    <td class="no-print"></td></tr>`;
+
+  // Agrégat par activité
+  const agg = aggregateDetails();
+  const aggBody = document.getElementById('agg-table-body');
+  if (agg.length === 0) {
+    aggBody.innerHTML = '<tr><td class="p-6 text-center text-slate-400 italic">Aucun détail saisi pour le moment.</td></tr>';
+  } else {
+    const maxH = agg[0].hours || 1;
+    aggBody.innerHTML = agg.map(a => {
+      const c = CATS.find(x => x.key === a.cat);
+      return `<tr class="border-b border-slate-100">
+        <td class="p-2 w-8"><div class="w-3 h-3 rounded-full" style="background:${c.color}"></div></td>
+        <td class="p-2 font-bold text-slate-800">${esc(a.label)}<span class="ml-2 text-[10px] text-slate-400 font-semibold">${a.nbAgents} agent(s)</span></td>
+        <td class="p-2 w-64"><div class="h-4 bg-slate-100 rounded overflow-hidden"><div class="h-full rounded" style="background:${c.color}; width:${Math.round(a.hours / maxH * 100)}%"></div></div></td>
+        <td class="p-2 text-center font-black w-24">${fmt(a.hours)}h/sem</td>
+        <td class="p-2 text-center text-slate-600 w-28">${Math.round(a.hours * cfg.weeks).toLocaleString('fr-FR')}h/an</td>
+      </tr>`;
+    }).join('');
+  }
 }
 
 function resetAll() {
   if (!confirm('⚠️ Effacer TOUTES les données de test locales ?')) return;
-  localStorage.removeItem(STORAGE_KEY);
-  state = defaultState();
-  currentAgent = null;
-  populateSelect();
-  selectAgent(null);
-  renderManager();
-  flashSaved();
+  localStorage.removeItem(STORAGE_KEY); state = defaultState(); currentAgent = null;
+  populateSelect(); selectAgent(null); renderManager(); flashSaved();
 }
 window.resetAll = resetAll;
 
-/* ---------- VUE DASHBOARD ---------- */
+/* ---------- DASHBOARD ---------- */
 function renderDashboard() {
   const cfg = state.config;
   const agents = Object.values(state.agents);
-  const capAgent = cfg.hoursWeek * cfg.weeks;
-  const capTotale = capAgent * cfg.etp;
-
-  let T = { projet: 0, mco: 0, support: 0, transverse: 0 };
+  const capAgent = cfg.hoursWeek * cfg.weeks, capTotale = capAgent * cfg.etp;
+  let T = { projet:0, mco:0, support:0, transverse:0 };
   const perAgent = agents.map(ag => {
     const t = agentTotals(ag);
     ['projet','mco','support','transverse'].forEach(k => T[k] += t[k]);
     return { name: ag.name, hebdo: t.total };
   });
-
   const mult = agents.length > 0 ? cfg.etp / agents.length : 0;
-  const ann = {
-    projet: T.projet * cfg.weeks * mult,
-    mco: T.mco * cfg.weeks * mult,
-    support: T.support * cfg.weeks * mult,
-    transverse: T.transverse * cfg.weeks * mult
-  };
+  const ann = { projet: T.projet*cfg.weeks*mult, mco: T.mco*cfg.weeks*mult, support: T.support*cfg.weeks*mult, transverse: T.transverse*cfg.weeks*mult };
   const charge = ann.projet + ann.mco + ann.support + ann.transverse;
-  const taux = capTotale > 0 ? Math.round((charge / capTotale) * 100) : 0;
-  const ecart = charge - capTotale;
-  const cout = Math.max(0, ecart) * cfg.taux;
+  const taux = capTotale > 0 ? Math.round(charge / capTotale * 100) : 0;
+  const ecart = charge - capTotale, cout = Math.max(0, ecart) * cfg.taux;
 
   document.getElementById('dash-effectif').textContent = cfg.etp;
-
-  // KPIs
   document.getElementById('dash-kpis').innerHTML = `
-    <div class="p-5 border border-slate-200 rounded-xl bg-white fade-in">
-      <div class="text-xs font-bold text-slate-500 uppercase">Capacité annuelle</div>
-      <div class="text-3xl font-black text-slate-800 my-2">${Math.round(capTotale).toLocaleString('fr-FR')} h</div>
-      <div class="text-xs text-slate-500">${cfg.etp} ETP × ${Math.round(capAgent)}h/an</div>
-    </div>
-    <div class="p-5 border border-slate-200 rounded-xl bg-white fade-in">
-      <div class="text-xs font-bold text-slate-500 uppercase">Charge projetée</div>
-      <div class="text-3xl font-black my-2" style="color:${taux>100?'#dc2626':'#1a2744'}">${Math.round(charge).toLocaleString('fr-FR')} h</div>
-      <div class="text-xs ${taux>100?'text-red-600 font-bold':'text-slate-500'}">${taux>100?'▲ +'+(taux-100).toFixed(1)+'% vs capacité':'▼ '+(100-taux)+'% de marge'}</div>
-    </div>
-    <div class="p-5 border border-slate-200 rounded-xl bg-white fade-in">
-      <div class="text-xs font-bold text-slate-500 uppercase">Taux de saturation</div>
-      <div class="text-3xl font-black my-2" style="color:${taux>100?'#dc2626':taux>85?'#ea580c':'#16a34a'}">${taux}%</div>
-      <div class="text-xs ${taux>100?'text-red-600 font-bold':'text-slate-500'}">${taux>110?'⚠️ Surcharge critique':taux>100?'⚠️ Surcharge':taux>85?'⚡ Vigilance':'✅ Maîtrisé'}</div>
-    </div>
-    <div class="p-5 border border-slate-200 rounded-xl bg-white fade-in">
-      <div class="text-xs font-bold text-slate-500 uppercase">Coût surcharge</div>
-      <div class="text-3xl font-black my-2 text-slate-800">${Math.round(cout).toLocaleString('fr-FR')} €</div>
-      <div class="text-xs text-slate-500">Dépassement × ${cfg.taux}€/h</div>
-    </div>`;
+    <div class="p-5 border border-slate-200 rounded-xl bg-white fade-in"><div class="text-xs font-bold text-slate-500 uppercase">Capacité annuelle</div><div class="text-3xl font-black text-slate-800 my-2">${Math.round(capTotale).toLocaleString('fr-FR')} h</div><div class="text-xs text-slate-500">${cfg.etp} ETP × ${Math.round(capAgent)}h/an</div></div>
+    <div class="p-5 border border-slate-200 rounded-xl bg-white fade-in"><div class="text-xs font-bold text-slate-500 uppercase">Charge projetée</div><div class="text-3xl font-black my-2" style="color:${taux>100?'#dc2626':'#1a2744'}">${Math.round(charge).toLocaleString('fr-FR')} h</div><div class="text-xs ${taux>100?'text-red-600 font-bold':'text-slate-500'}">${taux>100?'▲ +'+(taux-100).toFixed(1)+'% vs capacité':'▼ '+(100-taux)+'% de marge'}</div></div>
+    <div class="p-5 border border-slate-200 rounded-xl bg-white fade-in"><div class="text-xs font-bold text-slate-500 uppercase">Taux de saturation</div><div class="text-3xl font-black my-2" style="color:${taux>100?'#dc2626':taux>85?'#ea580c':'#16a34a'}">${taux}%</div><div class="text-xs ${taux>100?'text-red-600 font-bold':'text-slate-500'}">${taux>110?'⚠️ Surcharge critique':taux>100?'⚠️ Surcharge':taux>85?'⚡ Vigilance':'✅ Maîtrisé'}</div></div>
+    <div class="p-5 border border-slate-200 rounded-xl bg-white fade-in"><div class="text-xs font-bold text-slate-500 uppercase">Coût surcharge</div><div class="text-3xl font-black my-2 text-slate-800">${Math.round(cout).toLocaleString('fr-FR')} €</div><div class="text-xs text-slate-500">Dépassement × ${cfg.taux}€/h</div></div>`;
 
-  // Barres
   const max = Math.max(ann.projet, ann.mco, ann.support, ann.transverse, capTotale, 1);
-  const bars = [
-    { l: '🚀 Projets', v: ann.projet, c: '#2563eb' },
-    { l: '🔧 MCO / GLPI', v: ann.mco, c: '#dc2626' },
-    { l: '🆘 Support terrain', v: ann.support, c: '#ea580c' },
-    { l: '📋 Transverse', v: ann.transverse, c: '#475569' }
-  ];
-  document.getElementById('dash-bars').innerHTML = bars.map(b => `
-    <div class="flex items-center gap-4 mb-4">
+  document.getElementById('dash-bars').innerHTML = [
+    { l:'🚀 Projets', v:ann.projet, c:'#2563eb' }, { l:'🔧 MCO / GLPI', v:ann.mco, c:'#dc2626' },
+    { l:'🆘 Support terrain', v:ann.support, c:'#ea580c' }, { l:'📋 Transverse', v:ann.transverse, c:'#475569' }
+  ].map(b => `<div class="flex items-center gap-4 mb-4">
       <div class="w-40 font-bold text-sm text-slate-700">${b.l}</div>
-      <div class="flex-1 relative h-9 bg-slate-200 rounded-lg overflow-hidden">
-        <div class="absolute h-full bg-slate-300" style="width:${Math.round(capTotale/max*100)}%"></div>
-        <div class="absolute h-full bar-fill-load rounded-lg" style="background:${b.c}; width:${Math.round(b.v/max*100)}%"></div>
-      </div>
+      <div class="flex-1 relative h-9 bg-slate-200 rounded-lg overflow-hidden"><div class="absolute h-full bg-slate-300" style="width:${Math.round(capTotale/max*100)}%"></div><div class="absolute h-full bar-fill-load rounded-lg" style="background:${b.c}; width:${Math.round(b.v/max*100)}%"></div></div>
       <div class="w-28 text-right font-black text-sm" style="color:${b.c}">${Math.round(b.v).toLocaleString('fr-FR')} h</div>
-    </div>`).join('') +
-    '<p class="text-xs text-slate-400 italic mt-2">Gris = capacité totale · Coloré = charge</p>';
+    </div>`).join('') + '<p class="text-xs text-slate-400 italic mt-2">Gris = capacité totale · Coloré = charge</p>';
 
-  // Chart par agent
   const ctx = document.getElementById('chart-agents').getContext('2d');
   if (chartAgents) chartAgents.destroy();
-  chartAgents = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: perAgent.map(a => a.name.split(' ')[0]),
-      datasets: [
-        { label: 'Charge hebdo (h)', data: perAgent.map(a => a.hebdo),
-          backgroundColor: perAgent.map(a => a.hebdo > cfg.hoursWeek ? '#dc2626' : '#2563eb'), borderRadius: 6 },
-        { label: 'Capacité hebdo (h)', data: perAgent.map(() => cfg.hoursWeek),
-          type: 'line', borderColor: '#16a34a', borderDash: [6,4], pointRadius: 0, borderWidth: 2 }
-      ]
-    },
-    options: {
-      responsive: true,
-      plugins: { legend: { position: 'bottom' } },
-      scales: { y: { beginAtZero: true, title: { display: true, text: 'Heures / semaine' } }, x: { grid: { display: false } } }
-    }
-  });
+  chartAgents = new Chart(ctx, { type:'bar', data:{ labels: perAgent.map(a => a.name.split(' ')[0]),
+    datasets:[ { label:'Charge hebdo (h)', data: perAgent.map(a => a.hebdo), backgroundColor: perAgent.map(a => a.hebdo > cfg.hoursWeek ? '#dc2626' : '#2563eb'), borderRadius:6 },
+      { label:'Capacité hebdo (h)', data: perAgent.map(() => cfg.hoursWeek), type:'line', borderColor:'#16a34a', borderDash:[6,4], pointRadius:0, borderWidth:2 } ] },
+    options:{ responsive:true, plugins:{ legend:{ position:'bottom' } }, scales:{ y:{ beginAtZero:true, title:{ display:true, text:'Heures / semaine' } }, x:{ grid:{ display:false } } } } });
 
-  // Détail
+  // TOP ACTIVITÉS
+  const agg = aggregateDetails().slice(0, 8);
+  const topEl = document.getElementById('dash-top');
+  if (agg.length === 0) {
+    topEl.innerHTML = '<p class="text-slate-400 italic text-sm">Aucun détail saisi pour le moment.</p>';
+  } else {
+    const maxH = agg[0].hours || 1;
+    topEl.innerHTML = agg.map(a => {
+      const c = CATS.find(x => x.key === a.cat);
+      return `<div class="flex items-center gap-4 mb-3">
+        <div class="w-56 text-sm font-bold text-slate-700 truncate" title="${esc(a.label)}">${esc(a.label)}</div>
+        <div class="flex-1 h-7 bg-slate-200 rounded-lg overflow-hidden relative">
+          <div class="h-full rounded-lg bar-fill-load" style="background:${c.color}; width:${Math.round(a.hours/maxH*100)}%"></div>
+        </div>
+        <div class="w-24 text-right font-black text-sm" style="color:${c.color}">${fmt(a.hours)}h/sem</div>
+      </div>`;
+    }).join('');
+  }
+
   const rows = [
-    { a: 'Projets Lean / Amélioration / Invest.', t: 'Pilotage_Projet', v: T.projet, ch: ann.projet },
-    { a: 'Tickets MCO / Standards', t: 'Ticket_GLPI', v: T.mco, ch: ann.mco },
-    { a: 'Support terrain urgent / Audits', t: 'Saisie manuelle', v: T.support, ch: ann.support },
-    { a: 'Réunions / Reporting / Formation', t: 'Estimation', v: T.transverse, ch: ann.transverse }
+    { a:'Projets Lean / Amélioration / Invest.', t:'Pilotage_Projet', v:T.projet, ch:ann.projet },
+    { a:'Tickets MCO / Standards', t:'Ticket_GLPI', v:T.mco, ch:ann.mco },
+    { a:'Support terrain urgent / Audits', t:'Saisie manuelle', v:T.support, ch:ann.support },
+    { a:'Réunions / Reporting / Formation', t:'Estimation', v:T.transverse, ch:ann.transverse }
   ];
   document.getElementById('dash-detail').innerHTML = rows.map(r => {
     const pct = charge > 0 ? Math.round(r.ch / charge * 100) : 0;
-    const badge = pct > 35 ? '<span class="px-2 py-1 bg-red-100 text-red-700 rounded text-xs font-bold">Surcharge</span>'
-                : pct > 25 ? '<span class="px-2 py-1 bg-orange-100 text-orange-700 rounded text-xs font-bold">Tendu</span>'
-                : '<span class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-bold">Maîtrisé</span>';
-    return `<tr class="border-b border-slate-100">
-      <td class="p-3 font-bold text-slate-800">${r.a}</td>
-      <td class="p-3 text-slate-600 text-xs">${r.t}</td>
-      <td class="text-center p-3 font-semibold">${r.v.toFixed(1).replace('.0','')}h/sem</td>
-      <td class="text-center p-3 font-black">${Math.round(r.ch).toLocaleString('fr-FR')}</td>
-      <td class="text-center p-3 font-bold">${pct}%</td>
-      <td class="text-center p-3">${badge}</td>
-    </tr>`;
+    const badge = pct > 35 ? '<span class="px-2 py-1 bg-red-100 text-red-700 rounded text-xs font-bold">Surcharge</span>' : pct > 25 ? '<span class="px-2 py-1 bg-orange-100 text-orange-700 rounded text-xs font-bold">Tendu</span>' : '<span class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-bold">Maîtrisé</span>';
+    return `<tr class="border-b border-slate-100"><td class="p-3 font-bold text-slate-800">${r.a}</td><td class="p-3 text-slate-600 text-xs">${r.t}</td><td class="text-center p-3 font-semibold">${fmt(r.v)}h/sem</td><td class="text-center p-3 font-black">${Math.round(r.ch).toLocaleString('fr-FR')}</td><td class="text-center p-3 font-bold">${pct}%</td><td class="text-center p-3">${badge}</td></tr>`;
   }).join('');
 
-  // Recommandation
   const rec = document.getElementById('dash-recommandation');
   const etpManq = ecart > 0 ? (ecart / capAgent).toFixed(1) : 0;
-  if (taux > 110) {
-    rec.className = 'rounded-xl p-6 border-l-4 border-red-500 bg-red-50 fade-in';
-    rec.innerHTML = `<h3 class="font-black text-red-800 text-lg mb-3">⚠️ Diagnostic & Recommandations</h3>
-      <ul class="space-y-2 text-slate-700 text-sm leading-relaxed">
-        <li><strong>Saturation critique :</strong> équipe à <strong>${taux}%</strong> de sa capacité réelle</li>
-        <li><strong>Risque :</strong> surcharge de <strong>${Math.round(ecart).toLocaleString('fr-FR')}h/an</strong> = <strong>${etpManq} ETP</strong> manquants</li>
-        <li><strong>Préconisation :</strong> renfort de <strong>+${Math.ceil(etpManq)} ETP</strong> pour revenir à 95%</li>
-        <li><strong>Coût de l'inaction :</strong> ${Math.round(cout).toLocaleString('fr-FR')}€ / an</li>
-      </ul>`;
-  } else if (taux > 100) {
-    rec.className = 'rounded-xl p-6 border-l-4 border-orange-500 bg-orange-50 fade-in';
-    rec.innerHTML = `<h3 class="font-black text-orange-800 text-lg mb-3">🟠 Tension sur l'équipe</h3>
-      <ul class="space-y-2 text-slate-700 text-sm">
-        <li><strong>Saturation :</strong> ${taux}% — dépassement de <strong>${Math.round(ecart).toLocaleString('fr-FR')}h/an</strong></li>
-        <li><strong>Préconisation :</strong> renfort de ${etpManq} ETP ou gel des projets P3</li>
-      </ul>`;
-  } else if (taux > 85) {
-    rec.className = 'rounded-xl p-6 border-l-4 border-yellow-500 bg-yellow-50 fade-in';
-    rec.innerHTML = `<h3 class="font-black text-yellow-800 text-lg mb-3">⚡ Zone de vigilance</h3>
-      <ul class="space-y-2 text-slate-700 text-sm">
-        <li><strong>Charge :</strong> ${taux}% — marge de <strong>${Math.round(capTotale-charge).toLocaleString('fr-FR')}h/an</strong> seulement</li>
-        <li><strong>Recommandation :</strong> maintenir l'effectif, arbitrer tout nouveau projet</li>
-      </ul>`;
-  } else {
-    rec.className = 'rounded-xl p-6 border-l-4 border-green-500 bg-green-50 fade-in';
-    rec.innerHTML = `<h3 class="font-black text-green-800 text-lg mb-3">✅ Charge maîtrisée</h3>
-      <ul class="space-y-2 text-slate-700 text-sm">
-        <li><strong>Taux :</strong> ${taux}% — marge de <strong>${Math.round(capTotale-charge).toLocaleString('fr-FR')}h/an</strong></li>
-      </ul>`;
-  }
+  if (taux > 110) { rec.className = 'rounded-xl p-6 border-l-4 border-red-500 bg-red-50 fade-in';
+    rec.innerHTML = `<h3 class="font-black text-red-800 text-lg mb-3">⚠️ Diagnostic & Recommandations</h3><ul class="space-y-2 text-slate-700 text-sm leading-relaxed">
+      <li><strong>Saturation critique :</strong> équipe à <strong>${taux}%</strong> de sa capacité réelle</li>
+      <li><strong>Risque :</strong> surcharge de <strong>${Math.round(ecart).toLocaleString('fr-FR')}h/an</strong> = <strong>${etpManq} ETP</strong> manquants</li>
+      <li><strong>Préconisation :</strong> renfort de <strong>+${Math.ceil(etpManq)} ETP</strong> pour revenir à 95%</li>
+      <li><strong>Coût de l'inaction :</strong> ${Math.round(cout).toLocaleString('fr-FR')}€ / an</li></ul>`;
+  } else if (taux > 100) { rec.className = 'rounded-xl p-6 border-l-4 border-orange-500 bg-orange-50 fade-in';
+    rec.innerHTML = `<h3 class="font-black text-orange-800 text-lg mb-3">🟠 Tension sur l'équipe</h3><ul class="space-y-2 text-slate-700 text-sm">
+      <li><strong>Saturation :</strong> ${taux}% — dépassement de <strong>${Math.round(ecart).toLocaleString('fr-FR')}h/an</strong></li>
+      <li><strong>Préconisation :</strong> renfort de ${etpManq} ETP ou gel des projets P3</li></ul>`;
+  } else if (taux > 85) { rec.className = 'rounded-xl p-6 border-l-4 border-yellow-500 bg-yellow-50 fade-in';
+    rec.innerHTML = `<h3 class="font-black text-yellow-800 text-lg mb-3">⚡ Zone de vigilance</h3><ul class="space-y-2 text-slate-700 text-sm">
+      <li><strong>Charge :</strong> ${taux}% — marge de <strong>${Math.round(capTotale-charge).toLocaleString('fr-FR')}h/an</strong> seulement</li>
+      <li><strong>Recommandation :</strong> maintenir l'effectif, arbitrer tout nouveau projet</li></ul>`;
+  } else { rec.className = 'rounded-xl p-6 border-l-4 border-green-500 bg-green-50 fade-in';
+    rec.innerHTML = `<h3 class="font-black text-green-800 text-lg mb-3">✅ Charge maîtrisée</h3><ul class="space-y-2 text-slate-700 text-sm">
+      <li><strong>Taux :</strong> ${taux}% — marge de <strong>${Math.round(capTotale-charge).toLocaleString('fr-FR')}h/an</strong></li></ul>`; }
 }
 
 /* ---------- INIT ---------- */
-populateSelect();
-loadConfigInputs();
-flashSaved();
-switchView('agent');
+populateSelect(); loadConfigInputs(); flashSaved(); switchView('agent');
 </script>
 </body>
 </html>
