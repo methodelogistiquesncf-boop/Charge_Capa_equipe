@@ -13,6 +13,10 @@ body { font-family: 'Inter', sans-serif; }
 .bar-fill-load { transition: width 0.8s ease-out; }
 .fade-in { animation: fadeIn 0.4s ease-out; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.slot:hover { background: #eff6ff; cursor: pointer; }
+.slot:hover::after { content: '+'; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #93c5fd; font-weight: 900; font-size: 16px; }
+.blk { transition: transform 0.15s, box-shadow 0.15s; }
+.blk:hover { transform: scale(1.03); box-shadow: 0 4px 10px rgba(0,0,0,0.25); z-index: 30 !important; }
 @media print { .no-print { display: none !important; } body { background: white; } }
 </style>
 </head>
@@ -35,55 +39,82 @@ body { font-family: 'Inter', sans-serif; }
   </div>
 </header>
 
-<!-- ============ VUE 1 : SAISIE AGENT ============ -->
-<section id="view-agent" class="max-w-6xl mx-auto px-6 py-8">
+<!-- ============ VUE 1 : CALENDRIER AGENT ============ -->
+<section id="view-agent" class="max-w-7xl mx-auto px-6 py-8">
   <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
     <div class="p-6 border-b border-slate-200 flex flex-wrap justify-between items-center gap-4">
       <div>
-        <h2 class="text-xl font-black text-slate-800">📝 Saisie de la semaine type</h2>
-        <p class="text-sm text-slate-500 mt-1">Heures moyennes par jour · <span class="text-emerald-600 font-bold">Sauvegarde automatique</span></p>
+        <h2 class="text-xl font-black text-slate-800">🗓️ Calendrier de la semaine type</h2>
+        <p class="text-sm text-slate-500 mt-1">Cliquez sur un créneau vide pour placer une activité · Cliquez sur un bloc pour le modifier</p>
       </div>
       <div class="flex gap-2 items-center">
         <select id="agent-select" onchange="selectAgent(this.value)" class="p-2.5 rounded-xl border border-slate-200 font-semibold text-sm outline-none focus:border-blue-500">
           <option value="">-- Choisir un agent --</option>
         </select>
-        <button onclick="addAgent()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl font-bold text-sm">+ Nouvel agent</button>
+        <button onclick="addAgent()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl font-bold text-sm no-print">+ Nouvel agent</button>
       </div>
     </div>
 
-    <div class="p-6 bg-slate-50 border-b border-slate-200">
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
-        <div class="flex items-center gap-2 p-3 bg-white rounded-lg border border-slate-200"><div class="w-3 h-3 rounded-full" style="background:#2563eb"></div><div><strong>🚀 Projets</strong><br><span class="text-slate-500">Lean, investissements, nouveaux process</span></div></div>
-        <div class="flex items-center gap-2 p-3 bg-white rounded-lg border border-slate-200"><div class="w-3 h-3 rounded-full" style="background:#dc2626"></div><div><strong>🔧 MCO</strong><br><span class="text-slate-500">Standards, procédures, support N2/N3</span></div></div>
-        <div class="flex items-center gap-2 p-3 bg-white rounded-lg border border-slate-200"><div class="w-3 h-3 rounded-full" style="background:#ea580c"></div><div><strong>🆘 Support terrain</strong><br><span class="text-slate-500">Urgences, audits, troubleshooting</span></div></div>
-        <div class="flex items-center gap-2 p-3 bg-white rounded-lg border border-slate-200"><div class="w-3 h-3 rounded-full" style="background:#475569"></div><div><strong>📋 Transverse</strong><br><span class="text-slate-500">Réunions, reporting, formation</span></div></div>
-      </div>
-    </div>
+    <!-- Légende -->
+    <div class="p-4 bg-slate-50 border-b border-slate-200 flex flex-wrap gap-4 text-xs font-bold" id="legend"></div>
 
-    <div class="p-6" id="saisie-grid">
+    <!-- Calendrier -->
+    <div id="calendar-wrap" class="p-4 overflow-x-auto">
       <div class="text-center text-slate-400 py-16"><div class="text-5xl mb-3">👤</div><p class="font-semibold">Sélectionnez ou créez un agent pour commencer</p></div>
     </div>
 
-    <div id="agent-totals" class="hidden p-6 bg-slate-50 border-t border-slate-200">
-      <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4" id="totals-cards"></div>
+    <!-- Synthèse -->
+    <div id="agent-summary" class="hidden p-6 bg-slate-50 border-t border-slate-200">
+      <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-3" id="summary-cards"></div>
       <div id="agent-status" class="text-sm font-semibold text-center"></div>
-    </div>
-
-    <!-- ===== NOUVEAU : DÉTAIL DES ACTIVITÉS ===== -->
-    <div id="detail-section" class="hidden p-6 border-t-4 border-slate-200">
-      <div class="flex justify-between items-center mb-4 flex-wrap gap-3">
-        <div>
-          <h3 class="font-black text-slate-800 text-lg">🔎 Détail des activités</h3>
-          <p class="text-xs text-slate-500">Précisez <strong>sur quoi</strong> portent les heures : quel projet, quel type de MCO, quelle intervention terrain… (heures / semaine)</p>
-        </div>
-        <div class="flex gap-1 bg-slate-100 rounded-xl p-1" id="detail-tabs"></div>
-      </div>
-      <div id="detail-coherence" class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4"></div>
-      <div id="detail-table" class="overflow-x-auto"></div>
-      <button onclick="addDetailLine()" class="mt-3 bg-slate-800 hover:bg-slate-900 text-white px-4 py-2.5 rounded-xl font-bold text-sm">+ Ajouter une ligne de détail</button>
     </div>
   </div>
 </section>
+
+<!-- ============ MODAL BLOC ============ -->
+<div id="block-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
+  <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 fade-in">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-lg font-black text-slate-800" id="modal-title">Nouvelle activité</h3>
+      <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 text-xl font-black">✕</button>
+    </div>
+    <div class="space-y-4">
+      <div>
+        <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Catégorie</label>
+        <select id="m-cat" onchange="refreshModalDatalist()" class="w-full p-3 rounded-xl bg-slate-50 border border-slate-200 font-bold text-sm outline-none">
+          <option value="projet">🚀 Projets</option>
+          <option value="mco">🔧 MCO</option>
+          <option value="support">🆘 Support terrain</option>
+          <option value="transverse">📋 Transverse</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Activité précise (quel projet / quel type)</label>
+        <input type="text" id="m-label" list="dl-labels" placeholder="Ex : Lean Picking, Support N2/N3…" class="w-full p-3 rounded-xl bg-slate-50 border border-slate-200 font-semibold text-sm outline-none focus:border-blue-500">
+        <datalist id="dl-labels"></datalist>
+      </div>
+      <div class="grid grid-cols-3 gap-3">
+        <div>
+          <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Jour</label>
+          <select id="m-day" class="w-full p-3 rounded-xl bg-slate-50 border border-slate-200 font-bold text-sm outline-none"></select>
+        </div>
+        <div>
+          <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Début</label>
+          <select id="m-start" class="w-full p-3 rounded-xl bg-slate-50 border border-slate-200 font-bold text-sm outline-none"></select>
+        </div>
+        <div>
+          <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Durée</label>
+          <select id="m-dur" class="w-full p-3 rounded-xl bg-slate-50 border border-slate-200 font-bold text-sm outline-none"></select>
+        </div>
+      </div>
+    </div>
+    <div class="flex gap-3 mt-6">
+      <button id="m-delete" onclick="deleteBlock()" class="px-4 py-2.5 rounded-xl bg-red-50 text-red-600 font-bold text-sm hover:bg-red-100">🗑️</button>
+      <button onclick="closeModal()" class="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-bold text-sm hover:bg-slate-50">Annuler</button>
+      <button onclick="saveBlock()" class="flex-1 px-4 py-2.5 rounded-xl bg-blue-600 text-white font-bold text-sm hover:bg-blue-700 shadow-md">Enregistrer</button>
+    </div>
+  </div>
+</div>
 
 <!-- ============ VUE 2 : MANAGER ============ -->
 <section id="view-manager" class="max-w-7xl mx-auto px-6 py-8 hidden">
@@ -106,7 +137,6 @@ body { font-family: 'Inter', sans-serif; }
       </div>
     </div>
 
-    <!-- ===== NOUVEAU : RÉFÉRENTIELS ===== -->
     <div class="p-6 bg-slate-50 border-b border-slate-200">
       <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">🏷️ Référentiels d'activités (suggestions proposées aux agents)</h3>
       <div class="grid md:grid-cols-4 gap-4" id="ref-panel"></div>
@@ -121,7 +151,7 @@ body { font-family: 'Inter', sans-serif; }
           <th class="text-center p-3 font-bold text-xs uppercase text-orange-300">🆘 Support</th>
           <th class="text-center p-3 font-bold text-xs uppercase text-slate-300">📋 Trans.</th>
           <th class="text-center p-3 font-bold text-xs uppercase">Total/sem</th>
-          <th class="text-center p-3 font-bold text-xs uppercase">Cohérence détail</th>
+          <th class="text-center p-3 font-bold text-xs uppercase">Activités</th>
           <th class="text-center p-3 font-bold text-xs uppercase">Taux C/C</th>
           <th class="text-center p-3 font-bold text-xs uppercase no-print">Action</th>
         </tr></thead>
@@ -130,10 +160,9 @@ body { font-family: 'Inter', sans-serif; }
       </table>
     </div>
 
-    <!-- ===== NOUVEAU : AGRÉGAT PAR ACTIVITÉ ===== -->
     <div class="p-6 border-t border-slate-200">
       <h3 class="font-black text-slate-800 mb-1">🔎 Où partent les heures ? (agrégé tous agents)</h3>
-      <p class="text-xs text-slate-500 mb-4">Cumul des lignes de détail de toute l'équipe — permet de montrer quels projets / types d'activités consomment la capacité</p>
+      <p class="text-xs text-slate-500 mb-4">Cumul des blocs de toute l'équipe, par activité précise</p>
       <div class="overflow-x-auto"><table class="w-full text-sm"><tbody id="agg-table-body"></tbody></table></div>
     </div>
   </div>
@@ -157,10 +186,9 @@ body { font-family: 'Inter', sans-serif; }
         <div class="bg-slate-50 p-6 rounded-xl"><h3 class="font-black text-slate-800 mb-4">Répartition par catégorie</h3><div id="dash-bars"></div></div>
         <div class="bg-slate-50 p-6 rounded-xl"><h3 class="font-black text-slate-800 mb-4">Charge vs Capacité par agent</h3><canvas id="chart-agents" height="250"></canvas></div>
       </div>
-      <!-- ===== NOUVEAU : TOP ACTIVITÉS ===== -->
       <div class="bg-slate-50 p-6 rounded-xl mb-8">
         <h3 class="font-black text-slate-800 mb-1">🔥 Top activités consommatrices (tous agents)</h3>
-        <p class="text-xs text-slate-500 mb-4">Heures/semaine cumulées, issues du détail saisi par chaque agent</p>
+        <p class="text-xs text-slate-500 mb-4">Heures/semaine cumulées, issues des blocs placés par chaque agent</p>
         <div id="dash-top"></div>
       </div>
       <table class="w-full mb-6 border border-slate-200 rounded-lg overflow-hidden">
@@ -177,7 +205,7 @@ body { font-family: 'Inter', sans-serif; }
 </section>
 
 <script>
-const STORAGE_KEY = 'cc_semaine_type_v2';
+const STORAGE_KEY = 'cc_semaine_type_v3';
 const CATS = [
   { key: 'projet',     label: '🚀 Projets',         color: '#2563eb', trace: 'Pilotage_Projet' },
   { key: 'mco',        label: '🔧 MCO',             color: '#dc2626', trace: 'Ticket_GLPI' },
@@ -185,6 +213,7 @@ const CATS = [
   { key: 'transverse', label: '📋 Transverse',      color: '#475569', trace: 'Estimation' }
 ];
 const JOURS = ['Lundi','Mardi','Mercredi','Jeudi','Vendredi'];
+const DAY_START = 8, DAY_END = 18, ROW_H = 46;
 const DEFAULT_REFS = {
   projet: ["Amélioration continue / Lean", "Projets investissement", "Nouveaux process", "Études & chiffrages"],
   mco: ["Procédures & standards", "Support N2/N3", "Résolution d'écarts", "Maintenance des outils"],
@@ -194,7 +223,7 @@ const DEFAULT_REFS = {
 
 let state = loadState();
 let currentAgent = null;
-let currentDetailCat = 'projet';
+let editingBlockId = null;
 let chartAgents = null;
 let saveTimer = null;
 
@@ -212,46 +241,35 @@ function loadState() {
       config: { ...defaultState().config, ...(p.config || {}) },
       referentiels: { ...JSON.parse(JSON.stringify(DEFAULT_REFS)), ...(p.referentiels || {}) }
     };
-    // Migration : garantir la structure details
-    Object.values(s.agents).forEach(ag => {
-      if (!ag.semaine) ag.semaine = emptyWeek();
-      if (!ag.details) ag.details = { projet: [], mco: [], support: [], transverse: [] };
-      CATS.forEach(c => { if (!Array.isArray(ag.details[c.key])) ag.details[c.key] = []; });
-    });
+    Object.values(s.agents).forEach(ag => { if (!Array.isArray(ag.blocks)) ag.blocks = []; });
     return s;
   } catch (e) { return defaultState(); }
 }
 function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); flashSaved(); }
-function saveDebounced() {
-  setIndicator('⏳ Enregistrement…', 'text-yellow-300');
-  clearTimeout(saveTimer); saveTimer = setTimeout(saveState, 300);
-}
-function setIndicator(t, c) { const el = document.getElementById('save-indicator'); el.textContent = t; el.className = c; }
-function flashSaved() { setIndicator('💾 Enregistré à ' + new Date().toLocaleTimeString('fr-FR'), 'text-emerald-300'); }
+function saveDebounced() { setIndicator('⏳ Enregistrement…','text-yellow-300'); clearTimeout(saveTimer); saveTimer = setTimeout(saveState, 300); }
+function setIndicator(t,c){ const el = document.getElementById('save-indicator'); el.textContent = t; el.className = c; }
+function flashSaved(){ setIndicator('💾 Enregistré à ' + new Date().toLocaleTimeString('fr-FR'), 'text-emerald-300'); }
 const esc = s => String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
 const fmt = n => n.toFixed(1).replace('.0','');
+const fmtHour = h => Math.floor(h) + 'h' + (h % 1 ? '30' : '00');
 
-/* ---------- UTILITAIRES ---------- */
-function emptyWeek() { const w = {}; JOURS.forEach(j => w[j] = { projet:0, mco:0, support:0, transverse:0 }); return w; }
+/* ---------- CALCULS ---------- */
 function agentTotals(ag) {
   const t = { projet:0, mco:0, support:0, transverse:0 };
-  JOURS.forEach(j => CATS.forEach(c => t[c.key] += parseFloat(ag.semaine[j]?.[c.key]) || 0));
+  (ag.blocks || []).forEach(b => { t[b.cat] = (t[b.cat] || 0) + (parseFloat(b.duration) || 0); });
   t.total = t.projet + t.mco + t.support + t.transverse;
   return t;
 }
-function detailTotal(ag, cat) { return (ag.details[cat] || []).reduce((s, l) => s + (parseFloat(l.hours) || 0), 0); }
-function aggregateDetails() {
+function aggregateBlocks() {
   const agg = {};
-  Object.values(state.agents).forEach(ag => {
-    CATS.forEach(c => (ag.details[c.key] || []).forEach(l => {
-      const label = (l.label || '').trim(); if (!label) return;
-      const k = c.key + '|' + label;
-      if (!agg[k]) agg[k] = { cat: c.key, label, hours: 0, agents: new Set() };
-      agg[k].hours += parseFloat(l.hours) || 0;
-      agg[k].agents.add(ag.name);
-    }));
-  });
-  return Object.values(agg).map(a => ({ ...a, nbAgents: a.agents.size })).sort((a, b) => b.hours - a.hours);
+  Object.values(state.agents).forEach(ag => (ag.blocks || []).forEach(b => {
+    const label = (b.label || '').trim(); if (!label) return;
+    const k = b.cat + '|' + label;
+    if (!agg[k]) agg[k] = { cat: b.cat, label, hours: 0, agents: new Set() };
+    agg[k].hours += parseFloat(b.duration) || 0;
+    agg[k].agents.add(ag.name);
+  }));
+  return Object.values(agg).map(a => ({ ...a, nbAgents: a.agents.size })).sort((a,b) => b.hours - a.hours);
 }
 
 /* ---------- NAVIGATION ---------- */
@@ -277,7 +295,7 @@ function addAgent() {
   const name = prompt("Nom de l'agent (ex : Dupont Jean) :");
   if (!name || !name.trim()) return;
   const id = 'ag_' + Date.now();
-  state.agents[id] = { name: name.trim(), semaine: emptyWeek(), details: { projet: [], mco: [], support: [], transverse: [] }, created: new Date().toISOString() };
+  state.agents[id] = { name: name.trim(), blocks: [], created: new Date().toISOString() };
   saveState(); populateSelect();
   document.getElementById('agent-select').value = id;
   selectAgent(id);
@@ -286,162 +304,193 @@ window.addAgent = addAgent;
 function selectAgent(id) {
   currentAgent = id || null;
   if (!currentAgent) {
-    document.getElementById('saisie-grid').innerHTML = '<div class="text-center text-slate-400 py-16"><div class="text-5xl mb-3">👤</div><p class="font-semibold">Sélectionnez ou créez un agent pour commencer</p></div>';
-    document.getElementById('agent-totals').classList.add('hidden');
-    document.getElementById('detail-section').classList.add('hidden');
+    document.getElementById('calendar-wrap').innerHTML = '<div class="text-center text-slate-400 py-16"><div class="text-5xl mb-3">👤</div><p class="font-semibold">Sélectionnez ou créez un agent pour commencer</p></div>';
+    document.getElementById('agent-summary').classList.add('hidden');
     return;
   }
-  renderGrid();
-  document.getElementById('agent-totals').classList.remove('hidden');
-  document.getElementById('detail-section').classList.remove('hidden');
-  refreshTotals(); renderDetailTabs(); renderDetailTable(); renderCoherence();
+  renderCalendar(); renderSummary();
+  document.getElementById('agent-summary').classList.remove('hidden');
 }
 window.selectAgent = selectAgent;
 function deleteAgent(id) {
-  if (!confirm('Supprimer "' + state.agents[id].name + '" et toutes ses saisies ?')) return;
+  if (!confirm('Supprimer "' + state.agents[id].name + '" et tout son calendrier ?')) return;
   delete state.agents[id]; saveState(); populateSelect();
   if (currentAgent === id) selectAgent(null);
   renderManager();
 }
 window.deleteAgent = deleteAgent;
 
-/* ---------- GRILLE ---------- */
-function renderGrid() {
-  const ag = state.agents[currentAgent]; if (!ag) return;
-  let html = '<div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr class="bg-slate-100"><th class="p-3 text-left font-bold">Jour</th>';
-  CATS.forEach(c => html += `<th class="p-3 text-center font-bold" style="color:${c.color}">${c.label}</th>`);
-  html += '<th class="p-3 text-center font-bold bg-slate-200">Total jour</th></tr></thead><tbody>';
-  JOURS.forEach(j => {
-    html += `<tr class="border-b border-slate-100"><td class="p-3 font-bold text-slate-700">${j}</td>`;
-    CATS.forEach(c => {
-      const v = parseFloat(ag.semaine[j]?.[c.key]) || 0;
-      html += `<td class="p-2 text-center"><input type="number" min="0" max="24" step="0.5" value="${v}" data-jour="${j}" data-cat="${c.key}" oninput="updateCell(this)" class="w-20 p-2 text-center font-bold rounded-lg border border-slate-200 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"></td>`;
-    });
-    html += `<td class="p-3 text-center font-black" id="total-jour-${j}">0h</td></tr>`;
+/* ---------- CALENDRIER ---------- */
+function layoutDay(blocks) {
+  const sorted = [...blocks].sort((a,b) => a.start - b.start);
+  const res = {}; let cluster = [], clusterEnd = -1, lanes = [];
+  const flush = () => { const n = Math.max(1, lanes.length); cluster.forEach(b => res[b.id].lanes = n); cluster = []; lanes = []; clusterEnd = -1; };
+  sorted.forEach(b => {
+    if (cluster.length && b.start >= clusterEnd) flush();
+    let lane = lanes.findIndex(end => end <= b.start);
+    if (lane === -1) { lane = lanes.length; lanes.push(0); }
+    lanes[lane] = b.start + b.duration;
+    res[b.id] = { lane };
+    cluster.push(b);
+    clusterEnd = Math.max(clusterEnd, b.start + b.duration);
   });
-  html += '</tbody></table></div>';
-  document.getElementById('saisie-grid').innerHTML = html;
+  flush();
+  return res;
 }
-function updateCell(input) {
+
+function renderCalendar() {
+  const ag = state.agents[currentAgent]; if (!ag) return;
+  const rows = DAY_END - DAY_START;
+  const colH = rows * ROW_H;
+
+  let html = '<div class="min-w-[860px]"><div class="grid" style="grid-template-columns: 60px repeat(5, 1fr);">';
+
+  // En-têtes jours
+  html += '<div></div>';
+  JOURS.forEach(j => {
+    const dayTotal = (ag.blocks || []).filter(b => b.day === j).reduce((s,b) => s + (parseFloat(b.duration)||0), 0);
+    html += `<div class="text-center pb-2 border-b-2 border-slate-200">
+      <div class="font-black text-slate-800 text-sm uppercase">${j}</div>
+      <div class="text-xs font-bold ${dayTotal > state.config.hoursWeek/5 ? 'text-orange-600' : 'text-slate-400'}">${fmt(dayTotal)}h</div>
+    </div>`;
+  });
+
+  // Colonne heures
+  html += '<div class="relative" style="height:' + colH + 'px">';
+  for (let h = DAY_START; h < DAY_END; h++) {
+    html += `<div class="absolute right-2 text-[10px] font-bold text-slate-400" style="top:${(h-DAY_START)*ROW_H - 6}px">${fmtHour(h)}</div>`;
+  }
+  html += '</div>';
+
+  // Colonnes jours
+  JOURS.forEach(j => {
+    const dayBlocks = (ag.blocks || []).filter(b => b.day === j);
+    const layout = layoutDay(dayBlocks);
+    html += `<div class="relative border-l border-slate-200" style="height:${colH}px">`;
+    // Créneaux cliquables
+    for (let h = DAY_START; h < DAY_END; h++) {
+      html += `<div class="slot absolute left-0 right-0 border-b border-slate-100 relative" style="top:${(h-DAY_START)*ROW_H}px; height:${ROW_H}px" onclick="openModal('${j}', ${h})"></div>`;
+    }
+    // Blocs
+    dayBlocks.forEach(b => {
+      const c = CATS.find(x => x.key === b.cat) || CATS[0];
+      const pos = layout[b.id] || { lane: 0, lanes: 1 };
+      const w = 100 / pos.lanes;
+      html += `<div class="blk absolute rounded-lg px-2 py-1 text-white overflow-hidden cursor-pointer shadow-sm"
+        style="top:${(b.start-DAY_START)*ROW_H + 1}px; height:${Math.max(18, b.duration*ROW_H - 3)}px; left:calc(${pos.lane*w}% + 2px); width:calc(${w}% - 4px); background:${c.color}; z-index:10"
+        onclick="openModal(null, null, '${b.id}')" title="${esc(b.label)} — ${fmtHour(b.start)} → ${fmtHour(b.start+b.duration)}">
+        <div class="font-black text-[10px] leading-tight truncate">${esc(b.label) || '(sans libellé)'}</div>
+        ${b.duration >= 1 ? `<div class="text-[9px] opacity-80 font-bold">${fmtHour(b.start)}-${fmtHour(b.start+b.duration)} · ${fmt(b.duration)}h</div>` : ''}
+      </div>`;
+    });
+    html += '</div>';
+  });
+
+  html += '</div></div>';
+  document.getElementById('calendar-wrap').innerHTML = html;
+
+  // Légende
+  document.getElementById('legend').innerHTML = CATS.map(c =>
+    `<span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full" style="background:${c.color}"></span>${c.label}</span>`
+  ).join('') + '<span class="text-slate-400 font-semibold ml-auto no-print">💡 Astuce : survolez un créneau vide puis cliquez pour ajouter</span>';
+}
+
+/* ---------- MODAL BLOC ---------- */
+function fillModalSelects() {
+  document.getElementById('m-day').innerHTML = JOURS.map(j => `<option value="${j}">${j}</option>`).join('');
+  let opts = '';
+  for (let h = DAY_START; h < DAY_END; h += 0.5) opts += `<option value="${h}">${fmtHour(h)}</option>`;
+  document.getElementById('m-start').innerHTML = opts;
+  let d = '';
+  for (let x = 0.5; x <= 10; x += 0.5) d += `<option value="${x}">${fmt(x)}h</option>`;
+  document.getElementById('m-dur').innerHTML = d;
+}
+function refreshModalDatalist() {
+  const cat = document.getElementById('m-cat').value;
+  document.getElementById('dl-labels').innerHTML = (state.referentiels[cat] || []).map(r => `<option value="${esc(r)}">`).join('');
+}
+window.refreshModalDatalist = refreshModalDatalist;
+
+function openModal(day, start, blockId) {
   if (!currentAgent) return;
-  let v = parseFloat(input.value); if (isNaN(v) || v < 0) v = 0; if (v > 24) v = 24;
-  state.agents[currentAgent].semaine[input.dataset.jour][input.dataset.cat] = v;
-  refreshTotals(); renderCoherence(); saveDebounced();
+  editingBlockId = blockId || null;
+  fillModalSelects();
+  if (blockId) {
+    const b = state.agents[currentAgent].blocks.find(x => x.id === blockId); if (!b) return;
+    document.getElementById('modal-title').textContent = 'Modifier l\'activité';
+    document.getElementById('m-cat').value = b.cat;
+    document.getElementById('m-label').value = b.label || '';
+    document.getElementById('m-day').value = b.day;
+    document.getElementById('m-start').value = b.start;
+    document.getElementById('m-dur').value = b.duration;
+    document.getElementById('m-delete').classList.remove('hidden');
+  } else {
+    document.getElementById('modal-title').textContent = 'Nouvelle activité';
+    document.getElementById('m-cat').value = 'projet';
+    document.getElementById('m-label').value = '';
+    document.getElementById('m-day').value = day;
+    document.getElementById('m-start').value = start;
+    document.getElementById('m-dur').value = 1;
+    document.getElementById('m-delete').classList.add('hidden');
+  }
+  refreshModalDatalist();
+  document.getElementById('block-modal').classList.remove('hidden');
 }
-window.updateCell = updateCell;
-function refreshTotals() {
+window.openModal = openModal;
+function closeModal() { document.getElementById('block-modal').classList.add('hidden'); editingBlockId = null; }
+window.closeModal = closeModal;
+
+function saveBlock() {
+  const ag = state.agents[currentAgent]; if (!ag) return;
+  let start = parseFloat(document.getElementById('m-start').value);
+  let dur = parseFloat(document.getElementById('m-dur').value);
+  if (start + dur > DAY_END) dur = DAY_END - start;
+  const data = {
+    cat: document.getElementById('m-cat').value,
+    label: document.getElementById('m-label').value.trim(),
+    day: document.getElementById('m-day').value,
+    start, duration: dur
+  };
+  if (editingBlockId) {
+    const b = ag.blocks.find(x => x.id === editingBlockId);
+    Object.assign(b, data);
+  } else {
+    ag.blocks.push({ id: 'b' + Date.now() + Math.random().toString(36).slice(2,6), ...data });
+  }
+  saveState(); closeModal(); renderCalendar(); renderSummary();
+}
+window.saveBlock = saveBlock;
+
+function deleteBlock() {
+  if (!editingBlockId) return;
+  const ag = state.agents[currentAgent];
+  ag.blocks = ag.blocks.filter(b => b.id !== editingBlockId);
+  saveState(); closeModal(); renderCalendar(); renderSummary();
+}
+window.deleteBlock = deleteBlock;
+
+/* ---------- SYNTHÈSE AGENT ---------- */
+function renderSummary() {
   const ag = state.agents[currentAgent]; if (!ag) return;
   const t = agentTotals(ag);
-  JOURS.forEach(j => {
-    const d = CATS.reduce((s, c) => s + (parseFloat(ag.semaine[j]?.[c.key]) || 0), 0);
-    const el = document.getElementById('total-jour-' + j);
-    if (el) { el.textContent = fmt(d) + 'h';
-      el.className = 'p-3 text-center font-black ' + (d > state.config.hoursWeek/5 + 2 ? 'text-red-600' : d > state.config.hoursWeek/5 ? 'text-orange-600' : 'text-green-600'); }
-  });
-  document.getElementById('totals-cards').innerHTML = CATS.map(c => `
+  document.getElementById('summary-cards').innerHTML = CATS.map(c => `
     <div class="p-3 rounded-xl border border-slate-200 bg-white text-center">
       <div class="text-xs font-bold text-slate-500 uppercase">${c.label}</div>
       <div class="text-2xl font-black" style="color:${c.color}">${fmt(t[c.key])}h</div>
+      <div class="text-[10px] text-slate-400 font-semibold">${(ag.blocks||[]).filter(b => b.cat === c.key).length} activité(s)</div>
     </div>`).join('') + `
     <div class="p-3 rounded-xl border-2 border-slate-800 bg-slate-800 text-white text-center">
-      <div class="text-xs font-bold uppercase">TOTAL SEMAINE</div><div class="text-2xl font-black">${fmt(t.total)}h</div>
+      <div class="text-xs font-bold uppercase">TOTAL SEMAINE</div>
+      <div class="text-2xl font-black">${fmt(t.total)}h</div>
+      <div class="text-[10px] opacity-70 font-semibold">${(ag.blocks||[]).length} blocs</div>
     </div>`;
   const hw = state.config.hoursWeek, st = document.getElementById('agent-status');
-  if (t.total > hw + 2) st.innerHTML = `⚠️ <span class="text-red-600">${fmt(t.total)}h déclarées pour ${hw}h contractuelles → Débordement</span>`;
+  if (t.total > hw + 2) st.innerHTML = `⚠️ <span class="text-red-600">${fmt(t.total)}h placées pour ${hw}h contractuelles → Débordement</span>`;
   else if (t.total >= hw - 1) st.innerHTML = `✅ <span class="text-green-600">Semaine cohérente (${fmt(t.total)}h / ${hw}h)</span>`;
-  else st.innerHTML = `ℹ️ <span class="text-slate-600">${fmt(t.total)}h déclarées / ${hw}h contractuelles</span>`;
+  else st.innerHTML = `ℹ️ <span class="text-slate-600">${fmt(t.total)}h placées / ${hw}h contractuelles — complétez le calendrier</span>`;
 }
 
-/* ---------- DÉTAIL DES ACTIVITÉS ---------- */
-function renderDetailTabs() {
-  document.getElementById('detail-tabs').innerHTML = CATS.map(c => `
-    <button onclick="switchDetailCat('${c.key}')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition ${currentDetailCat === c.key ? 'text-white shadow' : 'text-slate-600 hover:bg-white'}"
-      style="${currentDetailCat === c.key ? 'background:' + c.color : ''}">${c.label}</button>`).join('');
-}
-window.switchDetailCat = function(cat) { currentDetailCat = cat; renderDetailTabs(); renderDetailTable(); };
-
-function renderDetailTable() {
-  const ag = state.agents[currentAgent]; if (!ag) return;
-  const lines = ag.details[currentDetailCat] || [];
-  const cat = CATS.find(c => c.key === currentDetailCat);
-  const refs = state.referentiels[currentDetailCat] || [];
-
-  let html = `<datalist id="dl-${currentDetailCat}">` + refs.map(r => `<option value="${esc(r)}">`).join('') + `</datalist>`;
-  html += `<table class="w-full text-sm"><thead><tr class="bg-slate-100">
-    <th class="p-3 text-left font-bold" style="color:${cat.color}">Activité précise (${cat.label})</th>
-    <th class="p-3 text-center font-bold w-32">Heures / semaine</th>
-    <th class="p-3 text-center font-bold w-24">Part</th>
-    <th class="p-3 w-16 no-print"></th></tr></thead><tbody>`;
-
-  if (lines.length === 0) {
-    html += `<tr><td colspan="4" class="p-6 text-center text-slate-400 italic">Aucune ligne de détail. Cliquez sur "+ Ajouter une ligne" pour préciser sur quoi portent vos heures ${cat.label}.</td></tr>`;
-  } else {
-    const tot = detailTotal(ag, currentDetailCat) || 1;
-    lines.forEach(l => {
-      const h = parseFloat(l.hours) || 0;
-      html += `<tr class="border-b border-slate-100">
-        <td class="p-2"><input type="text" list="dl-${currentDetailCat}" value="${esc(l.label)}" placeholder="Ex : ${esc(refs[0] || 'Nom du projet')}" oninput="updateDetailLine(this,'${l.id}','label')" class="w-full p-2 rounded-lg border border-slate-200 outline-none focus:border-blue-500 text-sm font-semibold"></td>
-        <td class="p-2 text-center"><input type="number" min="0" max="60" step="0.5" value="${h}" oninput="updateDetailLine(this,'${l.id}','hours')" class="w-24 p-2 text-center font-bold rounded-lg border border-slate-200 outline-none focus:border-blue-500"></td>
-        <td class="p-2 text-center font-bold text-slate-500">${Math.round(h / tot * 100)}%</td>
-        <td class="p-2 text-center no-print"><button onclick="deleteDetailLine('${l.id}')" class="text-red-500 hover:text-red-700 font-black">✕</button></td>
-      </tr>`;
-    });
-  }
-  html += `</tbody><tfoot><tr class="bg-slate-100 font-black">
-    <td class="p-3 text-right">TOTAL DÉTAILLÉ ${cat.label}</td>
-    <td class="p-3 text-center" id="detail-total-cell">${fmt(detailTotal(ag, currentDetailCat))}h</td>
-    <td class="p-3 text-center">100%</td><td class="no-print"></td></tr></tfoot></table>`;
-  document.getElementById('detail-table').innerHTML = html;
-}
-
-function addDetailLine() {
-  if (!currentAgent) return;
-  const ag = state.agents[currentAgent];
-  ag.details[currentDetailCat].push({ id: 'd' + Date.now() + Math.random().toString(36).slice(2, 6), label: '', hours: 0 });
-  saveState(); renderDetailTable(); renderCoherence();
-}
-window.addDetailLine = addDetailLine;
-
-function updateDetailLine(input, lineId, field) {
-  const ag = state.agents[currentAgent]; if (!ag) return;
-  const line = ag.details[currentDetailCat].find(l => l.id === lineId); if (!line) return;
-  if (field === 'hours') {
-    let v = parseFloat(input.value); if (isNaN(v) || v < 0) v = 0;
-    line.hours = v;
-    const tc = document.getElementById('detail-total-cell'); if (tc) tc.textContent = fmt(detailTotal(ag, currentDetailCat)) + 'h';
-  } else {
-    line.label = input.value;
-  }
-  renderCoherence(); saveDebounced();
-}
-window.updateDetailLine = updateDetailLine;
-
-function deleteDetailLine(lineId) {
-  const ag = state.agents[currentAgent]; if (!ag) return;
-  ag.details[currentDetailCat] = ag.details[currentDetailCat].filter(l => l.id !== lineId);
-  saveState(); renderDetailTable(); renderCoherence();
-}
-window.deleteDetailLine = deleteDetailLine;
-
-function renderCoherence() {
-  const ag = state.agents[currentAgent]; if (!ag) return;
-  const t = agentTotals(ag);
-  document.getElementById('detail-coherence').innerHTML = CATS.map(c => {
-    const g = t[c.key], d = detailTotal(ag, c.key);
-    const ok = Math.abs(g - d) < 0.01;
-    const empty = g === 0 && d === 0;
-    return `<div class="p-3 rounded-xl border text-xs font-bold ${empty ? 'bg-slate-50 border-slate-200 text-slate-400' : ok ? 'bg-green-50 border-green-200 text-green-700' : 'bg-orange-50 border-orange-200 text-orange-700'}">
-      <div class="flex justify-between items-center">
-        <span>${c.label}</span>
-        <span>${empty ? '—' : ok ? '✅' : '⚠️'}</span>
-      </div>
-      <div class="mt-1 font-black">${fmt(d)}h détaillées / ${fmt(g)}h grille</div>
-      ${!ok && !empty ? `<div class="font-semibold">Écart : ${fmt(Math.abs(g - d))}h à justifier</div>` : ''}
-    </div>`;
-  }).join('');
-}
-
-/* ---------- RÉFÉRENTIELS (MANAGER) ---------- */
+/* ---------- RÉFÉRENTIELS ---------- */
 function renderRefPanel() {
   const panel = document.getElementById('ref-panel');
   panel.innerHTML = CATS.map(c => {
@@ -449,7 +498,7 @@ function renderRefPanel() {
     return `<div class="bg-white rounded-xl border border-slate-200 p-3">
       <div class="font-black text-xs mb-2" style="color:${c.color}">${c.label}</div>
       <div class="flex flex-wrap gap-1 mb-2">
-        ${refs.map((r, i) => `<span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-100 text-slate-700 text-[11px] font-semibold">${esc(r)}<button data-del-ref="${c.key}" data-idx="${i}" class="text-red-400 hover:text-red-600 font-black no-print">✕</button></span>`).join('') || '<span class="text-[11px] text-slate-400 italic">Vide</span>'}
+        ${refs.map((r,i) => `<span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-100 text-slate-700 text-[11px] font-semibold">${esc(r)}<button data-del-ref="${c.key}" data-idx="${i}" class="text-red-400 hover:text-red-600 font-black no-print">✕</button></span>`).join('') || '<span class="text-[11px] text-slate-400 italic">Vide</span>'}
       </div>
       <div class="flex gap-1">
         <input type="text" id="ref-input-${c.key}" placeholder="Nouvelle activité…" class="flex-1 min-w-0 p-1.5 rounded-lg border border-slate-200 text-[11px] outline-none focus:border-blue-500">
@@ -459,14 +508,13 @@ function renderRefPanel() {
   }).join('');
   panel.querySelectorAll('[data-del-ref]').forEach(btn => btn.onclick = () => {
     state.referentiels[btn.dataset.delRef].splice(parseInt(btn.dataset.idx), 1);
-    saveState(); renderRefPanel(); if (currentAgent) renderDetailTable();
+    saveState(); renderRefPanel();
   });
   panel.querySelectorAll('[data-add-ref]').forEach(btn => btn.onclick = () => {
-    const cat = btn.dataset.addRef;
-    const inp = document.getElementById('ref-input-' + cat);
-    const v = inp.value.trim(); if (!v) return;
+    const cat = btn.dataset.addRef, inp = document.getElementById('ref-input-' + cat), v = inp.value.trim();
+    if (!v) return;
     if (!state.referentiels[cat].includes(v)) state.referentiels[cat].push(v);
-    inp.value = ''; saveState(); renderRefPanel(); if (currentAgent) renderDetailTable();
+    inp.value = ''; saveState(); renderRefPanel();
   });
 }
 
@@ -502,12 +550,8 @@ function renderManager() {
 
   tbody.innerHTML = ids.map(id => {
     const ag = state.agents[id], t = agentTotals(ag);
-    const annuel = t.total * cfg.weeks, taux = Math.round(t.total / cfg.hoursWeek * 100);
+    const taux = Math.round(t.total / cfg.hoursWeek * 100);
     ['projet','mco','support','transverse','total'].forEach(k => T[k] += t[k]);
-    const nbIncoherents = CATS.filter(c => Math.abs(t[c.key] - detailTotal(ag, c.key)) >= 0.01 && (t[c.key] || detailTotal(ag, c.key))).length;
-    const cohBadge = nbIncoherents === 0
-      ? '<span class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-bold">✅ Conforme</span>'
-      : `<span class="px-2 py-1 bg-orange-100 text-orange-700 rounded text-xs font-bold">⚠️ ${nbIncoherents} écart(s)</span>`;
     let badge;
     if (taux > 110) badge = '<span class="px-2 py-1 bg-red-100 text-red-700 rounded text-xs font-bold">🔴 Surcharge</span>';
     else if (taux > 100) badge = '<span class="px-2 py-1 bg-orange-100 text-orange-700 rounded text-xs font-bold">🟠 Tendu</span>';
@@ -520,7 +564,7 @@ function renderManager() {
       <td class="text-center p-3 font-semibold" style="color:#ea580c">${fmt(t.support)}h</td>
       <td class="text-center p-3 font-semibold" style="color:#475569">${fmt(t.transverse)}h</td>
       <td class="text-center p-3 font-black">${fmt(t.total)}h</td>
-      <td class="text-center p-3">${cohBadge}</td>
+      <td class="text-center p-3 font-bold text-slate-500">${(ag.blocks||[]).length}</td>
       <td class="text-center p-3">${badge} <span class="ml-1 font-black">${taux}%</span></td>
       <td class="text-center p-3 no-print"><button onclick="deleteAgent('${id}')" class="text-red-600 hover:text-red-800 font-bold text-xs">🗑️</button></td>
     </tr>`;
@@ -534,11 +578,10 @@ function renderManager() {
     <td class="text-center p-3"><span class="px-3 py-1.5 bg-slate-900 text-white rounded-lg font-black">${tauxGlobal}%</span></td>
     <td class="no-print"></td></tr>`;
 
-  // Agrégat par activité
-  const agg = aggregateDetails();
+  const agg = aggregateDetailsSafe();
   const aggBody = document.getElementById('agg-table-body');
   if (agg.length === 0) {
-    aggBody.innerHTML = '<tr><td class="p-6 text-center text-slate-400 italic">Aucun détail saisi pour le moment.</td></tr>';
+    aggBody.innerHTML = '<tr><td class="p-6 text-center text-slate-400 italic">Aucun bloc saisi pour le moment.</td></tr>';
   } else {
     const maxH = agg[0].hours || 1;
     aggBody.innerHTML = agg.map(a => {
@@ -546,13 +589,14 @@ function renderManager() {
       return `<tr class="border-b border-slate-100">
         <td class="p-2 w-8"><div class="w-3 h-3 rounded-full" style="background:${c.color}"></div></td>
         <td class="p-2 font-bold text-slate-800">${esc(a.label)}<span class="ml-2 text-[10px] text-slate-400 font-semibold">${a.nbAgents} agent(s)</span></td>
-        <td class="p-2 w-64"><div class="h-4 bg-slate-100 rounded overflow-hidden"><div class="h-full rounded" style="background:${c.color}; width:${Math.round(a.hours / maxH * 100)}%"></div></div></td>
+        <td class="p-2 w-64"><div class="h-4 bg-slate-100 rounded overflow-hidden"><div class="h-full rounded" style="background:${c.color}; width:${Math.round(a.hours/maxH*100)}%"></div></div></td>
         <td class="p-2 text-center font-black w-24">${fmt(a.hours)}h/sem</td>
-        <td class="p-2 text-center text-slate-600 w-28">${Math.round(a.hours * cfg.weeks).toLocaleString('fr-FR')}h/an</td>
+        <td class="p-2 text-center text-slate-600 w-28">${Math.round(a.hours*cfg.weeks).toLocaleString('fr-FR')}h/an</td>
       </tr>`;
     }).join('');
   }
 }
+function aggregateDetailsSafe() { return aggregateBlocks(); }
 
 function resetAll() {
   if (!confirm('⚠️ Effacer TOUTES les données de test locales ?')) return;
@@ -602,20 +646,16 @@ function renderDashboard() {
       { label:'Capacité hebdo (h)', data: perAgent.map(() => cfg.hoursWeek), type:'line', borderColor:'#16a34a', borderDash:[6,4], pointRadius:0, borderWidth:2 } ] },
     options:{ responsive:true, plugins:{ legend:{ position:'bottom' } }, scales:{ y:{ beginAtZero:true, title:{ display:true, text:'Heures / semaine' } }, x:{ grid:{ display:false } } } } });
 
-  // TOP ACTIVITÉS
-  const agg = aggregateDetails().slice(0, 8);
+  const agg = aggregateBlocks().slice(0, 8);
   const topEl = document.getElementById('dash-top');
-  if (agg.length === 0) {
-    topEl.innerHTML = '<p class="text-slate-400 italic text-sm">Aucun détail saisi pour le moment.</p>';
-  } else {
+  if (agg.length === 0) topEl.innerHTML = '<p class="text-slate-400 italic text-sm">Aucun bloc saisi pour le moment.</p>';
+  else {
     const maxH = agg[0].hours || 1;
     topEl.innerHTML = agg.map(a => {
       const c = CATS.find(x => x.key === a.cat);
       return `<div class="flex items-center gap-4 mb-3">
         <div class="w-56 text-sm font-bold text-slate-700 truncate" title="${esc(a.label)}">${esc(a.label)}</div>
-        <div class="flex-1 h-7 bg-slate-200 rounded-lg overflow-hidden relative">
-          <div class="h-full rounded-lg bar-fill-load" style="background:${c.color}; width:${Math.round(a.hours/maxH*100)}%"></div>
-        </div>
+        <div class="flex-1 h-7 bg-slate-200 rounded-lg overflow-hidden"><div class="h-full rounded-lg bar-fill-load" style="background:${c.color}; width:${Math.round(a.hours/maxH*100)}%"></div></div>
         <div class="w-24 text-right font-black text-sm" style="color:${c.color}">${fmt(a.hours)}h/sem</div>
       </div>`;
     }).join('');
