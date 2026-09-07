@@ -29,7 +29,7 @@ body { font-family: 'Inter', sans-serif; }
 </head>
 <body class="bg-slate-50 min-h-screen">
 
-<!-- ============ CONNEXION FIREBASE ============ -->
+<!-- ============ CONNEXION ============ -->
 <div id="login-screen" class="fixed inset-0 z-[200] flex items-center justify-center p-4" style="background: linear-gradient(135deg, #1a2744 0%, #2d4373 100%);">
   <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 text-center fade-in">
     <div class="w-16 h-16 mx-auto bg-blue-600 text-white rounded-2xl flex items-center justify-center font-black text-2xl shadow-lg">C/C</div>
@@ -236,11 +236,11 @@ body { font-family: 'Inter', sans-serif; }
 
 <script type="module">
 /* =====================================================
-   Import unique depuis firebase.js (config centralisée)
+   Import unique depuis firebase.js (version FIRESTORE)
 ===================================================== */
 import {
   db, auth, secondaryAuth, ADMIN_EMAIL, PATHS,
-  ref, set, update, remove, onValue, query, orderByChild, equalTo,
+  collection, doc, setDoc, updateDoc, deleteDoc, onSnapshot, query, where, getDocs,
   signInWithEmailAndPassword, signOut, onAuthStateChanged, createUserWithEmailAndPassword
 } from './firebase.js';
 
@@ -297,19 +297,23 @@ onAuthStateChanged(auth, user => {
 
 function clearListeners() { unsubs.forEach(u => u()); unsubs = []; blocksListenerOn = false; }
 
+/* ---------- ÉCOUTES FIRESTORE ---------- */
 function startListeners() {
-  unsubs.push(onValue(ref(db, PATHS.users), snap => {
-    allUsers = snap.val() || {};
+  unsubs.push(onSnapshot(collection(db, PATHS.users), snap => {
+    allUsers = {};
+    snap.forEach(d => { allUsers[d.id] = d.data(); });
     ensureOwnRecord();
     renderUsers(); renderUserSelect(); refreshAll();
-  }));
-  unsubs.push(onValue(ref(db, PATHS.config), snap => {
-    if (snap.val()) config = { ...config, ...snap.val() };
+  }, err => console.warn('Écoute users refusée :', err.code)));
+
+  unsubs.push(onSnapshot(doc(db, PATHS.config, 'main'), snap => {
+    if (snap.exists()) config = { ...config, ...snap.data() };
     loadConfigInputs(); refreshAll();
   }));
-  unsubs.push(onValue(ref(db, PATHS.refs), snap => {
-    const v = snap.val() || {};
-    CATS.forEach(c => refs[c.key] = v[c.key] ? Object.values(v[c.key]) : (refs[c.key] || []));
+
+  unsubs.push(onSnapshot(doc(db, PATHS.refs, 'main'), snap => {
+    const v = snap.data() || {};
+    CATS.forEach(c => refs[c.key] = Array.isArray(v[c.key]) ? v[c.key] : (refs[c.key] || []));
     renderRefPanel();
   }));
 }
@@ -319,10 +323,10 @@ function setupBlocksListener() {
   if (blocksListenerOn || !me || !me.role) return;
   blocksListenerOn = true;
   const target = (me.role === 'agent')
-    ? query(ref(db, PATHS.blocks), orderByChild('owner'), equalTo(me.uid))
-    : ref(db, PATHS.blocks);
-  unsubs.push(onValue(target, snap => {
-    allBlocks = Object.values(snap.val() || {});
+    ? query(collection(db, PATHS.blocks), where('owner', '==', me.uid))
+    : collection(db, PATHS.blocks);
+  unsubs.push(onSnapshot(target, snap => {
+    allBlocks = snap.docs.map(d => d.data());
     refreshAll();
   }, err => console.warn('Accès blocs refusé :', err.code)));
 }
@@ -340,7 +344,11 @@ function ensureOwnRecord() {
   } else {
     bootstrapped = true;
     const role = (Object.keys(allUsers).length === 0 || me.email === ADMIN_EMAIL) ? 'admin' : 'agent';
-    set(ref(db, PATHS.users + '/' + me.uid), { name: me.name, email: me.email, role, active: true, createdAt: Date.now() });
+    me.role = role;
+    setDoc(doc(db, PATHS.users, me.uid), { name: me.name, email: me.email, role, active: true, createdAt: Date.now() })
+      .catch(err => console.error('❌ Création du profil impossible :', err.code));
+    enterApp();
+    setupBlocksListener();
   }
 }
 
@@ -470,7 +478,7 @@ window.onDrop = (e, day) => {
   const rect = e.currentTarget.getBoundingClientRect();
   let start = DAY_START + Math.floor(((e.clientY - rect.top) / ROW_H) * 2) / 2;
   start = Math.min(Math.max(start, DAY_START), DAY_END - b.duration);
-  update(ref(db, PATHS.blocks + '/' + id), { day, start });
+  updateDoc(doc(db, PATHS.blocks, id), { day, start });
 };
 
 /* ---------- MODAL BLOC ---------- */
@@ -503,11 +511,11 @@ window.saveBlock = () => {
   let dur = parseFloat(document.getElementById('m-dur').value);
   if (start + dur > DAY_END) dur = DAY_END - start;
   const data = { cat: document.getElementById('m-cat').value, label: document.getElementById('m-label').value.trim(), day: document.getElementById('m-day').value, start, duration: dur };
-  if (editingBlockId) update(ref(db, PATHS.blocks + '/' + editingBlockId), data);
-  else { const id = 'b' + Date.now(); set(ref(db, PATHS.blocks + '/' + id), { id, owner: viewedUid, ...data }); }
+  if (editingBlockId) updateDoc(doc(db, PATHS.blocks, editingBlockId), data);
+  else { const id = 'b' + Date.now(); setDoc(doc(db, PATHS.blocks, id), { id, owner: viewedUid, ...data }); }
   closeModal();
 };
-window.deleteBlock = () => { if (editingBlockId && canEdit()) remove(ref(db, PATHS.blocks + '/' + editingBlockId)); closeModal(); };
+window.deleteBlock = () => { if (editingBlockId && canEdit()) deleteDoc(doc(db, PATHS.blocks, editingBlockId)); closeModal(); };
 
 /* ---------- SYNTHÈSE ---------- */
 function totalsOf(uid) {
@@ -539,12 +547,12 @@ function renderRefPanel() {
   if (!editable) return;
   panel.querySelectorAll('[data-del-ref]').forEach(btn => btn.onclick = () => {
     const cat = btn.dataset.delRef, arr = [...refs[cat]]; arr.splice(parseInt(btn.dataset.idx), 1);
-    set(ref(db, PATHS.refs + '/' + cat), arr);
+    setDoc(doc(db, PATHS.refs, 'main'), { [cat]: arr }, { merge: true });
   });
   panel.querySelectorAll('[data-add-ref]').forEach(btn => btn.onclick = () => {
     const cat = btn.dataset.addRef, inp = document.getElementById('ref-input-' + cat), v = inp.value.trim();
     if (!v || refs[cat].includes(v)) return;
-    set(ref(db, PATHS.refs + '/' + cat), [...refs[cat], v]);
+    setDoc(doc(db, PATHS.refs, 'main'), { [cat]: [...refs[cat], v] }, { merge: true });
   });
 }
 
@@ -557,17 +565,18 @@ function loadConfigInputs() {
 }
 window.saveConfigFromInputs = () => {
   if (!isAdmin()) return;
-  set(ref(db, PATHS.config), {
+  setDoc(doc(db, PATHS.config, 'main'), {
     hoursWeek: parseFloat(document.getElementById('cfg-hours-week').value) || 35,
     weeks: parseFloat(document.getElementById('cfg-weeks').value) || 47,
     etp: parseFloat(document.getElementById('cfg-etp').value) || 10,
     taux: parseFloat(document.getElementById('cfg-taux').value) || 55
-  });
+  }, { merge: true });
 };
-window.purgeBlocks = () => {
+window.purgeBlocks = async () => {
   if (!isAdmin() || !confirm('⚠️ Supprimer TOUS les blocs de TOUS les agents ?')) return;
   if (!confirm('Confirmation finale : action irréversible.')) return;
-  remove(ref(db, PATHS.blocks));
+  const snap = await getDocs(collection(db, PATHS.blocks));
+  await Promise.all(snap.docs.map(d => deleteDoc(d.ref)));
 };
 
 /* ---------- UTILISATEURS (ADMIN) ---------- */
@@ -579,14 +588,14 @@ window.createUser = async () => {
   if (!name || !email || pass.length < 6) { alert('Nom, email et mot de passe (6 car. min) requis.'); return; }
   try {
     const cred = await createUserWithEmailAndPassword(secondaryAuth, email, pass);
-    await set(ref(db, PATHS.users + '/' + cred.user.uid), { name, email, role, active: true, createdAt: Date.now() });
+    await setDoc(doc(db, PATHS.users, cred.user.uid), { name, email, role, active: true, createdAt: Date.now() });
     await signOut(secondaryAuth);
     ['nu-name','nu-email','nu-pass'].forEach(id => document.getElementById(id).value = '');
     alert('✅ Compte créé pour ' + name + ' (rôle ' + role + ')');
   } catch (e) { alert('❌ ' + e.message); }
 };
-window.changeRole = (uid, role) => update(ref(db, PATHS.users + '/' + uid), { role });
-window.toggleActive = uid => update(ref(db, PATHS.users + '/' + uid), { active: allUsers[uid].active === false });
+window.changeRole = (uid, role) => updateDoc(doc(db, PATHS.users, uid), { role });
+window.toggleActive = uid => updateDoc(doc(db, PATHS.users, uid), { active: allUsers[uid].active === false });
 
 function renderUsers() {
   if (!isAdmin()) return;
