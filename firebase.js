@@ -13,7 +13,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 /* Votre email = devient ADMIN au 1er lancement */
-export const ADMIN_EMAIL = "votre.email@entreprise.com";   // ← remplacez
+export const ADMIN_EMAIL = "michael.frischherz@sncf.Fr";   // ← remplacez
 
 const firebaseConfig = {
   apiKey: "AIzaSyAoe39w3q89D2i3dzeHVE8ulz-g0Go5IqQ",
