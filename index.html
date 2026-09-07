@@ -15,8 +15,15 @@ body { font-family: 'Inter', sans-serif; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 .slot:hover { background: #eff6ff; cursor: pointer; }
 .slot:hover::after { content: '+'; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #93c5fd; font-weight: 900; font-size: 16px; }
-.blk { transition: transform 0.15s, box-shadow 0.15s; }
+
+/* --- DRAG & DROP --- */
+.blk { transition: transform 0.15s, box-shadow 0.15s; cursor: grab; }
+.blk:active { cursor: grabbing; }
 .blk:hover { transform: scale(1.03); box-shadow: 0 4px 10px rgba(0,0,0,0.25); z-index: 30 !important; }
+.blk.dragging { opacity: 0.35; transform: scale(0.98); }
+.day-col.drag-over { background: #dbeafe; outline: 2px dashed #2563eb; outline-offset: -3px; }
+.day-col.drag-over .slot:hover::after { content: ''; }
+
 @media print { .no-print { display: none !important; } body { background: white; } }
 </style>
 </head>
@@ -45,7 +52,7 @@ body { font-family: 'Inter', sans-serif; }
     <div class="p-6 border-b border-slate-200 flex flex-wrap justify-between items-center gap-4">
       <div>
         <h2 class="text-xl font-black text-slate-800">🗓️ Calendrier de la semaine type</h2>
-        <p class="text-sm text-slate-500 mt-1">Cliquez sur un créneau vide pour placer une activité · Cliquez sur un bloc pour le modifier</p>
+        <p class="text-sm text-slate-500 mt-1">Clic sur créneau vide = ajouter · <strong class="text-blue-600">Glisser-déposer un bloc = déplacer</strong> · Clic sur un bloc = modifier</p>
       </div>
       <div class="flex gap-2 items-center">
         <select id="agent-select" onchange="selectAgent(this.value)" class="p-2.5 rounded-xl border border-slate-200 font-semibold text-sm outline-none focus:border-blue-500">
@@ -55,15 +62,12 @@ body { font-family: 'Inter', sans-serif; }
       </div>
     </div>
 
-    <!-- Légende -->
     <div class="p-4 bg-slate-50 border-b border-slate-200 flex flex-wrap gap-4 text-xs font-bold" id="legend"></div>
 
-    <!-- Calendrier -->
     <div id="calendar-wrap" class="p-4 overflow-x-auto">
       <div class="text-center text-slate-400 py-16"><div class="text-5xl mb-3">👤</div><p class="font-semibold">Sélectionnez ou créez un agent pour commencer</p></div>
     </div>
 
-    <!-- Synthèse -->
     <div id="agent-summary" class="hidden p-6 bg-slate-50 border-t border-slate-200">
       <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-3" id="summary-cards"></div>
       <div id="agent-status" class="text-sm font-semibold text-center"></div>
@@ -90,7 +94,7 @@ body { font-family: 'Inter', sans-serif; }
       </div>
       <div>
         <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Activité précise (quel projet / quel type)</label>
-        <input type="text" id="m-label" list="dl-labels" placeholder="Ex : Lean Picking, Support N2/N3…" class="w-full p-3 rounded-xl bg-slate-50 border border-slate-200 font-semibold text-sm outline-none focus:border-blue-500">
+        <input type="text" id="m-label" list="dl-labels" placeholder="Ex : MAG9, Lean Picking, Support N2/N3…" class="w-full p-3 rounded-xl bg-slate-50 border border-slate-200 font-semibold text-sm outline-none focus:border-blue-500">
         <datalist id="dl-labels"></datalist>
       </div>
       <div class="grid grid-cols-3 gap-3">
@@ -224,6 +228,7 @@ const DEFAULT_REFS = {
 let state = loadState();
 let currentAgent = null;
 let editingBlockId = null;
+let draggedBlockId = null;
 let chartAgents = null;
 let saveTimer = null;
 
@@ -320,6 +325,61 @@ function deleteAgent(id) {
 }
 window.deleteAgent = deleteAgent;
 
+/* ---------- DRAG & DROP ---------- */
+function onDragStart(e, id) {
+  draggedBlockId = id;
+  e.dataTransfer.setData('text/plain', id);
+  e.dataTransfer.effectAllowed = 'move';
+  setTimeout(() => e.target.classList.add('dragging'), 0);
+}
+window.onDragStart = onDragStart;
+
+function onDragEnd(e) {
+  e.target.classList.remove('dragging');
+  draggedBlockId = null;
+  document.querySelectorAll('.day-col.drag-over').forEach(el => el.classList.remove('drag-over'));
+}
+window.onDragEnd = onDragEnd;
+
+function onDragOver(e, day) {
+  e.preventDefault();                       // autorise le drop
+  e.dataTransfer.dropEffect = 'move';
+  const col = e.currentTarget;
+  if (!col.classList.contains('drag-over')) col.classList.add('drag-over');
+}
+window.onDragOver = onDragOver;
+
+function onDragLeave(e) {
+  const col = e.currentTarget;
+  if (!col.contains(e.relatedTarget)) col.classList.remove('drag-over');
+}
+window.onDragLeave = onDragLeave;
+
+function onDrop(e, day) {
+  e.preventDefault();
+  const col = e.currentTarget;
+  col.classList.remove('drag-over');
+
+  const id = e.dataTransfer.getData('text/plain') || draggedBlockId;
+  if (!id || !currentAgent) return;
+  const ag = state.agents[currentAgent];
+  const b = ag.blocks.find(x => x.id === id);
+  if (!b) return;
+
+  // Calcul de l'heure de dépôt : position verticale dans la colonne, aimantée à la demi-heure
+  const rect = col.getBoundingClientRect();
+  const y = e.clientY - rect.top;
+  let start = DAY_START + Math.floor((y / ROW_H) * 2) / 2;
+  start = Math.min(Math.max(start, DAY_START), DAY_END - b.duration); // impossible de sortir de 8h-18h
+
+  b.day = day;
+  b.start = start;
+  saveState();
+  renderCalendar();
+  renderSummary();
+}
+window.onDrop = onDrop;
+
 /* ---------- CALENDRIER ---------- */
 function layoutDay(blocks) {
   const sorted = [...blocks].sort((a,b) => a.start - b.start);
@@ -345,7 +405,6 @@ function renderCalendar() {
 
   let html = '<div class="min-w-[860px]"><div class="grid" style="grid-template-columns: 60px repeat(5, 1fr);">';
 
-  // En-têtes jours
   html += '<div></div>';
   JOURS.forEach(j => {
     const dayTotal = (ag.blocks || []).filter(b => b.day === j).reduce((s,b) => s + (parseFloat(b.duration)||0), 0);
@@ -355,31 +414,33 @@ function renderCalendar() {
     </div>`;
   });
 
-  // Colonne heures
   html += '<div class="relative" style="height:' + colH + 'px">';
   for (let h = DAY_START; h < DAY_END; h++) {
     html += `<div class="absolute right-2 text-[10px] font-bold text-slate-400" style="top:${(h-DAY_START)*ROW_H - 6}px">${fmtHour(h)}</div>`;
   }
   html += '</div>';
 
-  // Colonnes jours
   JOURS.forEach(j => {
     const dayBlocks = (ag.blocks || []).filter(b => b.day === j);
     const layout = layoutDay(dayBlocks);
-    html += `<div class="relative border-l border-slate-200" style="height:${colH}px">`;
-    // Créneaux cliquables
+    // Colonne = zone de drop
+    html += `<div class="day-col relative border-l border-slate-200" style="height:${colH}px"
+      ondragover="onDragOver(event,'${j}')" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${j}')">`;
     for (let h = DAY_START; h < DAY_END; h++) {
       html += `<div class="slot absolute left-0 right-0 border-b border-slate-100 relative" style="top:${(h-DAY_START)*ROW_H}px; height:${ROW_H}px" onclick="openModal('${j}', ${h})"></div>`;
     }
-    // Blocs
     dayBlocks.forEach(b => {
       const c = CATS.find(x => x.key === b.cat) || CATS[0];
       const pos = layout[b.id] || { lane: 0, lanes: 1 };
       const w = 100 / pos.lanes;
-      html += `<div class="blk absolute rounded-lg px-2 py-1 text-white overflow-hidden cursor-pointer shadow-sm"
+      html += `<div class="blk absolute rounded-lg px-2 py-1 text-white overflow-hidden shadow-sm"
+        draggable="true"
+        ondragstart="onDragStart(event,'${b.id}')"
+        ondragend="onDragEnd(event)"
+        onclick="openModal(null, null, '${b.id}')"
         style="top:${(b.start-DAY_START)*ROW_H + 1}px; height:${Math.max(18, b.duration*ROW_H - 3)}px; left:calc(${pos.lane*w}% + 2px); width:calc(${w}% - 4px); background:${c.color}; z-index:10"
-        onclick="openModal(null, null, '${b.id}')" title="${esc(b.label)} — ${fmtHour(b.start)} → ${fmtHour(b.start+b.duration)}">
-        <div class="font-black text-[10px] leading-tight truncate">${esc(b.label) || '(sans libellé)'}</div>
+        title="${esc(b.label)} — ${fmtHour(b.start)} → ${fmtHour(b.start+b.duration)} · Glisser pour déplacer">
+        <div class="font-black text-[10px] leading-tight truncate">⠿ ${esc(b.label) || '(sans libellé)'}</div>
         ${b.duration >= 1 ? `<div class="text-[9px] opacity-80 font-bold">${fmtHour(b.start)}-${fmtHour(b.start+b.duration)} · ${fmt(b.duration)}h</div>` : ''}
       </div>`;
     });
@@ -389,10 +450,9 @@ function renderCalendar() {
   html += '</div></div>';
   document.getElementById('calendar-wrap').innerHTML = html;
 
-  // Légende
   document.getElementById('legend').innerHTML = CATS.map(c =>
     `<span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full" style="background:${c.color}"></span>${c.label}</span>`
-  ).join('') + '<span class="text-slate-400 font-semibold ml-auto no-print">💡 Astuce : survolez un créneau vide puis cliquez pour ajouter</span>';
+  ).join('') + '<span class="text-slate-400 font-semibold ml-auto no-print">💡 Glissez-déposez un bloc pour le déplacer (calage à la demi-heure)</span>';
 }
 
 /* ---------- MODAL BLOC ---------- */
@@ -578,7 +638,7 @@ function renderManager() {
     <td class="text-center p-3"><span class="px-3 py-1.5 bg-slate-900 text-white rounded-lg font-black">${tauxGlobal}%</span></td>
     <td class="no-print"></td></tr>`;
 
-  const agg = aggregateDetailsSafe();
+  const agg = aggregateBlocks();
   const aggBody = document.getElementById('agg-table-body');
   if (agg.length === 0) {
     aggBody.innerHTML = '<tr><td class="p-6 text-center text-slate-400 italic">Aucun bloc saisi pour le moment.</td></tr>';
@@ -596,7 +656,6 @@ function renderManager() {
     }).join('');
   }
 }
-function aggregateDetailsSafe() { return aggregateBlocks(); }
 
 function resetAll() {
   if (!confirm('⚠️ Effacer TOUTES les données de test locales ?')) return;
