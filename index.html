@@ -324,7 +324,7 @@ function setupBlocksListener() {
   unsubs.push(onValue(target, snap => {
     allBlocks = Object.values(snap.val() || {});
     refreshAll();
-  }, err => console.warn('Accès blocs refusé :', err.code));
+  }, err => console.warn('Accès blocs refusé :', err.code)));
 }
 
 /* Création auto du profil au 1er login (bootstrap admin) */
