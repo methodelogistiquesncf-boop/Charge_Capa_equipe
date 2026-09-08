@@ -165,7 +165,7 @@ body { font-family: 'Inter', sans-serif; }
   <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
     <div class="p-6 border-b border-slate-200 flex flex-wrap justify-between items-center gap-4">
       <div><h2 class="text-xl font-black text-slate-800">📋 Consolidation équipe</h2>
-        <p class="text-sm text-slate-500 mt-1">Semaines réelles · capacités proratisées · budgets projets débités automatiquement</p></div>
+        <p class="text-sm text-slate-500 mt-1">Semaines réelles · capacités proratisées (ETP + absences) · budgets projets débités automatiquement</p></div>
       <div class="flex items-center gap-2">
         <select id="period-select" onchange="renderManager()" class="p-2.5 rounded-xl border border-slate-200 font-semibold text-sm outline-none">
           <option value="month">Mois en cours</option>
@@ -181,16 +181,15 @@ body { font-family: 'Inter', sans-serif; }
     <div id="cfg-section" class="p-6 bg-slate-50 border-b border-slate-200">
       <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">⚙️ Paramètres de projection annuelle</h3>
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div><label class="block text-xs font-semibold text-slate-600 mb-1.5">Heures contrat / sem.</label><input type="number" id="cfg-hours-week" oninput="saveConfigFromInputs()" class="w-full p-2 rounded-lg border border-slate-200 text-sm font-bold text-center"></div>
+        <div><label class="block text-xs font-semibold text-slate-600 mb-1.5">Heures contrat / sem. (1 ETP)</label><input type="number" id="cfg-hours-week" oninput="saveConfigFromInputs()" class="w-full p-2 rounded-lg border border-slate-200 text-sm font-bold text-center"></div>
         <div><label class="block text-xs font-semibold text-slate-600 mb-1.5">Semaines / an</label><input type="number" id="cfg-weeks" oninput="saveConfigFromInputs()" class="w-full p-2 rounded-lg border border-slate-200 text-sm font-bold text-center"></div>
         <div><label class="block text-xs font-semibold text-slate-600 mb-1.5">Effectif cible ETP (référence)</label><input type="number" id="cfg-etp" oninput="saveConfigFromInputs()" class="w-full p-2 rounded-lg border border-slate-200 text-sm font-bold text-center"></div>
         <div><label class="block text-xs font-semibold text-slate-600 mb-1.5">Taux horaire (€)</label><input type="number" id="cfg-taux" oninput="saveConfigFromInputs()" class="w-full p-2 rounded-lg border border-slate-200 text-sm font-bold text-center"></div>
       </div>
     </div>
 
-    <!-- ===== 💰 PROJETS & BUDGETS ===== -->
     <div class="p-6 bg-slate-50 border-b border-slate-200">
-      <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">💰 Projets & budgets <span class="text-[10px] font-normal text-slate-400">(gérés ici — consommation automatique)</span></h3>
+      <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">💰 Projets & budgets <span class="text-[10px] font-normal text-slate-400">(consommation automatique)</span></h3>
       <div id="proj-form" class="hidden mb-4 p-4 bg-white rounded-xl border border-slate-200 grid grid-cols-2 md:grid-cols-6 gap-3 items-end">
         <input id="pj-code" placeholder="Code (MAG9)" class="p-2 rounded-lg border border-slate-200 text-sm font-bold outline-none focus:border-blue-500">
         <input id="pj-name" placeholder="Nom du projet" class="md:col-span-2 p-2 rounded-lg border border-slate-200 text-sm font-bold outline-none focus:border-blue-500">
@@ -219,17 +218,18 @@ body { font-family: 'Inter', sans-serif; }
     </div>
 
     <div class="p-6 bg-slate-50 border-b border-slate-200">
-      <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">🏷️ Référentiels d'activités <span class="text-[10px] font-normal text-slate-400">(MCO, support, transverse, absences — les projets sont ci-dessus)</span></h3>
+      <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">🏷️ Référentiels d'activités <span class="text-[10px] font-normal text-slate-400">(les projets sont gérés ci-dessus)</span></h3>
       <div class="grid grid-cols-2 md:grid-cols-4 gap-3" id="ref-panel"></div>
     </div>
     <div class="p-6 border-b border-slate-200 grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <div class="bg-slate-50 p-4 rounded-xl"><h3 class="font-black text-slate-800 text-sm mb-3">📈 Charge hebdo équipe (h) vs capacité proratisée</h3><canvas id="chart-weeks" height="180"></canvas></div>
+      <div class="bg-slate-50 p-4 rounded-xl"><h3 class="font-black text-slate-800 text-sm mb-3">📈 Charge hebdo équipe (h) vs capacité proratisée (ETP+absences)</h3><canvas id="chart-weeks" height="180"></canvas></div>
       <div class="bg-slate-50 p-4 rounded-xl"><h3 class="font-black text-slate-800 text-sm mb-3">🧮 Chiffres de la période</h3><div id="period-stats" class="text-sm space-y-2"></div></div>
     </div>
     <div class="overflow-x-auto">
       <table class="w-full text-sm">
         <thead><tr class="bg-slate-800 text-white">
           <th class="text-left p-3 font-bold text-xs uppercase">Collaborateur</th>
+          <th class="text-center p-3 font-bold text-xs uppercase">ETP</th>
           <th class="text-center p-3 font-bold text-xs uppercase">Travaillé</th>
           <th class="text-center p-3 font-bold text-xs uppercase">Absences</th>
           <th class="text-center p-3 font-bold text-xs uppercase">Semaines saisies</th>
@@ -252,26 +252,28 @@ body { font-family: 'Inter', sans-serif; }
   <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
     <div class="p-6 border-b border-slate-200">
       <h2 class="text-xl font-black text-slate-800">👥 Utilisateurs & rôles</h2>
-      <p class="text-sm text-slate-500 mt-1">Créez les comptes, attribuez les rôles, réglez le mode de saisie, activez/désactivez les accès</p>
+      <p class="text-sm text-slate-500 mt-1">Comptes, rôles, <strong>ETP contractuel</strong>, mode de saisie, accès</p>
     </div>
     <div class="p-6 bg-slate-50 border-b border-slate-200">
       <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">➕ Créer un compte</h3>
-      <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+      <div class="grid grid-cols-2 md:grid-cols-6 gap-3">
         <input type="text" id="nu-name" placeholder="Nom complet" class="p-2.5 rounded-lg border border-slate-200 text-sm font-semibold outline-none focus:border-blue-500">
         <input type="email" id="nu-email" placeholder="Email" class="p-2.5 rounded-lg border border-slate-200 text-sm font-semibold outline-none focus:border-blue-500">
         <input type="text" id="nu-pass" placeholder="Mot de passe temporaire" class="p-2.5 rounded-lg border border-slate-200 text-sm font-semibold outline-none focus:border-blue-500">
         <select id="nu-role" class="p-2.5 rounded-lg border border-slate-200 text-sm font-bold outline-none">
           <option value="agent">🟢 Agent</option><option value="manager">🔵 Manager</option><option value="admin">🔴 Admin</option>
         </select>
+        <input type="number" id="nu-etp" placeholder="ETP" min="0.1" max="1" step="0.1" value="1" class="p-2.5 rounded-lg border border-slate-200 text-sm font-bold outline-none focus:border-blue-500 text-center" title="Équivalent Temps Plein : 1 = temps plein, 0.8 = 80%, 0.5 = mi-temps">
         <button onclick="createUser()" class="bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold text-sm">Créer</button>
       </div>
-      <p class="text-[11px] text-slate-400 mt-2">Rôles : <strong>agent</strong> = son planning seul · <strong>manager</strong> = vision équipe + budgets + dashboard · <strong>admin</strong> = tout.</p>
+      <p class="text-[11px] text-slate-400 mt-2"><strong>ETP</strong> : 1 = temps plein (35 h/sem) · 0.8 = 80 % (28 h) · 0.5 = mi-temps (17,5 h). La capacité de chaque agent est calculée automatiquement à partir de son ETP.</p>
     </div>
     <div class="overflow-x-auto">
       <table class="w-full text-sm">
         <thead><tr class="bg-slate-800 text-white">
           <th class="text-left p-3 font-bold text-xs uppercase">Nom</th>
           <th class="text-left p-3 font-bold text-xs uppercase">Email</th>
+          <th class="text-center p-3 font-bold text-xs uppercase">ETP</th>
           <th class="text-center p-3 font-bold text-xs uppercase">Rôle</th>
           <th class="text-center p-3 font-bold text-xs uppercase">Accès</th>
           <th class="text-center p-3 font-bold text-xs uppercase">📝 Saisie</th>
@@ -289,7 +291,7 @@ body { font-family: 'Inter', sans-serif; }
     <div class="p-8 text-white" style="background: linear-gradient(135deg, #1a2744 0%, #2d4373 100%);">
       <div class="flex justify-between items-start flex-wrap gap-4">
         <div><h1 class="text-2xl font-black mb-1">📊 Pilotage Charge / Capacité</h1>
-          <p class="text-white/70 text-sm">Équipe Performance & Méthodes logistique | <span id="dash-effectif">10</span> ETP | <span id="dash-source"></span></p></div>
+          <p class="text-white/70 text-sm">Équipe Performance & Méthodes logistique | <span id="dash-effectif">—</span> ETP | <span id="dash-source"></span></p></div>
         <button onclick="window.print()" class="no-print bg-white/20 hover:bg-white/30 px-4 py-2 rounded-xl text-sm font-bold">🖨️ Imprimer PDF</button>
       </div>
     </div>
@@ -297,7 +299,7 @@ body { font-family: 'Inter', sans-serif; }
       <div class="grid grid-cols-2 md:grid-cols-4 gap-5 mb-8" id="dash-kpis"></div>
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         <div class="bg-slate-50 p-6 rounded-xl"><h3 class="font-black text-slate-800 mb-4">Répartition par catégorie</h3><div id="dash-bars"></div></div>
-        <div class="bg-slate-50 p-6 rounded-xl"><h3 class="font-black text-slate-800 mb-4">Charge vs Capacité par collaborateur</h3><canvas id="chart-agents" height="250"></canvas></div>
+        <div class="bg-slate-50 p-6 rounded-xl"><h3 class="font-black text-slate-800 mb-4">Charge vs capacité contractuelle par collaborateur</h3><canvas id="chart-agents" height="250"></canvas></div>
       </div>
       <div class="bg-slate-50 p-6 rounded-xl mb-8">
         <h3 class="font-black text-slate-800 mb-1">📈 Trajectoire charge vs capacité (cumul depuis janvier)</h3>
@@ -385,11 +387,13 @@ function weekLabel(key) {
 }
 const weekOf = b => b.week || 'TYPE';
 
-/* ---------- ABSENCES → CAPACITÉ PRORATISÉE ---------- */
+/* ---------- ETP + ABSENCES → CAPACITÉ ---------- */
+const etpOf = uid => allUsers[uid]?.etp || 1.0;
+const capWeekOf = uid => config.hoursWeek * etpOf(uid);
 const absHoursOf = (uid, w) => allBlocks.filter(b => b.owner === uid && weekOf(b) === w && b.cat === 'absences').reduce((s,b) => s + b.duration, 0);
-const weightOf = (uid, w) => Math.max(0, 1 - absHoursOf(uid, w) / config.hoursWeek);
+const weightOf = (uid, w) => Math.max(0, 1 - absHoursOf(uid, w) / capWeekOf(uid));
 
-/* ---------- PROJETS : CONSOMMATION ---------- */
+/* ---------- PROJETS ---------- */
 const projBlocks = p => allBlocks.filter(b => b.cat === 'projet' && weekOf(b) !== 'TYPE' && (b.projectId === p.id || (!b.projectId && b.label === p.name)));
 const projectConsumed = p => projBlocks(p).reduce((s,b) => s + b.duration, 0);
 function projectElapsedWeeks(p) {
@@ -520,7 +524,7 @@ function ensureOwnRecord() {
     bootstrapped = true;
     const role = (Object.keys(allUsers).length === 0 || me.email === ADMIN_EMAIL) ? 'admin' : 'agent';
     me.role = role;
-    setDoc(doc(db, PATHS.users, me.uid), { name: me.name, email: me.email, role, active: true, createdAt: Date.now() })
+    setDoc(doc(db, PATHS.users, me.uid), { name: me.name, email: me.email, role, etp: 1.0, active: true, createdAt: Date.now() })
       .catch(err => console.error('❌ Création du profil impossible :', err.code));
     enterApp();
     setupBlocksListener();
@@ -699,7 +703,7 @@ window.onDrop = (e, day) => {
   copyDrag = false;
 };
 
-/* ---------- MODAL BLOC + PROJETS + DUPLICATION ---------- */
+/* ---------- MODAL BLOC ---------- */
 function fillModalSelects() {
   document.getElementById('m-day').innerHTML = JOURS.map(j => `<option value="${j}">${j}</option>`).join('');
   let o = ''; for (let h = DAY_START; h < DAY_END; h += 0.5) o += `<option value="${h}">${fmtHour(h)}</option>`;
@@ -805,17 +809,19 @@ function renderSummary() {
   document.getElementById('summary-cards').innerHTML = CATS.map(c => `
     <div class="p-3 rounded-xl border border-slate-200 bg-white text-center"><div class="text-xs font-bold text-slate-500 uppercase">${c.label}</div><div class="text-2xl font-black" style="color:${c.color}">${fmt(t[c.key])}h</div><div class="text-[10px] text-slate-400 font-semibold">${list.filter(b=>b.cat===c.key).length} bloc(s)</div></div>`).join('') +
     `<div class="p-3 rounded-xl border-2 border-slate-800 bg-slate-800 text-white text-center"><div class="text-xs font-bold uppercase">TOTAL TRAVAILLÉ</div><div class="text-2xl font-black">${fmt(t.total)}h</div><div class="text-[10px] opacity-70 font-semibold">${list.length} blocs</div></div>`;
-  const hw = config.hoursWeek, st = document.getElementById('agent-status');
-  const capW = weightOf(viewedUid, currentWeek) * hw;
-  const absTxt = t.absences ? ` (+ ${fmt(t.absences)}h 🌴 absence)` : '';
+  const etp = etpOf(viewedUid);
+  const capBase = capWeekOf(viewedUid);
+  const capW = weightOf(viewedUid, currentWeek) * capBase;
+  const absTxt = t.absences ? ` (+ ${fmt(t.absences)}h 🌴)` : '';
+  const st = document.getElementById('agent-status');
   if (viewedUid === me.uid && !meSaisit()) st.innerHTML = `🧭 <span class="text-slate-600">Compte gestion uniquement — aucune saisie attendue</span>`;
   else if (currentWeek === 'TYPE') st.innerHTML = `📐 <span class="text-indigo-600">Semaine type de référence (non comptée dans les statistiques réelles)</span>`;
-  else if (t.total > capW + 2) st.innerHTML = `⚠️ <span class="text-red-600">${fmt(t.total)}h travaillées pour ${fmt(capW)}h disponibles${absTxt} → Débordement</span>`;
-  else if (t.total >= capW - 1) st.innerHTML = `✅ <span class="text-green-600">Semaine cohérente : ${fmt(t.total)}h travaillées${absTxt} / ${fmt(hw)}h</span>`;
-  else st.innerHTML = `ℹ️ <span class="text-slate-600">${fmt(t.total)}h travaillées${absTxt} / ${fmt(capW)}h disponibles</span>`;
+  else if (t.total > capW + 2) st.innerHTML = `⚠️ <span class="text-red-600">${fmt(t.total)}h travaillées pour ${fmt(capW)}h disponibles${absTxt} (ETP ${etp}) → Débordement</span>`;
+  else if (t.total >= capW - 1) st.innerHTML = `✅ <span class="text-green-600">Semaine cohérente : ${fmt(t.total)}h travaillées${absTxt} / ${fmt(capBase)}h (ETP ${etp})</span>`;
+  else st.innerHTML = `ℹ️ <span class="text-slate-600">${fmt(t.total)}h travaillées${absTxt} / ${fmt(capW)}h disponibles (ETP ${etp})</span>`;
 }
 
-/* ---------- RÉFÉRENTIELS (sans projet) ---------- */
+/* ---------- RÉFÉRENTIELS ---------- */
 function renderRefPanel() {
   const editable = isAdmin();
   const panel = document.getElementById('ref-panel');
@@ -836,7 +842,7 @@ function renderRefPanel() {
   });
 }
 
-/* ---------- PROJETS : CRUD + TABLEAU ---------- */
+/* ---------- PROJETS ---------- */
 window.newProject = () => { editingProjectId = null; ['pj-code','pj-name','pj-budget'].forEach(id => document.getElementById(id).value = ''); document.getElementById('pj-active').checked = true; document.getElementById('proj-form').classList.remove('hidden'); };
 window.cancelProject = () => { document.getElementById('proj-form').classList.add('hidden'); editingProjectId = null; };
 window.editProject = id => {
@@ -856,14 +862,14 @@ window.saveProject = async () => {
   const budgetH = parseFloat(document.getElementById('pj-budget').value) || 0;
   const active = document.getElementById('pj-active').checked;
   if (!code || !name) { alert('Code et nom requis.'); return; }
-  if (!PATHS.projects) { alert('❌ firebase.js : le bloc PATHS ne contient pas "projects". Mettez-le à jour.'); return; }
+  if (!PATHS.projects) { alert('❌ firebase.js : PATHS ne contient pas "projects".'); return; }
   const id = editingProjectId || ('p' + Date.now());
   try {
     await setDoc(doc(db, PATHS.projects, id), { code, name, budgetH, active });
     cancelProject();
   } catch (e) {
     console.error('Erreur sauvegarde projet :', e);
-    alert('❌ Erreur à l\'enregistrement : ' + (e.code || e.message) + '\n\nVérifiez : 1) règles Firestore publiées avec le bloc cc_projects · 2) bloc PATHS à jour dans firebase.js');
+    alert('❌ Erreur à l\'enregistrement : ' + (e.code || e.message) + '\n\nVérifiez règles Firestore (cc_projects) et firebase.js.');
   }
 };
 
@@ -922,22 +928,30 @@ window.purgeBlocks = async () => {
   await Promise.all(snap.docs.map(d => deleteDoc(d.ref)));
 };
 
-/* ---------- UTILISATEURS ---------- */
+/* ---------- UTILISATEURS (ETP inclus) ---------- */
 window.createUser = async () => {
   const name = document.getElementById('nu-name').value.trim();
   const email = document.getElementById('nu-email').value.trim();
   const pass = document.getElementById('nu-pass').value;
   const role = document.getElementById('nu-role').value;
+  const etp = parseFloat(document.getElementById('nu-etp').value) || 1.0;
   if (!name || !email || pass.length < 6) { alert('Nom, email et mot de passe (6 car. min) requis.'); return; }
+  if (etp < 0.1 || etp > 1) { alert('ETP doit être entre 0.1 et 1'); return; }
   try {
     const cred = await createUserWithEmailAndPassword(secondaryAuth, email, pass);
-    await setDoc(doc(db, PATHS.users, cred.user.uid), { name, email, role, active: true, createdAt: Date.now() });
+    await setDoc(doc(db, PATHS.users, cred.user.uid), { name, email, role, etp, active: true, createdAt: Date.now() });
     await signOut(secondaryAuth);
     ['nu-name','nu-email','nu-pass'].forEach(id => document.getElementById(id).value = '');
-    alert('✅ Compte créé pour ' + name + ' (rôle ' + role + ')');
+    document.getElementById('nu-etp').value = '1';
+    alert('✅ Compte créé pour ' + name + ' (rôle ' + role + ', ETP ' + etp + ')');
   } catch (e) { alert('❌ ' + e.message); }
 };
 window.changeRole = (uid, role) => updateDoc(doc(db, PATHS.users, uid), { role });
+window.changeEtp = (uid, val) => {
+  const etp = parseFloat(val);
+  if (isNaN(etp) || etp < 0.1 || etp > 1) { alert('ETP doit être entre 0.1 et 1'); renderUsers(); return; }
+  updateDoc(doc(db, PATHS.users, uid), { etp });
+};
 window.toggleActive = uid => updateDoc(doc(db, PATHS.users, uid), { active: allUsers[uid].active === false });
 window.toggleSaisie = uid => updateDoc(doc(db, PATHS.users, uid), { saisit: allUsers[uid].saisit === false });
 
@@ -951,6 +965,7 @@ function renderUsers() {
     <tr class="border-b border-slate-100 hover:bg-slate-50">
       <td class="p-3 font-bold text-slate-800">${esc(u.name)} ${uid === me.uid ? '<span class="text-[10px] text-slate-400">(vous)</span>' : ''}</td>
       <td class="p-3 text-slate-500 text-xs">${esc(u.email)}</td>
+      <td class="p-3 text-center"><input type="number" value="${u.etp || 1.0}" min="0.1" max="1" step="0.1" onchange="changeEtp('${uid}', this.value)" class="w-16 p-1.5 rounded-lg border border-slate-200 text-xs font-bold outline-none text-center focus:border-blue-500" title="ETP : 1 = temps plein, 0.8 = 80%"></td>
       <td class="p-3 text-center"><select onchange="changeRole('${uid}', this.value)" class="p-1.5 rounded-lg border border-slate-200 text-xs font-bold outline-none ${ROLE_STYLE[u.role][1]}">
         <option value="agent" ${u.role==='agent'?'selected':''}>🟢 Agent</option>
         <option value="manager" ${u.role==='manager'?'selected':''}>🔵 Manager</option>
@@ -961,7 +976,7 @@ function renderUsers() {
     </tr>`).join('');
 }
 
-/* ---------- MANAGER ---------- */
+/* ---------- MANAGER (ETP) ---------- */
 function aggregateBlocks(list) {
   const agg = {};
   list.forEach(b => {
@@ -984,7 +999,7 @@ function renderManager() {
   const users = Object.entries(allUsers).filter(([uid, u]) => saisit(u));
   const gestion = Object.entries(allUsers).filter(([uid, u]) => !saisit(u));
 
-  let totalP = 0, sumCapP = 0, sumWeeksN = 0, totalAbs = 0;
+  let totalP = 0, sumCapP = 0, sumWeeksN = 0, totalAbs = 0, sumEtp = 0;
   document.getElementById('manager-table-body').innerHTML = users.map(([uid,u]) => {
     const buAll = blocksP.filter(b => b.owner === uid);
     const bu = buAll.filter(b => b.cat !== 'absences');
@@ -992,13 +1007,16 @@ function renderManager() {
     const abs = buAll.reduce((s,b) => s + (b.cat === 'absences' ? b.duration : 0), 0);
     const weeksN = new Set(buAll.map(b => weekOf(b))).size;
     const wSet = new Set(buAll.map(b => weekOf(b)));
-    let capU = 0; wSet.forEach(w => { capU += weightOf(uid, w) * config.hoursWeek; });
+    const etp = etpOf(uid);
+    sumEtp += etp;
+    let capU = 0; wSet.forEach(w => { capU += weightOf(uid, w) * capWeekOf(uid); });
     const avg = weeksN ? hours / weeksN : 0;
     const taux = capU ? Math.round(hours / capU * 100) : 0;
     totalP += hours; sumCapP += capU; sumWeeksN += weeksN; totalAbs += abs;
     const badge = taux > 110 ? '🔴 Surcharge' : taux > 100 ? '🟠 Tendu' : taux > 80 ? '🟡 Vigilance' : weeksN ? '🟢 OK' : '⚪ Sans saisie';
     return `<tr class="border-b border-slate-100 hover:bg-slate-50">
       <td class="p-3 font-bold text-slate-800">${esc(u.name)} <span class="text-[10px] ${ROLE_STYLE[u.role][1]} px-1.5 py-0.5 rounded font-black">${u.role}</span></td>
+      <td class="text-center p-3 font-black text-blue-600">${etp.toFixed(1)}</td>
       <td class="text-center p-3 font-black">${fmt(hours)}h</td>
       <td class="text-center p-3 font-bold text-violet-600">${abs ? fmt(abs) + 'h' : '—'}</td>
       <td class="text-center p-3 font-bold ${weeksN === 0 ? 'text-red-500' : 'text-slate-600'}">${weeksN} / ${weeksP}</td>
@@ -1006,10 +1024,12 @@ function renderManager() {
       <td class="text-center p-3 font-black">${capU ? taux + '% ' + badge : badge}</td></tr>`;
   }).join('');
 
-  const teamWeekAvg = sumWeeksN ? (totalP / sumWeeksN) * users.length : 0;
+  const teamWeekAvg = sumWeeksN ? (totalP / sumWeeksN) : 0;
   const tauxTeam = sumCapP ? Math.round(totalP / sumCapP * 100) : 0;
-  document.getElementById('manager-table-foot').innerHTML = `<tr><td class="p-3">TOTAL (${users.length})</td>
-    <td class="text-center p-3 text-lg">${fmt(totalP)}h</td><td class="text-center p-3 text-violet-600">${fmt(totalAbs)}h</td>
+  document.getElementById('manager-table-foot').innerHTML = `<tr><td class="p-3">TOTAL (${users.length} comptes)</td>
+    <td class="text-center p-3 text-lg font-black text-blue-600">${sumEtp.toFixed(1)} ETP</td>
+    <td class="text-center p-3 text-lg">${fmt(totalP)}h</td>
+    <td class="text-center p-3 text-violet-600">${fmt(totalAbs)}h</td>
     <td class="text-center p-3">${sumWeeksN} sem.-agent</td>
     <td class="text-center p-3 text-lg">${fmt(teamWeekAvg)}h/sem</td>
     <td class="text-center p-3"><span class="px-3 py-1.5 bg-slate-900 text-white rounded-lg font-black">${tauxTeam}%</span></td></tr>`;
@@ -1017,12 +1037,14 @@ function renderManager() {
   const fillRate = (users.length && weeksP) ? Math.round(sumWeeksN / (users.length * weeksP) * 100) : 0;
   const top = aggregateBlocks(blocksP)[0];
   document.getElementById('period-stats').innerHTML = `
+    <div class="flex justify-between"><span class="text-slate-500">Effectif réel (somme ETP)</span><strong class="text-blue-600">${sumEtp.toFixed(1)} ETP</strong></div>
+    <div class="flex justify-between"><span class="text-slate-500">Effectif cible (paramètre)</span><strong>${config.etp} ETP</strong></div>
     <div class="flex justify-between"><span class="text-slate-500">Semaines dans la période</span><strong>${weeksP}</strong></div>
     <div class="flex justify-between"><span class="text-slate-500">Semaines-agent saisies</span><strong>${sumWeeksN}</strong></div>
     <div class="flex justify-between"><span class="text-slate-500">Taux de saisie équipe</span><strong class="${fillRate < 80 ? 'text-red-600' : 'text-green-600'}">${fillRate}%</strong></div>
-    <div class="flex justify-between"><span class="text-slate-500">Absences 🌴 (CP/RTT/…)</span><strong class="text-violet-600">${fmt(totalAbs)}h</strong></div>
-    <div class="flex justify-between"><span class="text-slate-500">Charge moyenne équipe / semaine</span><strong>${fmt(teamWeekAvg)}h (capacité proratisée ${fmt(sumCapP)}h)</strong></div>
-    <div class="flex justify-between"><span class="text-slate-500">Activité n°1 de la période</span><strong>${top ? esc(top.label) + ' (' + fmt(top.hours) + 'h)' : '—'}</strong></div>
+    <div class="flex justify-between"><span class="text-slate-500">Absences 🌴</span><strong class="text-violet-600">${fmt(totalAbs)}h</strong></div>
+    <div class="flex justify-between"><span class="text-slate-500">Charge moyenne / semaine saisie</span><strong>${fmt(teamWeekAvg)}h (capacité proratisée ${fmt(sumCapP)}h)</strong></div>
+    <div class="flex justify-between"><span class="text-slate-500">Activité n°1</span><strong>${top ? esc(top.label) + ' (' + fmt(top.hours) + 'h)' : '—'}</strong></div>
     <div class="flex justify-between"><span class="text-slate-500">Comptes « gestion seule »</span><strong>${gestion.length ? gestion.map(([uid,u]) => esc(u.name)).join(', ') : '—'}</strong></div>`;
 
   const weeksSorted = [...new Set(blocksP.map(b => weekOf(b)))].sort();
@@ -1032,7 +1054,7 @@ function renderManager() {
       labels: weeksSorted.map(w => 'S' + w.slice(6)),
       datasets: [
         { label: 'Charge équipe (h)', data: weeksSorted.map(w => blocksP.filter(b => weekOf(b) === w && b.cat !== 'absences').reduce((s,b) => s + b.duration, 0)), borderColor: '#2563eb', backgroundColor: 'rgba(37,99,235,0.15)', fill: true, tension: 0.3 },
-        { label: 'Capacité proratisée (h)', data: weeksSorted.map(w => users.reduce((s,[uid]) => s + weightOf(uid, w) * config.hoursWeek, 0)), borderColor: '#16a34a', borderDash: [6,4], pointRadius: 0 }
+        { label: 'Capacité proratisée ETP+absences (h)', data: weeksSorted.map(w => users.reduce((s,[uid]) => s + weightOf(uid, w) * capWeekOf(uid), 0)), borderColor: '#16a34a', borderDash: [6,4], pointRadius: 0 }
       ] },
     options: { responsive: true, plugins: { legend: { position: 'bottom' } }, scales: { y: { beginAtZero: true } } } });
 
@@ -1047,12 +1069,13 @@ function renderManager() {
   }).join('');
 }
 
-/* ---------- DASHBOARD ---------- */
+/* ---------- DASHBOARD (ETP réel) ---------- */
 function renderDashboard() {
   const real = allBlocks.filter(b => weekOf(b) !== 'TYPE');
   const work = real.filter(b => b.cat !== 'absences');
   const users = Object.entries(allUsers).filter(([uid, u]) => saisit(u));
   const nbGestion = Object.values(allUsers).filter(u => !saisit(u)).length;
+  const sumEtp = users.reduce((s,[uid]) => s + etpOf(uid), 0);
 
   let sumWeeksEq = 0;
   users.forEach(([uid]) => {
@@ -1060,7 +1083,8 @@ function renderDashboard() {
     wSet.forEach(w => { sumWeeksEq += weightOf(uid, w); });
   });
   const hasReal = sumWeeksEq > 0;
-  const capAgent = config.hoursWeek * config.weeks, capTotale = capAgent * Math.max(1, users.length);
+  const capAgentEtp = config.hoursWeek * config.weeks;
+  const capTotale = capAgentEtp * Math.max(0.1, sumEtp);
 
   const catWeekAvg = c => hasReal
     ? work.filter(b => b.cat === c).reduce((s,b) => s + b.duration, 0) / sumWeeksEq
@@ -1071,19 +1095,19 @@ function renderDashboard() {
     const wSet = new Set(real.filter(b => b.owner === uid).map(b => weekOf(b)));
     let eq = 0; wSet.forEach(w => { eq += weightOf(uid, w); });
     const hebdo = eq ? bu.reduce((s,b) => s + b.duration, 0) / eq : totalsOfList(bu.length ? bu : allBlocks.filter(b => b.owner === uid && weekOf(b) === 'TYPE')).total;
-    return { name: u.name, hebdo };
+    return { name: u.name, hebdo, cap: capWeekOf(uid) };
   });
 
   const T = { projet: catWeekAvg('projet'), mco: catWeekAvg('mco'), support: catWeekAvg('support'), transverse: catWeekAvg('transverse') };
-  const ann = { projet: T.projet*config.etp*config.weeks, mco: T.mco*config.etp*config.weeks, support: T.support*config.etp*config.weeks, transverse: T.transverse*config.etp*config.weeks };
+  const ann = { projet: T.projet*sumEtp*config.weeks, mco: T.mco*sumEtp*config.weeks, support: T.support*sumEtp*config.weeks, transverse: T.transverse*sumEtp*config.weeks };
   const charge = ann.projet+ann.mco+ann.support+ann.transverse;
   const taux = capTotale ? Math.round(charge/capTotale*100) : 0;
   const ecart = charge - capTotale, cout = Math.max(0,ecart)*config.taux;
 
-  document.getElementById('dash-effectif').textContent = users.length;
-  document.getElementById('dash-source').textContent = hasReal ? `Base : ${fmt(sumWeeksEq)} semaines équivalentes pleines` : 'Base : semaines types';
+  document.getElementById('dash-effectif').textContent = sumEtp.toFixed(1);
+  document.getElementById('dash-source').textContent = hasReal ? `Base : ${fmt(sumWeeksEq)} sem. équivalentes · cible ${config.etp} ETP` : 'Base : semaines types · cible ' + config.etp + ' ETP';
   document.getElementById('dash-kpis').innerHTML = `
-    <div class="p-5 border border-slate-200 rounded-xl bg-white fade-in"><div class="text-xs font-bold text-slate-500 uppercase">Capacité annuelle</div><div class="text-3xl font-black text-slate-800 my-2">${Math.round(capTotale).toLocaleString('fr-FR')} h</div><div class="text-xs text-slate-500">${users.length} ETP saisis × ${Math.round(capAgent)}h/an${nbGestion ? ' · ' + nbGestion + ' compte(s) gestion' : ''}</div></div>
+    <div class="p-5 border border-slate-200 rounded-xl bg-white fade-in"><div class="text-xs font-bold text-slate-500 uppercase">Capacité annuelle</div><div class="text-3xl font-black text-slate-800 my-2">${Math.round(capTotale).toLocaleString('fr-FR')} h</div><div class="text-xs text-slate-500">${sumEtp.toFixed(1)} ETP réels × ${Math.round(capAgentEtp)}h/an · cible ${config.etp}</div></div>
     <div class="p-5 border border-slate-200 rounded-xl bg-white fade-in"><div class="text-xs font-bold text-slate-500 uppercase">Charge projetée</div><div class="text-3xl font-black my-2" style="color:${taux>100?'#dc2626':'#1a2744'}">${Math.round(charge).toLocaleString('fr-FR')} h</div><div class="text-xs ${taux>100?'text-red-600 font-bold':'text-slate-500'}">${taux>100?'▲ +'+(taux-100).toFixed(1)+'% vs capacité':'▼ '+(100-taux)+'% de marge'}</div></div>
     <div class="p-5 border border-slate-200 rounded-xl bg-white fade-in"><div class="text-xs font-bold text-slate-500 uppercase">Taux de saturation</div><div class="text-3xl font-black my-2" style="color:${taux>100?'#dc2626':taux>85?'#ea580c':'#16a34a'}">${taux}%</div><div class="text-xs">${taux>110?'⚠️ Surcharge critique':taux>100?'⚠️ Surcharge':taux>85?'⚡ Vigilance':'✅ Maîtrisé'}</div></div>
     <div class="p-5 border border-slate-200 rounded-xl bg-white fade-in"><div class="text-xs font-bold text-slate-500 uppercase">Coût surcharge</div><div class="text-3xl font-black my-2 text-slate-800">${Math.round(cout).toLocaleString('fr-FR')} €</div><div class="text-xs text-slate-500">Dépassement × ${config.taux}€/h</div></div>`;
@@ -1095,8 +1119,8 @@ function renderDashboard() {
   const ctx = document.getElementById('chart-agents').getContext('2d');
   if (chartAgents) chartAgents.destroy();
   chartAgents = new Chart(ctx, { type:'bar', data:{ labels: perUser.map(a=>a.name.split(' ')[0]), datasets:[
-    { label:'Charge moyenne hebdo (h)', data: perUser.map(a=>a.hebdo), backgroundColor: perUser.map(a=>a.hebdo>config.hoursWeek?'#dc2626':'#2563eb'), borderRadius:6 },
-    { label:'Capacité hebdo (h)', data: perUser.map(()=>config.hoursWeek), type:'line', borderColor:'#16a34a', borderDash:[6,4], pointRadius:0, borderWidth:2 }]},
+    { label:'Charge moyenne hebdo (h)', data: perUser.map(a=>a.hebdo), backgroundColor: perUser.map(a=>a.hebdo>a.cap?'#dc2626':'#2563eb'), borderRadius:6 },
+    { label:'Capacité contractuelle (h = 35×ETP)', data: perUser.map(a=>a.cap), backgroundColor:'rgba(22,163,74,0.25)', borderColor:'#16a34a', borderWidth:1, borderRadius:6 }]},
     options:{ responsive:true, plugins:{legend:{position:'bottom'}}, scales:{ y:{beginAtZero:true}, x:{grid:{display:false}} } } });
 
   const nowKey = isoWeekKey(new Date());
@@ -1106,7 +1130,7 @@ function renderDashboard() {
   const dataC = [], dataCap = [];
   weeksY.forEach(w => {
     cumC += work.filter(b => weekOf(b) === w).reduce((s,b) => s + b.duration, 0);
-    cumCap += uids.reduce((s,uid) => s + weightOf(uid, w) * config.hoursWeek, 0);
+    cumCap += uids.reduce((s,uid) => s + weightOf(uid, w) * capWeekOf(uid), 0);
     dataC.push(Math.round(cumC));
     dataCap.push(Math.round(cumCap));
   });
@@ -1116,7 +1140,7 @@ function renderDashboard() {
       labels: weeksY.map(w => 'S' + w.slice(6)),
       datasets: [
         { label: 'Charge cumulée (h)', data: dataC, borderColor: '#2563eb', backgroundColor: 'rgba(37,99,235,0.12)', fill: true, tension: 0.3 },
-        { label: 'Capacité cumulée (h)', data: dataCap, borderColor: '#16a34a', borderDash: [6,4], pointRadius: 0 }
+        { label: 'Capacité cumulée (ETP+absences)', data: dataCap, borderColor: '#16a34a', borderDash: [6,4], pointRadius: 0 }
       ] },
     options: { responsive: true, plugins: { legend: { position: 'bottom' } }, scales: { y: { beginAtZero: true } } } });
 
@@ -1140,13 +1164,13 @@ function renderDashboard() {
   document.getElementById('dash-top').innerHTML = agg.length ? agg.map(a => { const c = CATS.find(x=>x.key===a.cat);
     return `<div class="flex items-center gap-4 mb-3"><div class="w-56 text-sm font-bold text-slate-700 truncate">${esc(a.label)}</div><div class="flex-1 h-7 bg-slate-200 rounded-lg overflow-hidden"><div class="h-full bar-fill-load" style="background:${c.color};width:${Math.round(a.hours/maxH*100)}%"></div></div><div class="w-24 text-right font-black text-sm" style="color:${c.color}">${fmt(a.hours)}h</div></div>`; }).join('') : '<p class="text-slate-400 italic text-sm">Aucune semaine réelle saisie.</p>';
 
-  const rows = [{a:'Projets',t:'Pilotage_Projet',v:T.projet*config.etp,ch:ann.projet},{a:'MCO',t:'Ticket_GLPI',v:T.mco*config.etp,ch:ann.mco},{a:'Support terrain',t:'Saisie planning',v:T.support*config.etp,ch:ann.support},{a:'Transverse',t:'Saisie planning',v:T.transverse*config.etp,ch:ann.transverse}];
+  const rows = [{a:'Projets',t:'Pilotage_Projet',v:T.projet*sumEtp,ch:ann.projet},{a:'MCO',t:'Ticket_GLPI',v:T.mco*sumEtp,ch:ann.mco},{a:'Support terrain',t:'Saisie planning',v:T.support*sumEtp,ch:ann.support},{a:'Transverse',t:'Saisie planning',v:T.transverse*sumEtp,ch:ann.transverse}];
   document.getElementById('dash-detail').innerHTML = rows.map(r => { const pct = charge ? Math.round(r.ch/charge*100) : 0;
     const badge = pct>35?'<span class="px-2 py-1 bg-red-100 text-red-700 rounded text-xs font-bold">Surcharge</span>':pct>25?'<span class="px-2 py-1 bg-orange-100 text-orange-700 rounded text-xs font-bold">Tendu</span>':'<span class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-bold">Maîtrisé</span>';
     return `<tr class="border-b border-slate-100"><td class="p-3 font-bold text-slate-800">${r.a}</td><td class="p-3 text-slate-600 text-xs">${r.t}</td><td class="text-center p-3 font-semibold">${fmt(r.v)}h/sem</td><td class="text-center p-3 font-black">${Math.round(r.ch).toLocaleString('fr-FR')}</td><td class="text-center p-3 font-bold">${pct}%</td><td class="text-center p-3">${badge}</td></tr>`; }).join('');
 
-  const rec = document.getElementById('dash-recommandation'), etpManq = ecart > 0 ? (ecart/capAgent).toFixed(1) : 0;
-  if (taux > 110) { rec.className='rounded-xl p-6 border-l-4 border-red-500 bg-red-50'; rec.innerHTML=`<h3 class="font-black text-red-800 text-lg mb-3">⚠️ Diagnostic & Recommandations</h3><ul class="space-y-2 text-slate-700 text-sm"><li><strong>Saturation :</strong> ${taux}% de la capacité réelle</li><li><strong>Surcharge :</strong> ${Math.round(ecart).toLocaleString('fr-FR')}h/an = <strong>${etpManq} ETP</strong> manquants</li><li><strong>Préconisation :</strong> +${Math.ceil(etpManq)} ETP pour revenir à 95%</li><li><strong>Coût de l'inaction :</strong> ${Math.round(cout).toLocaleString('fr-FR')}€/an</li></ul>`; }
+  const rec = document.getElementById('dash-recommandation'), etpManq = ecart > 0 ? (ecart/capAgentEtp).toFixed(1) : 0;
+  if (taux > 110) { rec.className='rounded-xl p-6 border-l-4 border-red-500 bg-red-50'; rec.innerHTML=`<h3 class="font-black text-red-800 text-lg mb-3">⚠️ Diagnostic & Recommandations</h3><ul class="space-y-2 text-slate-700 text-sm"><li><strong>Saturation :</strong> ${taux}% de la capacité réelle (${sumEtp.toFixed(1)} ETP)</li><li><strong>Surcharge :</strong> ${Math.round(ecart).toLocaleString('fr-FR')}h/an = <strong>${etpManq} ETP</strong> manquants</li><li><strong>Préconisation :</strong> +${Math.ceil(parseFloat(etpManq))} ETP pour revenir à 95%</li><li><strong>Coût de l'inaction :</strong> ${Math.round(cout).toLocaleString('fr-FR')}€/an</li></ul>`; }
   else if (taux > 100) { rec.className='rounded-xl p-6 border-l-4 border-orange-500 bg-orange-50'; rec.innerHTML=`<h3 class="font-black text-orange-800 text-lg mb-3">🟠 Tension</h3><ul class="space-y-2 text-slate-700 text-sm"><li>Dépassement de ${Math.round(ecart).toLocaleString('fr-FR')}h/an — renfort de ${etpManq} ETP ou gel des P3</li></ul>`; }
   else if (taux > 85) { rec.className='rounded-xl p-6 border-l-4 border-yellow-500 bg-yellow-50'; rec.innerHTML=`<h3 class="font-black text-yellow-800 text-lg mb-3">⚡ Vigilance</h3><ul class="space-y-2 text-slate-700 text-sm"><li>Marge restante : ${Math.round(capTotale-charge).toLocaleString('fr-FR')}h/an</li></ul>`; }
   else { rec.className='rounded-xl p-6 border-l-4 border-green-500 bg-green-50'; rec.innerHTML=`<h3 class="font-black text-green-800 text-lg mb-3">✅ Charge maîtrisée</h3><ul class="space-y-2 text-slate-700 text-sm"><li>Marge : ${Math.round(capTotale-charge).toLocaleString('fr-FR')}h/an</li></ul>`; }
@@ -1154,7 +1178,7 @@ function renderDashboard() {
 }
 </script>
 
-<!-- ===== Service Worker (PWA) ===== -->
+<!-- ===== Service Worker ===== -->
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
