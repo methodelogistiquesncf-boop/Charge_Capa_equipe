@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Semaine Type - Charge / Capacité</title>
+<title>Planning Activités — Charge / Capacité</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
@@ -33,11 +33,16 @@ body { font-family: 'Inter', sans-serif; }
 <div id="login-screen" class="fixed inset-0 z-[200] flex items-center justify-center p-4" style="background: linear-gradient(135deg, #1a2744 0%, #2d4373 100%);">
   <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 text-center fade-in">
     <div class="w-16 h-16 mx-auto bg-blue-600 text-white rounded-2xl flex items-center justify-center font-black text-2xl shadow-lg">C/C</div>
-    <h1 class="text-2xl font-black text-slate-800 mt-4">Semaine Type</h1>
-    <p class="text-sm text-slate-500 mt-1">Charge / Capacité — Équipe Performance & Méthodes</p>
+    <h1 class="text-2xl font-black text-slate-800 mt-4">Planning Activités</h1>
+    <p class="text-sm text-slate-500 mt-1">Charge / Capacité — Équipe Performance & Méthodes logistique</p>
     <div class="mt-6 text-left space-y-3">
       <input type="email" id="login-email" placeholder="Email professionnel" class="w-full p-3 rounded-xl bg-slate-50 border-2 border-slate-200 outline-none focus:border-blue-500 font-semibold text-sm">
-      <input type="password" id="login-password" placeholder="Mot de passe" class="w-full p-3 rounded-xl bg-slate-50 border-2 border-slate-200 outline-none focus:border-blue-500 font-semibold text-sm" onkeydown="if(event.key==='Enter')window.login()">
+      <div>
+        <input type="password" id="login-password" placeholder="Mot de passe" class="w-full p-3 rounded-xl bg-slate-50 border-2 border-slate-200 outline-none focus:border-blue-500 font-semibold text-sm" onkeydown="if(event.key==='Enter')window.login()">
+        <div class="flex justify-end mt-1">
+          <button onclick="forgotPassword()" class="text-xs font-bold text-blue-600 hover:underline">🔑 Mot de passe oublié ?</button>
+        </div>
+      </div>
       <p id="login-error" class="text-red-500 text-xs font-bold hidden"></p>
       <button onclick="window.login()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-2xl font-black shadow-lg transition">🔓 Se connecter</button>
     </div>
@@ -52,7 +57,7 @@ body { font-family: 'Inter', sans-serif; }
     <div class="flex items-center gap-3 mr-auto min-w-0">
       <div class="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center font-black text-sm shrink-0">C/C</div>
       <div class="min-w-0">
-        <h1 class="text-base md:text-lg font-black truncate">Semaine Type - Charge / Capacité</h1>
+        <h1 class="text-base md:text-lg font-black truncate">Planning Activités</h1>
         <p class="text-white/60 text-[11px] font-medium hidden md:block"><span id="save-indicator" class="text-emerald-300">☁️ Synchronisé</span></p>
       </div>
     </div>
@@ -85,7 +90,7 @@ body { font-family: 'Inter', sans-serif; }
       </div>
     </div>
 
-    <!-- ===== BARRE DE SEMAINE ===== -->
+    <!-- Barre de semaine -->
     <div id="week-bar" class="p-4 border-b border-slate-200 flex flex-wrap items-center gap-2 bg-white">
       <button onclick="shiftWeekView(-1)" class="px-3 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 font-black text-sm no-print">◀</button>
       <div id="week-title" class="font-black text-slate-800 text-sm min-w-[230px] text-center px-2"></div>
@@ -166,13 +171,10 @@ body { font-family: 'Inter', sans-serif; }
       <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">🏷️ Référentiels d'activités</h3>
       <div class="grid md:grid-cols-4 gap-4" id="ref-panel"></div>
     </div>
-
-    <!-- Courbe + chiffres période -->
     <div class="p-6 border-b border-slate-200 grid grid-cols-1 lg:grid-cols-2 gap-6">
       <div class="bg-slate-50 p-4 rounded-xl"><h3 class="font-black text-slate-800 text-sm mb-3">📈 Charge hebdo équipe (h)</h3><canvas id="chart-weeks" height="180"></canvas></div>
       <div class="bg-slate-50 p-4 rounded-xl"><h3 class="font-black text-slate-800 text-sm mb-3">🧮 Chiffres de la période</h3><div id="period-stats" class="text-sm space-y-2"></div></div>
     </div>
-
     <div class="overflow-x-auto">
       <table class="w-full text-sm">
         <thead><tr class="bg-slate-800 text-white">
@@ -234,8 +236,8 @@ body { font-family: 'Inter', sans-serif; }
     <div class="p-8 text-white" style="background: linear-gradient(135deg, #1a2744 0%, #2d4373 100%);">
       <div class="flex justify-between items-start flex-wrap gap-4">
         <div><h1 class="text-2xl font-black mb-1">📊 Pilotage Charge / Capacité</h1>
-          <p class="text-white/70 text-sm">Équipe Performance & Méthodes | <span id="dash-effectif">10</span> ETP | <span id="dash-source"></span></p></div>
-        <button onclick="window.print()" class="no-print bg-white/20 hover:bg-white-30 px-4 py-2 rounded-xl text-sm font-bold">🖨️ Imprimer PDF</button>
+          <p class="text-white/70 text-sm">Équipe Performance & Méthodes logistique | <span id="dash-effectif">10</span> ETP | <span id="dash-source"></span></p></div>
+        <button onclick="window.print()" class="no-print bg-white/20 hover:bg-white/30 px-4 py-2 rounded-xl text-sm font-bold">🖨️ Imprimer PDF</button>
       </div>
     </div>
     <div class="p-8">
@@ -265,7 +267,7 @@ body { font-family: 'Inter', sans-serif; }
 import {
   db, auth, secondaryAuth, ADMIN_EMAIL, PATHS,
   collection, doc, setDoc, updateDoc, deleteDoc, onSnapshot, query, where, getDocs,
-  signInWithEmailAndPassword, signOut, onAuthStateChanged, createUserWithEmailAndPassword
+  signInWithEmailAndPassword, signOut, onAuthStateChanged, createUserWithEmailAndPassword, sendPasswordResetEmail
 } from './firebase.js';
 
 const CATS = [
@@ -360,6 +362,16 @@ window.login = async () => {
   catch (e) { err.textContent = '❌ ' + (e.code === 'auth/invalid-credential' ? 'Identifiants incorrects' : e.message); err.classList.remove('hidden'); }
 };
 window.logout = () => signOut(auth);
+window.forgotPassword = async () => {
+  const email = document.getElementById('login-email').value.trim() || prompt('Email du compte :');
+  if (!email) return;
+  try {
+    await sendPasswordResetEmail(auth, email);
+    alert('📧 Un email de réinitialisation vient d\'être envoyé à ' + email);
+  } catch (e) {
+    alert('❌ Impossible d\'envoyer l\'email : ' + (e.code || e.message));
+  }
+};
 
 onAuthStateChanged(auth, user => {
   if (user) {
@@ -525,8 +537,7 @@ function renderCalendar() {
   const owner = allUsers[viewedUid];
 
   document.getElementById('week-title').textContent = weekLabel(currentWeek);
-  const cp = document.getElementById('copy-prev-btn');
-  cp.classList.toggle('hidden', !editable || currentWeek === 'TYPE');
+  document.getElementById('copy-prev-btn').classList.toggle('hidden', !editable || currentWeek === 'TYPE');
 
   document.getElementById('calendar-owner-title').textContent =
     viewedUid === me.uid ? 'Mon calendrier' : `Calendrier de ${owner?.name || '?'}`;
@@ -763,7 +774,6 @@ function renderManager() {
     <td class="text-center p-3 text-lg">${fmt(teamWeekAvg)}h/sem</td>
     <td class="text-center p-3"><span class="px-3 py-1.5 bg-slate-900 text-white rounded-lg font-black">${tauxTeam}%</span></td></tr>`;
 
-  /* Chiffres période */
   const fillRate = (users.length && weeksP) ? Math.round(sumWeeksN / (users.length * weeksP) * 100) : 0;
   const top = aggregateBlocks(blocksP)[0];
   document.getElementById('period-stats').innerHTML = `
@@ -773,7 +783,6 @@ function renderManager() {
     <div class="flex justify-between"><span class="text-slate-500">Charge moyenne équipe / semaine</span><strong>${fmt(teamWeekAvg)}h (capacité ${fmt(users.length * config.hoursWeek)}h)</strong></div>
     <div class="flex justify-between"><span class="text-slate-500">Activité n°1 de la période</span><strong>${top ? esc(top.label) + ' (' + fmt(top.hours) + 'h)' : '—'}</strong></div>`;
 
-  /* Courbe hebdo */
   const weeksSorted = [...new Set(blocksP.map(b => weekOf(b)))].sort();
   const ctxW = document.getElementById('chart-weeks').getContext('2d');
   if (chartWeeks) chartWeeks.destroy();
@@ -785,7 +794,6 @@ function renderManager() {
       ] },
     options: { responsive: true, plugins: { legend: { position: 'bottom' } }, scales: { y: { beginAtZero: true } } } });
 
-  /* Agrégat période */
   const agg = aggregateBlocks(blocksP), maxH = agg[0]?.hours || 1;
   document.getElementById('agg-table-body').innerHTML = agg.length === 0 ? '<tr><td class="p-6 text-center text-slate-400 italic">Aucun bloc sur la période.</td></tr>' : agg.map(a => {
     const c = CATS.find(x => x.key === a.cat);
@@ -793,7 +801,7 @@ function renderManager() {
       <td class="p-2 font-bold text-slate-800">${esc(a.label)}<span class="ml-2 text-[10px] text-slate-400 font-semibold">${a.nbAgents} pers.</span></td>
       <td class="p-2 w-64"><div class="h-4 bg-slate-100 rounded overflow-hidden"><div class="h-full rounded" style="background:${c.color};width:${Math.round(a.hours/maxH*100)}%"></div></div></td>
       <td class="p-2 text-center font-black w-24">${fmt(a.hours)}h</td>
-      <td class="p-2 text-center text-slate-600 w-28">${Math.round(a.hours*config.weeks/ (sumWeeksN||1) * users.length).toLocaleString('fr-FR')}h/an proj.</td></tr>`;
+      <td class="p-2 text-center text-slate-600 w-28">${Math.round(a.hours*config.weeks/(sumWeeksN||1)*users.length).toLocaleString('fr-FR')}h/an proj.</td></tr>`;
   }).join('');
 }
 
