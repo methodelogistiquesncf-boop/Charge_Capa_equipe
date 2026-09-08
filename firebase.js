@@ -3,6 +3,7 @@
    Application "Planning Activités" (Charge / Capacité)
    Projet : pilotage-equipe-12517  •  Base : FIRESTORE
 ===================================================== */
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import {
   getFirestore, collection, doc, setDoc, updateDoc, deleteDoc,
@@ -13,7 +14,10 @@ import {
   onAuthStateChanged, createUserWithEmailAndPassword, sendPasswordResetEmail
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-/* ---------- 1. PARAMÈTRES À PERSONNALISER ---------- */
+/* =====================================================
+   1. CONFIGURATION FIREBASE
+   ===================================================== */
+
 export const ADMIN_EMAIL = "michael.frischherz@sncf.fr";
 
 const firebaseConfig = {
@@ -25,28 +29,42 @@ const firebaseConfig = {
   appId: "1:972121598212:web:4e4976d2a753af54120851"
 };
 
-/* ---------- 2. Noms des collections Firestore ---------- */
+/* =====================================================
+   2. NOMS DES COLLECTIONS FIRESTORE
+   ===================================================== */
+
 export const PATHS = {
-  users:    "cc_users",
-  blocks:   "cc_blocks",
-  projects: "cc_projects",
-  config:   "cc_config",
-  refs:     "cc_refs"
+  users:    "cc_users",       // Comptes utilisateurs (rôles, modes saisie)
+  blocks:   "cc_blocks",      // Blocs d'activités (plannings)
+  projects: "cc_projects",    // Budgets projets (code, nom, budget h, actif)
+  config:   "cc_config",      // Paramètres globaux (heures, semaines, ETP, taux)
+  refs:     "cc_refs"         // Référentiels d'activités (MCO, support, transverse, absences)
 };
 
-/* ---------- 3. Initialisation ---------- */
+/* =====================================================
+   3. INITIALISATION FIREBASE
+   ===================================================== */
+
+// Instance principale : utilisée pour toutes les opérations courantes
 export const app  = initializeApp(firebaseConfig);
 export const db   = getFirestore(app);
 export const auth = getAuth(app);
 
-/* Instance secondaire : création de comptes par l'admin sans perdre sa session */
+// Instance secondaire : permet à l'admin de créer des comptes
+// sans perdre sa propre session (Firebase Auth ne permet qu'un utilisateur actif par app)
 export const secondaryApp  = initializeApp(firebaseConfig, "secondary");
 export const secondaryAuth = getAuth(secondaryApp);
 
-/* ---------- 4. Ré-export des méthodes SDK ---------- */
+/* =====================================================
+   4. RÉ-EXPORT DES MÉTHODES SDK
+   ===================================================== */
+
 export {
+  // Firestore
   collection, doc, setDoc, updateDoc, deleteDoc,
   onSnapshot, query, where, getDocs,
+  
+  // Auth
   signInWithEmailAndPassword, signOut,
   onAuthStateChanged, createUserWithEmailAndPassword, sendPasswordResetEmail
 };
