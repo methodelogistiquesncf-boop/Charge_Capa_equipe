@@ -152,8 +152,9 @@ body { font-family: 'Inter', sans-serif; }
       <li><strong>2. Construire l'enveloppe</strong> : run-rate × 47 semaines = budget annuel. Ex : 25 h/sem × 47 = 1 175 h (= 0,71 ETP).</li>
       <li><strong>3. Créer l'enveloppe</strong> : « ➕ Nouvelle enveloppe » → catégorie <strong>🔧 MCO (auto)</strong> → code MCO-26 → budget 1 175 h.</li>
       <li><strong>4. Suivre</strong> : chaque bloc 🔧 saisi par l'équipe débite l'enveloppe. Colonne Rythme + horizon « ≈ X sem. rest. » = signal de dérive.</li>
+      <li><strong>🗑️ Supprimer</strong> : suppression définitive après double confirmation. Les blocs déjà saisis restent dans leurs catégories (charge, courbes) mais perdent leur rattachement budgétaire. Pour conserver l'historique sans le suivre, préférez <strong>⚪ clôturer</strong>.</li>
     </ul>
-    <p class="text-xs text-slate-500 mt-2">⚠️ Une seule enveloppe « auto » active par catégorie (sinon double comptage). Même logique pour 🆘 Support et 📋 Transverse.</p>
+    <p class="text-xs text-slate-500 mt-2">⚠️ Une seule enveloppe « auto » active par catégorie (sinon double comptage).</p>
   </div>
   <div class="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
     <h3 class="font-black text-slate-800">📋 Lire la consolidation</h3>
@@ -207,6 +208,7 @@ body { font-family: 'Inter', sans-serif; }
     <h3 class="font-black text-slate-800">❓ FAQ</h3>
     <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">🧮 Qu'est-ce qu'un ETP ?</summary><p class="text-sm text-slate-600 mt-2">Équivalent Temps Plein : 1 ETP = temps plein. La somme des ETP = effectif réel, base de toutes les capacités.</p></details>
     <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">💰 Quelle différence projet vs enveloppe « auto » ?</summary><p class="text-sm text-slate-600 mt-2">Un <strong>projet</strong> se débite seulement quand un bloc lui est rattaché (liste « Projet budgété »). Une enveloppe <strong>auto</strong> (MCO/support/transverse) débite <strong>tous</strong> les blocs de sa catégorie, sans action de l'agent — adapté aux charges récurrentes.</p></details>
+    <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">🗑️ Supprimer ou clôturer une enveloppe ?</summary><p class="text-sm text-slate-600 mt-2"><strong>⚪ Clôturer</strong> = garde l'historique et la consommation, retire l'enveloppe des suggestions agents (recommandé en fin de projet). <strong>🗑️ Supprimer</strong> = efface définitivement la ligne (double confirmation) ; les blocs saisis restent dans leurs catégories mais ne sont plus rattachés budgétairement.</p></details>
     <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">🔧 Comment budgétiser le MCO ?</summary><p class="text-sm text-slate-600 mt-2">Mesurez le run-rate (h/sem sur 12 mois) × 47 semaines = budget annuel, puis créez une enveloppe « 🔧 MCO (auto) ». Voir onglet Manager.</p></details>
     <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">🔑 Mot de passe oublié ?</summary><p class="text-sm text-slate-600 mt-2">Lien sur l'écran de connexion → email de réinitialisation.</p></details>
     <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">🌴 À quoi sert 🌴 Absences ?</summary><p class="text-sm text-slate-600 mt-2">À poser CP/RTT/formation dans le calendrier. Capacité proratisée automatiquement.</p></details>
