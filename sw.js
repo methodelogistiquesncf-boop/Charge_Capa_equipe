@@ -1,4 +1,4 @@
-const CACHE = 'pa-cache-v12';
+const CACHE = 'pa-cache-v13';
 const SHELL = ['./', './index.html', './aide.html', './firebase.js', './manifest.json', './icons/logo.svg', './icons/icon-512.png'];
 
 self.addEventListener('install', e => {
