@@ -133,8 +133,9 @@ body { font-family: 'Inter', sans-serif; }
     <ul class="text-sm text-slate-600 space-y-2 list-disc pl-5">
       <li><strong>Période</strong> (en haut à droite) : mois, mois dernier, trimestre, année, 12 mois, tout.</li>
       <li><strong>📈 Courbe de charge hebdo</strong> : heures réelles de l'équipe semaine par semaine, comparées à la capacité (ligne verte pointillée). C'est LA preuve visuelle des pics de surcharge.</li>
-      <li><strong>🧮 Chiffres de la période</strong> : taux de saisie équipe (qui remplit ses semaines ?), charge moyenne/semaine, activité n°1.</li>
-      <li><strong>Tableau par collaborateur</strong> : total période, semaines saisies (colonne rouge si 0 → relance ciblée), moyenne/semaine, taux C/C.</li>
+      <li><strong>🧮 Chiffres de la période</strong> : taux de saisie équipe (qui remplit ses semaines ?), charge moyenne/semaine, activité n°1, comptes « gestion seule ».</li>
+      <li><strong>Tableau par collaborateur</strong> : total période, semaines saisies (colonne rouge si 0 → relance ciblée), moyenne/semaine, taux C/C. Seuls les comptes « 📝 Saisit » y figurent.</li>
+      <li><strong>Comptes « 🧭 Gestion seule »</strong> : exclus du tableau, de la courbe et de la capacité ; listés dans « Chiffres de la période » pour transparence.</li>
       <li><strong>« Où partent les heures ? »</strong> : agrégat par activité précise (quel projet, quel type de MCO…), tous agents confondus.</li>
     </ul>
     <div class="p-4 bg-slate-50 rounded-xl text-sm text-slate-700">
@@ -145,7 +146,7 @@ body { font-family: 'Inter', sans-serif; }
   <div class="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
     <h3 class="font-black text-slate-800">📊 Onglet Dashboard : la synthèse direction</h3>
     <ul class="text-sm text-slate-600 space-y-2 list-disc pl-5">
-      <li>KPIs : capacité annuelle, charge projetée <strong>calculée sur les semaines réelles</strong>, taux de saturation, coût de la surcharge.</li>
+      <li>KPIs : capacité annuelle (calculée sur les comptes « 📝 Saisit »), charge projetée <strong>sur semaines réelles</strong>, taux de saturation, coût de la surcharge.</li>
       <li>Répartition par catégorie, charge par collaborateur, top activités consommatrices.</li>
       <li><strong>Recommandation automatique</strong> : nombre d'ETP manquants chiffré, coût de l'inaction.</li>
       <li><strong>🖨️ Imprimer PDF</strong> : pour le CODIR, la revue annuelle, le rendez-vous directeur.</li>
@@ -176,6 +177,10 @@ body { font-family: 'Inter', sans-serif; }
     </div>
     <div class="flex gap-4 items-start p-4 bg-slate-50 rounded-xl">
       <div class="w-8 h-8 shrink-0 rounded-full bg-red-500 text-white font-black flex items-center justify-center">3</div>
+      <p class="text-sm text-slate-700"><strong>Régler le mode de saisie</strong> : bouton <strong>« 📝 Saisit »</strong> = le compte remplit un planning et sa charge compte dans l'équipe · bouton <strong>« 🧭 Gestion seule »</strong> = manager/admin pur : calendrier personnel en lecture seule, exclu de toutes les statistiques. Exemple : un admin contributeur (comme vous) reste « 📝 », un manager purement gestionnaire passe « 🧭 ».</p>
+    </div>
+    <div class="flex gap-4 items-start p-4 bg-slate-50 rounded-xl">
+      <div class="w-8 h-8 shrink-0 rounded-full bg-red-500 text-white font-black flex items-center justify-center">4</div>
       <p class="text-sm text-slate-700"><strong>Désactiver un compte</strong> (départ d'un agent) : bouton ✅ Actif → ⛔ Désactivé. Le compte ne peut plus se connecter, l'historique est conservé.</p>
     </div>
     <p class="text-xs text-slate-500">La colonne « Semaines saisies » montre l'adoption réelle de l'outil par chacun.</p>
@@ -185,7 +190,7 @@ body { font-family: 'Inter', sans-serif; }
     <h3 class="font-black text-slate-800">⚙️ Référentiels & paramètres (onglet Manager)</h3>
     <ul class="text-sm text-slate-600 space-y-2 list-disc pl-5">
       <li><strong>Référentiels d'activités</strong> : les suggestions proposées aux agents dans chaque catégorie (vos projets actifs, types de MCO…). Ajout ➕ / suppression ✕ réservés à l'admin.</li>
-      <li><strong>Paramètres de projection</strong> : heures contractuelles/semaine, semaines travaillées/an (47 = 52 − CP), effectif cible ETP, taux horaire chargé. <strong>Ils pilotent tous les calculs</strong> du dashboard (capacité, coût, ETP manquants).</li>
+      <li><strong>Paramètres de projection</strong> : heures contractuelles/semaine, semaines travaillées/an (47 = 52 − CP), effectif cible ETP (référence direction), taux horaire chargé. <strong>Ils pilotent tous les calculs</strong> du dashboard.</li>
       <li><strong>🗑️ Purger</strong> : supprime tous les blocs de tous les agents (double confirmation). À réserver aux tests.</li>
     </ul>
   </div>
@@ -195,7 +200,8 @@ body { font-family: 'Inter', sans-serif; }
     <table class="w-full text-xs">
       <thead><tr class="text-left text-white/60 uppercase"><th class="p-2">Fonction</th><th class="p-2">🟢 Agent</th><th class="p-2">🔵 Manager</th><th class="p-2">🔴 Admin</th></tr></thead>
       <tbody class="divide-y divide-white/10">
-        <tr><td class="p-2 font-bold">Son propre calendrier</td><td class="p-2">✏️ édite</td><td class="p-2">✏️ édite</td><td class="p-2">✏️ édite</td></tr>
+        <tr><td class="p-2 font-bold">Remplit un planning</td><td class="p-2">✅ toujours</td><td class="p-2">📝/ selon réglage</td><td class="p-2">📝/ selon réglage</td></tr>
+        <tr><td class="p-2 font-bold">Son propre calendrier</td><td class="p-2">✏️ édite</td><td class="p-2">✏️ édite (si 📝)</td><td class="p-2">✏️ édite (si 📝)</td></tr>
         <tr><td class="p-2 font-bold">Calendriers des autres</td><td class="p-2">🚫 invisible</td><td class="p-2">👁️ lecture seule</td><td class="p-2">✏️ édite</td></tr>
         <tr><td class="p-2 font-bold">Consolidation + Dashboard</td><td class="p-2">🚫</td><td class="p-2">✅</td><td class="p-2">✅</td></tr>
         <tr><td class="p-2 font-bold">Référentiels & paramètres</td><td class="p-2">🚫</td><td class="p-2">👁️ lecture</td><td class="p-2">✏️ édite</td></tr>
@@ -212,8 +218,9 @@ body { font-family: 'Inter', sans-serif; }
     <h3 class="font-black text-slate-800">❓ Questions fréquentes</h3>
     <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">🔑 Mot de passe oublié ?</summary><p class="text-sm text-slate-600 mt-2">Cliquez sur « Mot de passe oublié ? » depuis l'écran de connexion : un email de réinitialisation vous est envoyé. Sinon, contactez votre administrateur.</p></details>
     <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">📲 Comment installer l'application sur mon téléphone / PC ?</summary><p class="text-sm text-slate-600 mt-2">Android/Chrome : menu ⋮ → « Installer l'application ». iPhone/Safari : Partager → « Sur l'écran d'accueil ». PC Chrome/Edge : icône ⊕ dans la barre d'adresse. L'icône calendrier s'ajoute à votre écran d'accueil et l'app s'ouvre en plein écran.</p></details>
+    <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">🧭 Pourquoi mon planning est-il en lecture seule (« mode gestion ») ?</summary><p class="text-sm text-slate-600 mt-2">Votre compte est réglé sur « 🧭 Gestion seule » par l'administrateur : vous pilotez sans saisir, et vos heures ne sont pas comptées dans la charge équipe. Si vous devez contribuer (votre charge compte dans le dossier effectifs), demandez à passer en « 📝 Saisit ».</p></details>
     <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">📅 J'ai saisi mes blocs sur la mauvaise semaine ?</summary><p class="text-sm text-slate-600 mt-2">Naviguez avec ◀ ▶ jusqu'à la bonne semaine, puis cliquez sur chaque bloc pour corriger jour/date, ou repartez de « ⧉ Copier semaine préc. ».</p></details>
-    <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">🚫 Je ne peux ni cliquer ni glisser les blocs ?</summary><p class="text-sm text-slate-600 mt-2">Deux cas : vous consultez le planning d'un autre (bandeau orange « Consultation seule », réservé manager/admin), ou vous êtes sur la « 📐 Semaine type ». Vérifiez le nom en haut du calendrier et la barre de semaine.</p></details>
+    <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">🚫 Je ne peux ni cliquer ni glisser les blocs ?</summary><p class="text-sm text-slate-600 mt-2">Trois cas : compte « 🧭 Gestion seule » (bandeau gris), consultation du planning d'un autre (bandeau orange), ou semaine type 📐. Vérifiez le bandeau en haut du calendrier et la barre de semaine.</p></details>
     <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">👀 Qui voit mes semaines ?</summary><p class="text-sm text-slate-600 mt-2">Un agent ne voit <strong>que son propre calendrier</strong>. Les managers et admins voient tout (c'est leur fonction), mais sans pouvoir modifier vos blocs (manager). Personne d'autre.</p></details>
     <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">☁️ Mes données sont-elles sauvegardées si je ferme l'onglet ?</summary><p class="text-sm text-slate-600 mt-2">Oui : chaque modification est envoyée immédiatement au serveur (badge « ☁️ Synchronisé »). Vous pouvez fermer, changer de machine, reprendre plus tard.</p></details>
     <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">📴 L'application fonctionne-t-elle sans réseau ?</summary><p class="text-sm text-slate-600 mt-2">L'interface installée s'ouvre hors connexion (coquille en cache), mais la lecture et l'écriture des données nécessitent du réseau : c'est un outil d'équipe en temps réel.</p></details>
