@@ -1,8 +1,4 @@
-/* =====================================================
-   sw.js — Service Worker "Planning Activités"
-   ⚠️ À chaque nouvelle version publiée : incrémentez CACHE (v3, v4…)
-===================================================== */
-const CACHE = 'pa-cache-v2';
+const CACHE = 'pa-cache-v8';
 const SHELL = [
   './',
   './index.html',
@@ -31,8 +27,6 @@ self.addEventListener('activate', e => {
 
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
-
-  /* Navigations : réseau d'abord (pages toujours à jour), repli cache si offline */
   if (e.request.mode === 'navigate') {
     e.respondWith(
       fetch(e.request)
@@ -41,8 +35,6 @@ self.addEventListener('fetch', e => {
     );
     return;
   }
-
-  /* Même origine (fichiers du repo) : cache d'abord */
   if (url.origin === location.origin) {
     e.respondWith(
       caches.match(e.request).then(hit => hit || fetch(e.request).then(res => {
@@ -51,8 +43,6 @@ self.addEventListener('fetch', e => {
     );
     return;
   }
-
-  /* CDN (Tailwind, Chart.js, Firebase gstatic, fonts) : cache + revalidation */
   e.respondWith(
     caches.match(e.request).then(hit => {
       const fresher = fetch(e.request).then(res => {
