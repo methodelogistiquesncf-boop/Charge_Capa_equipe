@@ -91,14 +91,14 @@ body { font-family: 'Inter', sans-serif; }
     <div class="p-6 border-b border-slate-200 flex flex-wrap justify-between items-center gap-4">
       <div>
         <h2 class="text-xl font-black text-slate-800">🗓️ <span id="calendar-owner-title">Calendrier</span></h2>
-        <p class="text-sm text-slate-500 mt-1">Clic créneau vide = ajouter · Glisser-déposer = déplacer · <strong class="text-emerald-600">Ctrl+glisser = copier</strong> · Clic bloc = modifier (boutons « dupliquer »)</p>
+        <p class="text-sm text-slate-500 mt-1">Clic créneau vide = ajouter · Glisser-déposer = déplacer · <strong class="text-emerald-600">Ctrl+glisser = copier</strong> · Clic bloc = modifier (boutons « dupliquer ») · <strong class="text-violet-600">Absences (CP, RTT…) = catégorie 🌴</strong></p>
       </div>
       <div id="agent-controls" class="hidden items-center gap-2">
         <select id="agent-select" onchange="selectUser(this.value)" class="p-2.5 rounded-xl border border-slate-200 font-semibold text-sm outline-none focus:border-blue-500"></select>
       </div>
     </div>
 
-    <!-- Barre de semaine + jours disponibles -->
+    <!-- Barre de semaine -->
     <div id="week-bar" class="p-4 border-b border-slate-200 flex flex-wrap items-center gap-2 bg-white">
       <button onclick="shiftWeekView(-1)" class="px-3 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 font-black text-sm no-print">◀</button>
       <div id="week-title" class="font-black text-slate-800 text-sm min-w-[230px] text-center px-2"></div>
@@ -107,12 +107,6 @@ body { font-family: 'Inter', sans-serif; }
       <button onclick="goTypeWeek()" class="px-3 py-2 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs no-print">📐 Semaine type</button>
       <button onclick="copyPrevWeek()" id="copy-prev-btn" class="px-3 py-2 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs no-print">⧉ Copier semaine préc.</button>
       <button onclick="copyTypeWeek()" id="copy-type-btn" class="px-3 py-2 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs no-print">📐 Copier semaine type</button>
-      <div class="flex items-center gap-2 ml-auto">
-        <label class="text-xs font-bold text-slate-500 whitespace-nowrap" title="Jours travaillés disponibles cette semaine (absences déduites)">📅 Jours dispo :</label>
-        <input type="number" id="week-days" min="0" max="5" step="0.5" value="5" class="w-20 p-2 rounded-lg border border-slate-200 text-sm font-bold text-center outline-none focus:border-blue-500" oninput="saveWeekInfo()">
-        <input type="text" id="week-note" placeholder="motif (CP, RTT, formation…)" class="hidden md:block w-44 p-2 rounded-lg border border-slate-200 text-xs outline-none focus:border-blue-500" oninput="saveWeekInfo()">
-        <span id="week-cap-hint" class="text-[11px] font-bold text-slate-400 whitespace-nowrap"></span>
-      </div>
     </div>
 
     <div id="readonly-banner" class="hidden px-6 py-3 bg-orange-50 border-b border-orange-200 text-orange-700 text-sm font-bold">👁️ Consultation seule — vous ne pouvez pas modifier le planning d'un autre collaborateur.</div>
@@ -120,7 +114,7 @@ body { font-family: 'Inter', sans-serif; }
     <div class="p-4 bg-slate-50 border-b border-slate-200 flex flex-wrap gap-4 text-xs font-bold" id="legend"></div>
     <div id="calendar-wrap" class="p-4 overflow-x-auto"></div>
     <div id="agent-summary" class="p-6 bg-slate-50 border-t border-slate-200">
-      <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-3" id="summary-cards"></div>
+      <div class="grid grid-cols-2 md:grid-cols-6 gap-3 mb-3" id="summary-cards"></div>
       <div id="agent-status" class="text-sm font-semibold text-center"></div>
     </div>
   </div>
@@ -138,9 +132,10 @@ body { font-family: 'Inter', sans-serif; }
         <select id="m-cat" onchange="refreshModalDatalist()" class="w-full p-3 rounded-xl bg-slate-50 border border-slate-200 font-bold text-sm outline-none">
           <option value="projet">🚀 Projets</option><option value="mco">🔧 MCO</option>
           <option value="support">🆘 Support terrain</option><option value="transverse">📋 Transverse</option>
+          <option value="absences">🌴 Absences (CP, RTT, formation…)</option>
         </select></div>
       <div><label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Activité précise</label>
-        <input type="text" id="m-label" list="dl-labels" placeholder="Ex : MAG9, Lean Picking…" class="w-full p-3 rounded-xl bg-slate-50 border border-slate-200 font-semibold text-sm outline-none focus:border-blue-500">
+        <input type="text" id="m-label" list="dl-labels" placeholder="Ex : MAG9, Lean Picking, CP…" class="w-full p-3 rounded-xl bg-slate-50 border border-slate-200 font-semibold text-sm outline-none focus:border-blue-500">
         <datalist id="dl-labels"></datalist></div>
       <div class="grid grid-cols-3 gap-3">
         <div><label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Jour</label><select id="m-day" class="w-full p-3 rounded-xl bg-slate-50 border border-slate-200 font-bold text-sm outline-none"></select></div>
@@ -165,7 +160,7 @@ body { font-family: 'Inter', sans-serif; }
   <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
     <div class="p-6 border-b border-slate-200 flex flex-wrap justify-between items-center gap-4">
       <div><h2 class="text-xl font-black text-slate-800">📋 Consolidation équipe</h2>
-        <p class="text-sm text-slate-500 mt-1">Semaines réelles saisies · capacités proratisées selon les jours dispo</p></div>
+        <p class="text-sm text-slate-500 mt-1">Semaines réelles saisies · capacités proratisées selon les absences 🌴 posées dans les calendriers</p></div>
       <div class="flex items-center gap-2">
         <select id="period-select" onchange="renderManager()" class="p-2.5 rounded-xl border border-slate-200 font-semibold text-sm outline-none">
           <option value="month">Mois en cours</option>
@@ -189,7 +184,7 @@ body { font-family: 'Inter', sans-serif; }
     </div>
     <div class="p-6 bg-slate-50 border-b border-slate-200">
       <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">🏷️ Référentiels d'activités</h3>
-      <div class="grid md:grid-cols-4 gap-4" id="ref-panel"></div>
+      <div class="grid grid-cols-2 md:grid-cols-5 gap-3" id="ref-panel"></div>
     </div>
     <div class="p-6 border-b border-slate-200 grid grid-cols-1 lg:grid-cols-2 gap-6">
       <div class="bg-slate-50 p-4 rounded-xl"><h3 class="font-black text-slate-800 text-sm mb-3">📈 Charge hebdo équipe (h) vs capacité proratisée</h3><canvas id="chart-weeks" height="180"></canvas></div>
@@ -199,7 +194,8 @@ body { font-family: 'Inter', sans-serif; }
       <table class="w-full text-sm">
         <thead><tr class="bg-slate-800 text-white">
           <th class="text-left p-3 font-bold text-xs uppercase">Collaborateur</th>
-          <th class="text-center p-3 font-bold text-xs uppercase">Total période</th>
+          <th class="text-center p-3 font-bold text-xs uppercase">Travaillé (période)</th>
+          <th class="text-center p-3 font-bold text-xs uppercase">Absences</th>
           <th class="text-center p-3 font-bold text-xs uppercase">Semaines saisies</th>
           <th class="text-center p-3 font-bold text-xs uppercase">Moyenne / sem</th>
           <th class="text-center p-3 font-bold text-xs uppercase">Taux C/C (proratisé)</th>
@@ -209,7 +205,7 @@ body { font-family: 'Inter', sans-serif; }
       </table>
     </div>
     <div class="p-6 border-t border-slate-200">
-      <h3 class="font-black text-slate-800 mb-1">🔎 Où partent les heures ? (agrégé période)</h3>
+      <h3 class="font-black text-slate-800 mb-1">🔎 Où partent les heures ? (agrégé période, hors absences)</h3>
       <div class="overflow-x-auto"><table class="w-full text-sm"><tbody id="agg-table-body"></tbody></table></div>
     </div>
   </div>
@@ -300,21 +296,22 @@ const CATS = [
   { key: 'projet',     label: '🚀 Projets',         color: '#2563eb', trace: 'Pilotage_Projet' },
   { key: 'mco',        label: '🔧 MCO',             color: '#dc2626', trace: 'Ticket_GLPI' },
   { key: 'support',    label: '🆘 Support terrain', color: '#ea580c', trace: 'Non tracé' },
-  { key: 'transverse', label: '📋 Transverse',      color: '#475569', trace: 'Estimation' }
+  { key: 'transverse', label: '📋 Transverse',      color: '#475569', trace: 'Estimation' },
+  { key: 'absences',   label: '🌴 Absences',        color: '#7c3aed', trace: 'Saisie planning' }
 ];
+const DEFAULT_REFS = { projet: [], mco: [], support: [], transverse: [], absences: ['CP', 'RTT', 'Formation', 'Maladie', 'Autre'] };
 const JOURS = ['Lundi','Mardi','Mercredi','Jeudi','Vendredi'];
 const DAY_START = 8, DAY_END = 18, ROW_H = 46;
 const ROLE_STYLE = { agent: ['🟢','bg-green-100 text-green-700'], manager: ['🔵','bg-blue-100 text-blue-700'], admin: ['🔴','bg-red-100 text-red-700'] };
 
-let me = null, allUsers = {}, allBlocks = [], allWeeks = {};
+let me = null, allUsers = {}, allBlocks = [];
 let config = { hoursWeek: 35, weeks: 47, etp: 10, taux: 55 };
-let refs = { projet: [], mco: [], support: [], transverse: [] };
+let refs = { ...DEFAULT_REFS, projet: [], mco: [], support: [], transverse: [] };
 let viewedUid = null, editingBlockId = null, draggedBlockId = null;
-let chartAgents = null, chartWeeks = null, chartCumul = null, bootstrapped = false;
-let blocksListenerOn = false, weeksListenerOn = false;
+let chartAgents = null, chartWeeks = null, chartCumul = null, bootstrapped = false, blocksListenerOn = false;
 let unsubs = [];
 let currentWeek = isoWeekKey(new Date());
-let dupDone = {}, copyDrag = false, weekSaveTimer = null;
+let dupDone = {}, copyDrag = false;
 
 /* ---------- SEMAINES ISO ---------- */
 function isoWeekKey(date) {
@@ -347,17 +344,9 @@ function weekLabel(key) {
 }
 const weekOf = b => b.week || 'TYPE';
 
-/* ---------- JOURS DISPONIBLES / ABSENCES ---------- */
-const weekKeyOf = (uid, w) => uid + '_' + w;
-const daysOf = (uid, w) => { const d = allWeeks[weekKeyOf(uid, w)]; return d && typeof d.days === 'number' ? Math.max(0, Math.min(5, d.days)) : 5; };
-const weightOf = (uid, w) => daysOf(uid, w) / 5;
-
-function updateWeekHint() {
-  let days = parseFloat(document.getElementById('week-days').value);
-  if (isNaN(days)) days = 5;
-  days = Math.max(0, Math.min(5, days));
-  document.getElementById('week-cap-hint').textContent = '= ' + fmt(days / 5 * config.hoursWeek) + 'h dispo cette semaine';
-}
+/* ---------- ABSENCES → CAPACITÉ PRORATISÉE ---------- */
+const absHoursOf = (uid, w) => allBlocks.filter(b => b.owner === uid && weekOf(b) === w && b.cat === 'absences').reduce((s,b) => s + b.duration, 0);
+const weightOf = (uid, w) => Math.max(0, 1 - absHoursOf(uid, w) / config.hoursWeek);
 
 /* ---------- PÉRIODES MANAGER ---------- */
 function periodRange(kind) {
@@ -424,14 +413,14 @@ onAuthStateChanged(auth, user => {
     startListeners();
   } else {
     clearListeners();
-    me = null; viewedUid = null; allBlocks = []; allUsers = {}; allWeeks = {};
+    me = null; viewedUid = null; allBlocks = [];
     document.getElementById('login-screen').classList.remove('hidden');
     document.getElementById('session-badge').classList.add('hidden');
     document.getElementById('session-badge').classList.remove('flex');
   }
 });
 
-function clearListeners() { unsubs.forEach(u => u()); unsubs = []; blocksListenerOn = false; weeksListenerOn = false; }
+function clearListeners() { unsubs.forEach(u => u()); unsubs = []; blocksListenerOn = false; }
 
 function startListeners() {
   unsubs.push(onSnapshot(collection(db, PATHS.users), snap => {
@@ -446,7 +435,7 @@ function startListeners() {
   }));
   unsubs.push(onSnapshot(doc(db, PATHS.refs, 'main'), snap => {
     const v = snap.data() || {};
-    CATS.forEach(c => refs[c.key] = Array.isArray(v[c.key]) ? v[c.key] : (refs[c.key] || []));
+    CATS.forEach(c => refs[c.key] = Array.isArray(v[c.key]) ? v[c.key] : (DEFAULT_REFS[c.key] || []));
     renderRefPanel();
   }));
 }
@@ -463,19 +452,6 @@ function setupBlocksListener() {
   }, err => console.warn('Accès blocs refusé :', err.code)));
 }
 
-function setupWeeksListener() {
-  if (weeksListenerOn || !me || !me.role) return;
-  weeksListenerOn = true;
-  const target = (me.role === 'agent')
-    ? query(collection(db, PATHS.weeks), where('owner', '==', me.uid))
-    : collection(db, PATHS.weeks);
-  unsubs.push(onSnapshot(target, snap => {
-    allWeeks = {};
-    snap.forEach(d => { const v = d.data(); if (v && v.owner && v.week) allWeeks[v.owner + '_' + v.week] = v; });
-    refreshAll();
-  }, err => console.warn('Accès semaines refusé :', err.code)));
-}
-
 function ensureOwnRecord() {
   if (!me || bootstrapped) return;
   const rec = allUsers[me.uid];
@@ -485,7 +461,6 @@ function ensureOwnRecord() {
     if (rec.active === false) { alert('Compte désactivé. Contactez votre administrateur.'); signOut(auth); return; }
     enterApp();
     setupBlocksListener();
-    setupWeeksListener();
   } else {
     bootstrapped = true;
     const role = (Object.keys(allUsers).length === 0 || me.email === ADMIN_EMAIL) ? 'admin' : 'agent';
@@ -494,7 +469,6 @@ function ensureOwnRecord() {
       .catch(err => console.error('❌ Création du profil impossible :', err.code));
     enterApp();
     setupBlocksListener();
-    setupWeeksListener();
   }
 }
 
@@ -551,7 +525,7 @@ function renderUserSelect() {
 function selectUser(uid) { viewedUid = uid; renderCalendar(); renderSummary(); }
 window.selectUser = selectUser;
 
-/* ---------- BARRE DE SEMAINE + JOURS DISPO ---------- */
+/* ---------- BARRE DE SEMAINE ---------- */
 window.shiftWeekView = d => {
   if (currentWeek === 'TYPE') currentWeek = isoWeekKey(new Date());
   currentWeek = shiftWeek(currentWeek, d);
@@ -582,18 +556,6 @@ window.copyTypeWeek = () => {
     setDoc(doc(db, PATHS.blocks, id), { cat: b.cat, label: b.label, day: b.day, start: b.start, duration: b.duration, owner: viewedUid, week: currentWeek, id });
   });
 };
-window.saveWeekInfo = () => {
-  if (!canEdit() || currentWeek === 'TYPE') return;
-  updateWeekHint();
-  clearTimeout(weekSaveTimer);
-  weekSaveTimer = setTimeout(() => {
-    let days = parseFloat(document.getElementById('week-days').value);
-    if (isNaN(days)) days = 5;
-    days = Math.max(0, Math.min(5, days));
-    const note = document.getElementById('week-note').value.trim();
-    setDoc(doc(db, PATHS.weeks, weekKeyOf(viewedUid, currentWeek)), { owner: viewedUid, week: currentWeek, days, note }, { merge: true });
-  }, 400);
-};
 
 /* ---------- CALENDRIER ---------- */
 function layoutDay(blocks) {
@@ -620,15 +582,6 @@ function renderCalendar() {
   document.getElementById('copy-prev-btn').classList.toggle('hidden', !editable || currentWeek === 'TYPE');
   document.getElementById('copy-type-btn').classList.toggle('hidden', !editable || currentWeek === 'TYPE');
 
-  const wdoc = allWeeks[weekKeyOf(viewedUid, currentWeek)];
-  const wdIn = document.getElementById('week-days');
-  const wnIn = document.getElementById('week-note');
-  wdIn.value = wdoc && typeof wdoc.days === 'number' ? wdoc.days : 5;
-  wnIn.value = wdoc?.note || '';
-  const wdis = !editable || currentWeek === 'TYPE';
-  wdIn.disabled = wdis; wnIn.disabled = wdis;
-  updateWeekHint();
-
   document.getElementById('calendar-owner-title').textContent =
     viewedUid === me.uid ? 'Mon calendrier' : `Calendrier de ${owner?.name || '?'}`;
   document.getElementById('readonly-banner').classList.toggle('hidden', editable);
@@ -638,8 +591,9 @@ function renderCalendar() {
   const colH = (DAY_END - DAY_START) * ROW_H;
   let html = '<div class="min-w-[860px]"><div class="grid" style="grid-template-columns: 60px repeat(5, 1fr);"><div></div>';
   JOURS.forEach(j => {
-    const t = blocks.filter(b => b.day === j).reduce((s,b) => s + b.duration, 0);
-    html += `<div class="text-center pb-2 border-b-2 border-slate-200"><div class="font-black text-slate-800 text-sm uppercase">${j}</div><div class="text-xs font-bold ${t > config.hoursWeek/5 ? 'text-orange-600' : 'text-slate-400'}">${fmt(t)}h</div></div>`;
+    const t = blocks.filter(b => b.day === j && b.cat !== 'absences').reduce((s,b) => s + b.duration, 0);
+    const a = blocks.filter(b => b.day === j && b.cat === 'absences').reduce((s,b) => s + b.duration, 0);
+    html += `<div class="text-center pb-2 border-b-2 border-slate-200"><div class="font-black text-slate-800 text-sm uppercase">${j}</div><div class="text-xs font-bold ${t > config.hoursWeek/5 ? 'text-orange-600' : 'text-slate-400'}">${fmt(t)}h${a ? ' <span class="text-violet-600">+ ' + fmt(a) + 'h 🌴</span>' : ''}</div></div>`;
   });
   html += `<div class="relative" style="height:${colH}px">`;
   for (let h = DAY_START; h < DAY_END; h++) html += `<div class="absolute right-2 text-[10px] font-bold text-slate-400" style="top:${(h-DAY_START)*ROW_H-6}px">${fmtHour(h)}</div>`;
@@ -746,24 +700,26 @@ window.dupToAll = () => { if (!canEdit()) return; const b = allBlocks.find(x => 
 
 /* ---------- SYNTHÈSE ---------- */
 function totalsOfList(list) {
-  const t = { projet:0, mco:0, support:0, transverse:0 };
+  const t = { projet:0, mco:0, support:0, transverse:0, absences:0 };
   list.forEach(b => t[b.cat] = (t[b.cat]||0) + b.duration);
-  t.total = t.projet + t.mco + t.support + t.transverse; return t;
+  t.total = t.projet + t.mco + t.support + t.transverse;
+  return t;
 }
 function renderSummary() {
   if (!viewedUid) return;
   const list = viewBlocks();
   const t = totalsOfList(list);
   document.getElementById('summary-cards').innerHTML = CATS.map(c => `
-    <div class="p-3 rounded-xl border border-slate-200 bg-white text-center"><div class="text-xs font-bold text-slate-500 uppercase">${c.label}</div><div class="text-2xl font-black" style="color:${c.color}">${fmt(t[c.key])}h</div><div class="text-[10px] text-slate-400 font-semibold">${list.filter(b=>b.cat===c.key).length} activité(s)</div></div>`).join('') +
-    `<div class="p-3 rounded-xl border-2 border-slate-800 bg-slate-800 text-white text-center"><div class="text-xs font-bold uppercase">TOTAL SEMAINE</div><div class="text-2xl font-black">${fmt(t.total)}h</div><div class="text-[10px] opacity-70 font-semibold">${list.length} blocs</div></div>`;
+    <div class="p-3 rounded-xl border border-slate-200 bg-white text-center"><div class="text-xs font-bold text-slate-500 uppercase">${c.label}</div><div class="text-2xl font-black" style="color:${c.color}">${fmt(t[c.key])}h</div><div class="text-[10px] text-slate-400 font-semibold">${list.filter(b=>b.cat===c.key).length} bloc(s)</div></div>`).join('') +
+    `<div class="p-3 rounded-xl border-2 border-slate-800 bg-slate-800 text-white text-center"><div class="text-xs font-bold uppercase">TOTAL TRAVAILLÉ</div><div class="text-2xl font-black">${fmt(t.total)}h</div><div class="text-[10px] opacity-70 font-semibold">${list.length} blocs</div></div>`;
   const hw = config.hoursWeek, st = document.getElementById('agent-status');
   const capW = weightOf(viewedUid, currentWeek) * hw;
+  const absTxt = t.absences ? ` (+ ${fmt(t.absences)}h 🌴 absence)` : '';
   if (viewedUid === me.uid && !meSaisit()) st.innerHTML = `🧭 <span class="text-slate-600">Compte gestion uniquement — aucune saisie attendue, heures non comptabilisées dans la charge équipe</span>`;
   else if (currentWeek === 'TYPE') st.innerHTML = `📐 <span class="text-indigo-600">Semaine type de référence (non comptée dans les statistiques réelles)</span>`;
-  else if (t.total > capW + 2) st.innerHTML = `⚠️ <span class="text-red-600">${fmt(t.total)}h posées pour ${fmt(capW)}h disponibles → Débordement</span>`;
-  else if (t.total >= capW - 1) st.innerHTML = `✅ <span class="text-green-600">Semaine cohérente (${fmt(t.total)}h / ${fmt(capW)}h disponibles)</span>`;
-  else st.innerHTML = `ℹ️ <span class="text-slate-600">${fmt(t.total)}h posées / ${fmt(capW)}h disponibles</span>`;
+  else if (t.total > capW + 2) st.innerHTML = `⚠️ <span class="text-red-600">${fmt(t.total)}h travaillées pour ${fmt(capW)}h disponibles${absTxt} → Débordement</span>`;
+  else if (t.total >= capW - 1) st.innerHTML = `✅ <span class="text-green-600">Semaine cohérente : ${fmt(t.total)}h travaillées${absTxt} / ${fmt(hw)}h</span>`;
+  else st.innerHTML = `ℹ️ <span class="text-slate-600">${fmt(t.total)}h travaillées${absTxt} / ${fmt(capW)}h disponibles</span>`;
 }
 
 /* ---------- RÉFÉRENTIELS ---------- */
@@ -777,13 +733,13 @@ function renderRefPanel() {
   </div>`).join('');
   if (!editable) return;
   panel.querySelectorAll('[data-del-ref]').forEach(btn => btn.onclick = () => {
-    const cat = btn.dataset.delRef, arr = [...refs[cat]]; arr.splice(parseInt(btn.dataset.idx), 1);
+    const cat = btn.dataset.delRef, arr = [...(refs[cat]||[])]; arr.splice(parseInt(btn.dataset.idx), 1);
     setDoc(doc(db, PATHS.refs, 'main'), { [cat]: arr }, { merge: true });
   });
   panel.querySelectorAll('[data-add-ref]').forEach(btn => btn.onclick = () => {
     const cat = btn.dataset.addRef, inp = document.getElementById('ref-input-' + cat), v = inp.value.trim();
-    if (!v || refs[cat].includes(v)) return;
-    setDoc(doc(db, PATHS.refs, 'main'), { [cat]: [...refs[cat], v] }, { merge: true });
+    if (!v || (refs[cat]||[]).includes(v)) return;
+    setDoc(doc(db, PATHS.refs, 'main'), { [cat]: [...(refs[cat]||[]), v] }, { merge: true });
   });
 }
 
@@ -849,10 +805,11 @@ function renderUsers() {
     </tr>`).join('');
 }
 
-/* ---------- MANAGER (capacités proratisées) ---------- */
+/* ---------- MANAGER (capacités proratisées via absences) ---------- */
 function aggregateBlocks(list) {
   const agg = {};
   list.forEach(b => {
+    if (b.cat === 'absences') return;
     const label = (b.label||'').trim(); if (!label) return;
     const k = b.cat + '|' + label;
     if (!agg[k]) agg[k] = { cat: b.cat, label, hours: 0, agents: new Set() };
@@ -871,21 +828,23 @@ function renderManager() {
   const users = Object.entries(allUsers).filter(([uid, u]) => saisit(u));
   const gestion = Object.entries(allUsers).filter(([uid, u]) => !saisit(u));
 
-  let totalP = 0, sumCapP = 0, sumWeeksN = 0;
+  let totalP = 0, sumCapP = 0, sumWeeksN = 0, totalAbs = 0;
   document.getElementById('manager-table-body').innerHTML = users.map(([uid,u]) => {
-    const bu = blocksP.filter(b => b.owner === uid);
+    const buAll = blocksP.filter(b => b.owner === uid);
+    const bu = buAll.filter(b => b.cat !== 'absences');
     const hours = bu.reduce((s,b) => s + b.duration, 0);
-    const weeksN = new Set(bu.map(b => weekOf(b))).size;
-    const wSet = new Set(bu.map(b => weekOf(b)));
-    Object.values(allWeeks).forEach(v => { if (v.owner === uid && v.days < 5 && inPeriod(v.week, range)) wSet.add(v.week); });
+    const abs = buAll.reduce((s,b) => s + (b.cat === 'absences' ? b.duration : 0), 0);
+    const weeksN = new Set(buAll.map(b => weekOf(b))).size;
+    const wSet = new Set(buAll.map(b => weekOf(b)));
     let capU = 0; wSet.forEach(w => { capU += weightOf(uid, w) * config.hoursWeek; });
     const avg = weeksN ? hours / weeksN : 0;
     const taux = capU ? Math.round(hours / capU * 100) : 0;
-    totalP += hours; sumCapP += capU; sumWeeksN += weeksN;
+    totalP += hours; sumCapP += capU; sumWeeksN += weeksN; totalAbs += abs;
     const badge = taux > 110 ? '🔴 Surcharge' : taux > 100 ? '🟠 Tendu' : taux > 80 ? '🟡 Vigilance' : weeksN ? '🟢 OK' : '⚪ Sans saisie';
     return `<tr class="border-b border-slate-100 hover:bg-slate-50">
       <td class="p-3 font-bold text-slate-800">${esc(u.name)} <span class="text-[10px] ${ROLE_STYLE[u.role][1]} px-1.5 py-0.5 rounded font-black">${u.role}</span></td>
       <td class="text-center p-3 font-black">${fmt(hours)}h</td>
+      <td class="text-center p-3 font-bold text-violet-600">${abs ? fmt(abs) + 'h' : '—'}</td>
       <td class="text-center p-3 font-bold ${weeksN === 0 ? 'text-red-500' : 'text-slate-600'}">${weeksN} / ${weeksP}</td>
       <td class="text-center p-3 font-black">${fmt(avg)}h</td>
       <td class="text-center p-3 font-black">${capU ? taux + '% ' + badge : badge}</td></tr>`;
@@ -894,19 +853,18 @@ function renderManager() {
   const teamWeekAvg = sumWeeksN ? (totalP / sumWeeksN) * users.length : 0;
   const tauxTeam = sumCapP ? Math.round(totalP / sumCapP * 100) : 0;
   document.getElementById('manager-table-foot').innerHTML = `<tr><td class="p-3">TOTAL (${users.length})</td>
-    <td class="text-center p-3 text-lg">${fmt(totalP)}h</td><td class="text-center p-3">${sumWeeksN} sem.-agent</td>
+    <td class="text-center p-3 text-lg">${fmt(totalP)}h</td><td class="text-center p-3 text-violet-600">${fmt(totalAbs)}h</td>
+    <td class="text-center p-3">${sumWeeksN} sem.-agent</td>
     <td class="text-center p-3 text-lg">${fmt(teamWeekAvg)}h/sem</td>
     <td class="text-center p-3"><span class="px-3 py-1.5 bg-slate-900 text-white rounded-lg font-black">${tauxTeam}%</span></td></tr>`;
 
-  let absH = 0;
-  users.forEach(([uid]) => weekList.forEach(w => { absH += (1 - weightOf(uid, w)) * config.hoursWeek; }));
   const fillRate = (users.length && weeksP) ? Math.round(sumWeeksN / (users.length * weeksP) * 100) : 0;
   const top = aggregateBlocks(blocksP)[0];
   document.getElementById('period-stats').innerHTML = `
     <div class="flex justify-between"><span class="text-slate-500">Semaines dans la période</span><strong>${weeksP}</strong></div>
     <div class="flex justify-between"><span class="text-slate-500">Semaines-agent saisies</span><strong>${sumWeeksN}</strong></div>
     <div class="flex justify-between"><span class="text-slate-500">Taux de saisie équipe</span><strong class="${fillRate < 80 ? 'text-red-600' : 'text-green-600'}">${fillRate}%</strong></div>
-    <div class="flex justify-between"><span class="text-slate-500">Absences déclarées (CP/RTT/…)</span><strong class="text-orange-600">${fmt(absH)}h</strong></div>
+    <div class="flex justify-between"><span class="text-slate-500">Absences 🌴 (CP/RTT/…)</span><strong class="text-violet-600">${fmt(totalAbs)}h</strong></div>
     <div class="flex justify-between"><span class="text-slate-500">Charge moyenne équipe / semaine</span><strong>${fmt(teamWeekAvg)}h (capacité proratisée ${fmt(sumCapP)}h)</strong></div>
     <div class="flex justify-between"><span class="text-slate-500">Activité n°1 de la période</span><strong>${top ? esc(top.label) + ' (' + fmt(top.hours) + 'h)' : '—'}</strong></div>
     <div class="flex justify-between"><span class="text-slate-500">Comptes « gestion seule » (hors charge)</span><strong>${gestion.length ? gestion.map(([uid,u]) => esc(u.name)).join(', ') : '—'}</strong></div>`;
@@ -917,7 +875,7 @@ function renderManager() {
   chartWeeks = new Chart(ctxW, { type: 'line', data: {
       labels: weeksSorted.map(w => 'S' + w.slice(6)),
       datasets: [
-        { label: 'Charge équipe (h)', data: weeksSorted.map(w => blocksP.filter(b => weekOf(b) === w).reduce((s,b) => s + b.duration, 0)), borderColor: '#2563eb', backgroundColor: 'rgba(37,99,235,0.15)', fill: true, tension: 0.3 },
+        { label: 'Charge équipe (h)', data: weeksSorted.map(w => blocksP.filter(b => weekOf(b) === w && b.cat !== 'absences').reduce((s,b) => s + b.duration, 0)), borderColor: '#2563eb', backgroundColor: 'rgba(37,99,235,0.15)', fill: true, tension: 0.3 },
         { label: 'Capacité proratisée (h)', data: weeksSorted.map(w => users.reduce((s,[uid]) => s + weightOf(uid, w) * config.hoursWeek, 0)), borderColor: '#16a34a', borderDash: [6,4], pointRadius: 0 }
       ] },
     options: { responsive: true, plugins: { legend: { position: 'bottom' } }, scales: { y: { beginAtZero: true } } } });
@@ -933,29 +891,28 @@ function renderManager() {
   }).join('');
 }
 
-/* ---------- DASHBOARD (réel, proratisé, hors comptes gestion) ---------- */
+/* ---------- DASHBOARD (réel hors absences, proratisé, hors comptes gestion) ---------- */
 function renderDashboard() {
   const real = allBlocks.filter(b => weekOf(b) !== 'TYPE');
+  const work = real.filter(b => b.cat !== 'absences');
   const users = Object.entries(allUsers).filter(([uid, u]) => saisit(u));
   const nbGestion = Object.values(allUsers).filter(u => !saisit(u)).length;
 
   let sumWeeksEq = 0;
   users.forEach(([uid]) => {
     const wSet = new Set(real.filter(b => b.owner === uid).map(b => weekOf(b)));
-    Object.values(allWeeks).forEach(v => { if (v.owner === uid && v.days < 5) wSet.add(v.week); });
     wSet.forEach(w => { sumWeeksEq += weightOf(uid, w); });
   });
   const hasReal = sumWeeksEq > 0;
   const capAgent = config.hoursWeek * config.weeks, capTotale = capAgent * Math.max(1, users.length);
 
   const catWeekAvg = c => hasReal
-    ? real.filter(b => b.cat === c).reduce((s,b) => s + b.duration, 0) / sumWeeksEq
+    ? work.filter(b => b.cat === c).reduce((s,b) => s + b.duration, 0) / sumWeeksEq
     : totalsOfList(allBlocks.filter(b => weekOf(b) === 'TYPE'))[c] / Math.max(1, users.length);
 
   const perUser = users.map(([uid,u]) => {
-    const bu = real.filter(b => b.owner === uid);
-    const wSet = new Set(bu.map(b => weekOf(b)));
-    Object.values(allWeeks).forEach(v => { if (v.owner === uid && v.days < 5) wSet.add(v.week); });
+    const bu = work.filter(b => b.owner === uid);
+    const wSet = new Set(real.filter(b => b.owner === uid).map(b => weekOf(b)));
     let eq = 0; wSet.forEach(w => { eq += weightOf(uid, w); });
     const hebdo = eq ? bu.reduce((s,b) => s + b.duration, 0) / eq : totalsOfList(bu.length ? bu : allBlocks.filter(b => b.owner === uid && weekOf(b) === 'TYPE')).total;
     return { name: u.name, hebdo };
@@ -986,14 +943,13 @@ function renderDashboard() {
     { label:'Capacité hebdo (h)', data: perUser.map(()=>config.hoursWeek), type:'line', borderColor:'#16a34a', borderDash:[6,4], pointRadius:0, borderWidth:2 }]},
     options:{ responsive:true, plugins:{legend:{position:'bottom'}}, scales:{ y:{beginAtZero:true}, x:{grid:{display:false}} } } });
 
-  /* --- Courbe cumulée charge vs capacité (année en cours) --- */
   const nowKey = isoWeekKey(new Date());
   const weeksY = weeksListInRange(periodRange('year')).filter(w => w <= nowKey);
   const uids = users.map(([uid]) => uid);
   let cumC = 0, cumCap = 0;
   const dataC = [], dataCap = [];
   weeksY.forEach(w => {
-    cumC += real.filter(b => weekOf(b) === w).reduce((s,b) => s + b.duration, 0);
+    cumC += work.filter(b => weekOf(b) === w).reduce((s,b) => s + b.duration, 0);
     cumCap += uids.reduce((s,uid) => s + weightOf(uid, w) * config.hoursWeek, 0);
     dataC.push(Math.round(cumC));
     dataCap.push(Math.round(cumCap));
@@ -1008,7 +964,7 @@ function renderDashboard() {
       ] },
     options: { responsive: true, plugins: { legend: { position: 'bottom' } }, scales: { y: { beginAtZero: true } } } });
 
-  const agg = aggregateBlocks(real).slice(0,8), maxH = agg[0]?.hours || 1;
+  const agg = aggregateBlocks(work).slice(0,8), maxH = agg[0]?.hours || 1;
   document.getElementById('dash-top').innerHTML = agg.length ? agg.map(a => { const c = CATS.find(x=>x.key===a.cat);
     return `<div class="flex items-center gap-4 mb-3"><div class="w-56 text-sm font-bold text-slate-700 truncate">${esc(a.label)}</div><div class="flex-1 h-7 bg-slate-200 rounded-lg overflow-hidden"><div class="h-full bar-fill-load" style="background:${c.color};width:${Math.round(a.hours/maxH*100)}%"></div></div><div class="w-24 text-right font-black text-sm" style="color:${c.color}">${fmt(a.hours)}h</div></div>`; }).join('') : '<p class="text-slate-400 italic text-sm">Aucune semaine réelle saisie pour le moment.</p>';
 
