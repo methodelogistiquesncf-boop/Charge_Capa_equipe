@@ -91,7 +91,7 @@ body { font-family: 'Inter', sans-serif; }
     <div class="p-6 border-b border-slate-200 flex flex-wrap justify-between items-center gap-4">
       <div>
         <h2 class="text-xl font-black text-slate-800">🗓️ <span id="calendar-owner-title">Calendrier</span></h2>
-        <p class="text-sm text-slate-500 mt-1">Clic créneau vide = ajouter · Glisser-déposer = déplacer · <strong class="text-emerald-600">Ctrl+glisser = copier</strong> · Clic bloc = modifier · <strong class="text-violet-600">Absences = 🌴</strong></p>
+        <p class="text-sm text-slate-500 mt-1">Clic créneau vide = ajouter · Glisser-déposer = déplacer · <strong class="text-emerald-600">Ctrl+glisser = copier</strong> · Clic bloc = modifier</p>
       </div>
       <div id="agent-controls" class="hidden items-center gap-2">
         <select id="agent-select" onchange="selectUser(this.value)" class="p-2.5 rounded-xl border border-slate-200 font-semibold text-sm outline-none focus:border-blue-500"></select>
@@ -113,7 +113,7 @@ body { font-family: 'Inter', sans-serif; }
     <div class="p-4 bg-slate-50 border-b border-slate-200 flex flex-wrap gap-4 text-xs font-bold" id="legend"></div>
     <div id="calendar-wrap" class="p-4 overflow-x-auto"></div>
     <div id="agent-summary" class="p-6 bg-slate-50 border-t border-slate-200">
-      <div class="grid grid-cols-2 md:grid-cols-6 gap-3 mb-3" id="summary-cards"></div>
+      <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-3" id="summary-cards"></div>
       <div id="agent-status" class="text-sm font-semibold text-center"></div>
     </div>
   </div>
@@ -131,7 +131,6 @@ body { font-family: 'Inter', sans-serif; }
         <select id="m-cat" onchange="refreshModalDatalist(); updateProjWrap()" class="w-full p-3 rounded-xl bg-slate-50 border border-slate-200 font-bold text-sm outline-none">
           <option value="projet">🚀 Projets</option><option value="mco">🔧 MCO</option>
           <option value="support">🆘 Support terrain</option><option value="transverse">📋 Transverse</option>
-          <option value="absences">🌴 Absences (CP, RTT, formation…)</option>
         </select></div>
       <div id="m-proj-wrap" class="hidden"><label class="block text-xs font-black text-slate-500 uppercase mb-1.5" id="m-proj-label">Projet budgété</label>
         <select id="m-proj" onchange="onProjChange()" class="w-full p-3 rounded-xl bg-slate-50 border border-slate-200 font-bold text-sm outline-none">
@@ -140,7 +139,7 @@ body { font-family: 'Inter', sans-serif; }
         <p id="m-proj-warn" class="hidden mt-1 text-[11px] font-bold text-red-600"></p>
       </div>
       <div><label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Activité précise</label>
-        <input type="text" id="m-label" list="dl-labels" placeholder="Ex : MAG9, Lean Picking, CP…" class="w-full p-3 rounded-xl bg-slate-50 border border-slate-200 font-semibold text-sm outline-none focus:border-blue-500">
+        <input type="text" id="m-label" list="dl-labels" placeholder="Ex : MAG9, Lean Picking…" class="w-full p-3 rounded-xl bg-slate-50 border border-slate-200 font-semibold text-sm outline-none focus:border-blue-500">
         <datalist id="dl-labels"></datalist></div>
       <div class="grid grid-cols-3 gap-3">
         <div><label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Jour</label><select id="m-day" class="w-full p-3 rounded-xl bg-slate-50 border border-slate-200 font-bold text-sm outline-none"></select></div>
@@ -165,7 +164,7 @@ body { font-family: 'Inter', sans-serif; }
   <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
     <div class="p-6 border-b border-slate-200 flex flex-wrap justify-between items-center gap-4">
       <div><h2 class="text-xl font-black text-slate-800">📋 Consolidation équipe</h2>
-        <p class="text-sm text-slate-500 mt-1">Semaines réelles · capacités proratisées (ETP + absences) · enveloppes budgétaires débitées automatiquement</p></div>
+        <p class="text-sm text-slate-500 mt-1">Capacité auto = heures × ETP × rendement × (j. ouvrés − congés) ÷ j. ouvrés · enveloppes débitées automatiquement</p></div>
       <div class="flex items-center gap-2">
         <select id="period-select" onchange="renderManager()" class="p-2.5 rounded-xl border border-slate-200 font-semibold text-sm outline-none">
           <option value="month">Mois en cours</option>
@@ -180,12 +179,14 @@ body { font-family: 'Inter', sans-serif; }
     </div>
     <div id="cfg-section" class="p-6 bg-slate-50 border-b border-slate-200">
       <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">⚙️ Paramètres de projection annuelle</h3>
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
         <div><label class="block text-xs font-semibold text-slate-600 mb-1.5">Heures contrat / sem. (1 ETP)</label><input type="number" id="cfg-hours-week" oninput="saveConfigFromInputs()" class="w-full p-2 rounded-lg border border-slate-200 text-sm font-bold text-center"></div>
         <div><label class="block text-xs font-semibold text-slate-600 mb-1.5">Semaines / an</label><input type="number" id="cfg-weeks" oninput="saveConfigFromInputs()" class="w-full p-2 rounded-lg border border-slate-200 text-sm font-bold text-center"></div>
+        <div><label class="block text-xs font-semibold text-slate-600 mb-1.5">Jours congés+RTT / an</label><input type="number" id="cfg-conge" oninput="saveConfigFromInputs()" class="w-full p-2 rounded-lg border border-slate-200 text-sm font-bold text-center"></div>
         <div><label class="block text-xs font-semibold text-slate-600 mb-1.5">Effectif cible ETP (référence)</label><input type="number" id="cfg-etp" oninput="saveConfigFromInputs()" class="w-full p-2 rounded-lg border border-slate-200 text-sm font-bold text-center"></div>
         <div><label class="block text-xs font-semibold text-slate-600 mb-1.5">Taux horaire (€)</label><input type="number" id="cfg-taux" oninput="saveConfigFromInputs()" class="w-full p-2 rounded-lg border border-slate-200 text-sm font-bold text-center"></div>
       </div>
+      <p class="text-[11px] text-slate-500 mt-2" id="cfg-formule"></p>
     </div>
 
     <div class="p-6 bg-slate-50 border-b border-slate-200">
@@ -224,11 +225,11 @@ body { font-family: 'Inter', sans-serif; }
     </div>
 
     <div class="p-6 bg-slate-50 border-b border-slate-200">
-      <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">🏷️ Référentiels d'activités <span class="text-[10px] font-normal text-slate-400">(les enveloppes sont gérées ci-dessus)</span></h3>
+      <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">🏷️ Référentiels d'activités</h3>
       <div class="grid grid-cols-2 md:grid-cols-4 gap-3" id="ref-panel"></div>
     </div>
     <div class="p-6 border-b border-slate-200 grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <div class="bg-slate-50 p-4 rounded-xl"><h3 class="font-black text-slate-800 text-sm mb-3">📈 Charge hebdo équipe (h) vs capacité proratisée (ETP+absences)</h3><canvas id="chart-weeks" height="180"></canvas></div>
+      <div class="bg-slate-50 p-4 rounded-xl"><h3 class="font-black text-slate-800 text-sm mb-3">📈 Charge hebdo équipe (h) vs capacité réelle (ETP × rendement × congés déduits)</h3><canvas id="chart-weeks" height="180"></canvas></div>
       <div class="bg-slate-50 p-4 rounded-xl"><h3 class="font-black text-slate-800 text-sm mb-3">🧮 Chiffres de la période</h3><div id="period-stats" class="text-sm space-y-2"></div></div>
     </div>
     <div class="overflow-x-auto">
@@ -236,10 +237,10 @@ body { font-family: 'Inter', sans-serif; }
         <thead><tr class="bg-slate-800 text-white">
           <th class="text-left p-3 font-bold text-xs uppercase">Collaborateur</th>
           <th class="text-center p-3 font-bold text-xs uppercase">ETP</th>
+          <th class="text-center p-3 font-bold text-xs uppercase">Rendement</th>
+          <th class="text-center p-3 font-bold text-xs uppercase">Capacité / sem</th>
           <th class="text-center p-3 font-bold text-xs uppercase">Travaillé</th>
-          <th class="text-center p-3 font-bold text-xs uppercase">Absences</th>
           <th class="text-center p-3 font-bold text-xs uppercase">Semaines saisies</th>
-          <th class="text-center p-3 font-bold text-xs uppercase">Moyenne / sem</th>
           <th class="text-center p-3 font-bold text-xs uppercase">Taux C/C</th>
         </tr></thead>
         <tbody id="manager-table-body"></tbody>
@@ -247,7 +248,7 @@ body { font-family: 'Inter', sans-serif; }
       </table>
     </div>
     <div class="p-6 border-t border-slate-200">
-      <h3 class="font-black text-slate-800 mb-1">🔎 Où partent les heures ? (agrégé période, hors absences)</h3>
+      <h3 class="font-black text-slate-800 mb-1">🔎 Où partent les heures ? (agrégé période)</h3>
       <div class="overflow-x-auto"><table class="w-full text-sm"><tbody id="agg-table-body"></tbody></table></div>
     </div>
   </div>
@@ -258,7 +259,7 @@ body { font-family: 'Inter', sans-serif; }
   <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
     <div class="p-6 border-b border-slate-200">
       <h2 class="text-xl font-black text-slate-800">👥 Utilisateurs & rôles</h2>
-      <p class="text-sm text-slate-500 mt-1">Comptes, rôles, <strong>ETP contractuel</strong>, mode de saisie, accès</p>
+      <p class="text-sm text-slate-500 mt-1">Comptes, rôles, <strong>ETP</strong>, <strong>taux de rendement</strong> (défaut 0,85), mode de saisie, accès</p>
     </div>
     <div class="p-6 bg-slate-50 border-b border-slate-200">
       <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">➕ Créer un compte</h3>
@@ -269,10 +270,10 @@ body { font-family: 'Inter', sans-serif; }
         <select id="nu-role" class="p-2.5 rounded-lg border border-slate-200 text-sm font-bold outline-none">
           <option value="agent">🟢 Agent</option><option value="manager">🔵 Manager</option><option value="admin">🔴 Admin</option>
         </select>
-        <input type="number" id="nu-etp" placeholder="ETP" min="0.1" max="1" step="0.1" value="1" class="p-2.5 rounded-lg border border-slate-200 text-sm font-bold outline-none focus:border-blue-500 text-center" title="Équivalent Temps Plein : 1 = temps plein, 0.8 = 80%, 0.5 = mi-temps">
+        <input type="number" id="nu-etp" placeholder="ETP" min="0.1" max="1" step="0.1" value="1" class="p-2.5 rounded-lg border border-slate-200 text-sm font-bold outline-none focus:border-blue-500 text-center" title="Équivalent Temps Plein">
         <button onclick="createUser()" class="bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold text-sm">Créer</button>
       </div>
-      <p class="text-[11px] text-slate-400 mt-2"><strong>ETP</strong> : 1 = temps plein (35 h/sem) · 0.8 = 80 % (28 h) · 0.5 = mi-temps (17,5 h).</p>
+      <p class="text-[11px] text-slate-400 mt-2"><strong>ETP</strong> : 1 = temps plein · 0.8 = 80 % · 0.5 = mi-temps. Le <strong>rendement</strong> (0,85 par défaut) se règle ensuite dans le tableau.</p>
     </div>
     <div class="overflow-x-auto">
       <table class="w-full text-sm">
@@ -280,10 +281,11 @@ body { font-family: 'Inter', sans-serif; }
           <th class="text-left p-3 font-bold text-xs uppercase">Nom</th>
           <th class="text-left p-3 font-bold text-xs uppercase">Email</th>
           <th class="text-center p-3 font-bold text-xs uppercase">ETP</th>
+          <th class="text-center p-3 font-bold text-xs uppercase">Rendement</th>
           <th class="text-center p-3 font-bold text-xs uppercase">Rôle</th>
           <th class="text-center p-3 font-bold text-xs uppercase">Accès</th>
           <th class="text-center p-3 font-bold text-xs uppercase">📝 Saisie</th>
-          <th class="text-center p-3 font-bold text-xs uppercase">Semaines saisies</th>
+          <th class="text-center p-3 font-bold text-xs uppercase">Semaines</th>
         </tr></thead>
         <tbody id="users-table-body"></tbody>
       </table>
@@ -305,7 +307,7 @@ body { font-family: 'Inter', sans-serif; }
       <div class="grid grid-cols-2 md:grid-cols-4 gap-5 mb-8" id="dash-kpis"></div>
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         <div class="bg-slate-50 p-6 rounded-xl"><h3 class="font-black text-slate-800 mb-4">Répartition par catégorie</h3><div id="dash-bars"></div></div>
-        <div class="bg-slate-50 p-6 rounded-xl"><h3 class="font-black text-slate-800 mb-4">Charge vs capacité contractuelle par collaborateur</h3><canvas id="chart-agents" height="250"></canvas></div>
+        <div class="bg-slate-50 p-6 rounded-xl"><h3 class="font-black text-slate-800 mb-4">Charge vs capacité réelle par collaborateur</h3><canvas id="chart-agents" height="250"></canvas></div>
       </div>
       <div class="bg-slate-50 p-6 rounded-xl mb-8">
         <h3 class="font-black text-slate-800 mb-1">📈 Trajectoire charge vs capacité (cumul depuis janvier)</h3>
@@ -346,16 +348,17 @@ const CATS = [
   { key: 'mco',        label: '🔧 MCO',             color: '#dc2626', trace: 'Ticket_GLPI' },
   { key: 'support',    label: '🆘 Support terrain', color: '#ea580c', trace: 'Non tracé' },
   { key: 'transverse', label: '📋 Transverse',      color: '#475569', trace: 'Estimation' },
-  { key: 'absences',   label: '🌴 Absences',        color: '#7c3aed', trace: 'Saisie planning' }
+  { key: 'absences',   label: '🌴 Absences (historique)', color: '#7c3aed', trace: '—' }
 ];
-const DEFAULT_REFS = { projet: [], mco: [], support: [], transverse: [], absences: ['CP', 'RTT', 'Formation', 'Maladie', 'Autre'] };
+const WORK_CATS = CATS.filter(c => c.key !== 'absences');
+const DEFAULT_REFS = { projet: [], mco: [], support: [], transverse: [], absences: [] };
 const JOURS = ['Lundi','Mardi','Mercredi','Jeudi','Vendredi'];
 const DAY_START = 8, DAY_END = 18, ROW_H = 46;
 const ROLE_STYLE = { agent: ['🟢','bg-green-100 text-green-700'], manager: ['🔵','bg-blue-100 text-blue-700'], admin: ['🔴','bg-red-100 text-red-700'] };
 
 let me = null, allUsers = {}, allBlocks = [], allProjects = [];
-let config = { hoursWeek: 35, weeks: 47, etp: 10, taux: 55 };
-let refs = { ...DEFAULT_REFS, projet: [], mco: [], support: [], transverse: [] };
+let config = { hoursWeek: 35, weeks: 52, congeDays: 46, etp: 10, taux: 55 };
+let refs = { ...DEFAULT_REFS };
 let viewedUid = null, editingBlockId = null, draggedBlockId = null, editingProjectId = null;
 let chartAgents = null, chartWeeks = null, chartCumul = null, bootstrapped = false, blocksListenerOn = false;
 let unsubs = [];
@@ -393,13 +396,24 @@ function weekLabel(key) {
 }
 const weekOf = b => b.week || 'TYPE';
 
-/* ---------- ETP + ABSENCES → CAPACITÉ ---------- */
+/* ---------- CAPACITÉ AUTOMATIQUE ---------- */
+/* jours ouvrés = semaines/an × 5 ; on retire les jours de congés ;
+   capacité = heures × ETP × rendement × facteur congés */
 const etpOf = uid => allUsers[uid]?.etp || 1.0;
-const capWeekOf = uid => config.hoursWeek * etpOf(uid);
-const absHoursOf = (uid, w) => allBlocks.filter(b => b.owner === uid && weekOf(b) === w && b.cat === 'absences').reduce((s,b) => s + b.duration, 0);
-const weightOf = (uid, w) => Math.max(0, 1 - absHoursOf(uid, w) / capWeekOf(uid));
+const rendementOf = uid => {
+  const r = parseFloat(allUsers[uid]?.rendement);
+  return isNaN(r) ? 0.85 : Math.max(0.1, Math.min(1, r));
+};
+const leaveFactor = () => {
+  const joursOuvres = Math.max(1, config.weeks * 5);
+  return Math.max(0, (joursOuvres - (config.congeDays ?? 46)) / joursOuvres);
+};
+const capWeekOf = uid => config.hoursWeek * etpOf(uid) * rendementOf(uid) * leaveFactor();
+const capYearOf = uid => capWeekOf(uid) * config.weeks;
+const stdCapWeek = () => config.hoursWeek * 0.85 * leaveFactor();
+const joursTravaillesAn = () => Math.max(0, config.weeks * 5 - (config.congeDays ?? 46));
 
-/* ---------- ENVELOPPES : CONSOMMATION ---------- */
+/* ---------- ENVELOPPES ---------- */
 const projBlocks = p => {
   const cat = p.cat || 'projet';
   if (cat !== 'projet') return allBlocks.filter(b => weekOf(b) !== 'TYPE' && b.cat === cat);
@@ -534,7 +548,7 @@ function ensureOwnRecord() {
     bootstrapped = true;
     const role = (Object.keys(allUsers).length === 0 || me.email === ADMIN_EMAIL) ? 'admin' : 'agent';
     me.role = role;
-    setDoc(doc(db, PATHS.users, me.uid), { name: me.name, email: me.email, role, etp: 1.0, active: true, createdAt: Date.now() })
+    setDoc(doc(db, PATHS.users, me.uid), { name: me.name, email: me.email, role, etp: 1.0, rendement: 0.85, active: true, createdAt: Date.now() })
       .catch(err => console.error('❌ Création du profil impossible :', err.code));
     enterApp();
     setupBlocksListener();
@@ -661,8 +675,7 @@ function renderCalendar() {
   let html = '<div class="min-w-[860px]"><div class="grid" style="grid-template-columns: 60px repeat(5, 1fr);"><div></div>';
   JOURS.forEach(j => {
     const t = blocks.filter(b => b.day === j && b.cat !== 'absences').reduce((s,b) => s + b.duration, 0);
-    const a = blocks.filter(b => b.day === j && b.cat === 'absences').reduce((s,b) => s + b.duration, 0);
-    html += `<div class="text-center pb-2 border-b-2 border-slate-200"><div class="font-black text-slate-800 text-sm uppercase">${j}</div><div class="text-xs font-bold ${t > config.hoursWeek/5 ? 'text-orange-600' : 'text-slate-400'}">${fmt(t)}h${a ? ' <span class="text-violet-600">+ ' + fmt(a) + 'h 🌴</span>' : ''}</div></div>`;
+    html += `<div class="text-center pb-2 border-b-2 border-slate-200"><div class="font-black text-slate-800 text-sm uppercase">${j}</div><div class="text-xs font-bold ${t > config.hoursWeek/5 ? 'text-orange-600' : 'text-slate-400'}">${fmt(t)}h</div></div>`;
   });
   html += `<div class="relative" style="height:${colH}px">`;
   for (let h = DAY_START; h < DAY_END; h++) html += `<div class="absolute right-2 text-[10px] font-bold text-slate-400" style="top:${(h-DAY_START)*ROW_H-6}px">${fmtHour(h)}</div>`;
@@ -688,7 +701,7 @@ function renderCalendar() {
   });
   html += '</div></div>';
   document.getElementById('calendar-wrap').innerHTML = html;
-  document.getElementById('legend').innerHTML = CATS.map(c => `<span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full" style="background:${c.color}"></span>${c.label}</span>`).join('');
+  document.getElementById('legend').innerHTML = WORK_CATS.map(c => `<span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full" style="background:${c.color}"></span>${c.label}</span>`).join('');
 }
 
 /* ---------- DRAG & DROP ---------- */
@@ -713,7 +726,7 @@ window.onDrop = (e, day) => {
   copyDrag = false;
 };
 
-/* ---------- MODAL BLOC + ENVELOPPES ---------- */
+/* ---------- MODAL BLOC ---------- */
 function fillModalSelects() {
   document.getElementById('m-day').innerHTML = JOURS.map(j => `<option value="${j}">${j}</option>`).join('');
   let o = ''; for (let h = DAY_START; h < DAY_END; h += 0.5) o += `<option value="${h}">${fmtHour(h)}</option>`;
@@ -730,9 +743,8 @@ window.refreshModalDatalist = () => {
 };
 function updateProjWrap() {
   const cat = document.getElementById('m-cat').value;
-  const show = cat !== 'absences';
-  document.getElementById('m-proj-wrap').classList.toggle('hidden', !show);
-  if (!show) return;
+  document.getElementById('m-proj-wrap').classList.toggle('hidden', cat === 'absences');
+  if (cat === 'absences') return;
   document.getElementById('m-proj-label').textContent = cat === 'projet' ? 'Projet budgété' : 'Enveloppe de la catégorie (optionnel si enveloppe « auto »)';
   const sel = document.getElementById('m-proj');
   const cur = sel.value;
@@ -818,26 +830,23 @@ function renderSummary() {
   if (!viewedUid) return;
   const list = viewBlocks();
   const t = totalsOfList(list);
-  document.getElementById('summary-cards').innerHTML = CATS.map(c => `
+  document.getElementById('summary-cards').innerHTML = WORK_CATS.map(c => `
     <div class="p-3 rounded-xl border border-slate-200 bg-white text-center"><div class="text-xs font-bold text-slate-500 uppercase">${c.label}</div><div class="text-2xl font-black" style="color:${c.color}">${fmt(t[c.key])}h</div><div class="text-[10px] text-slate-400 font-semibold">${list.filter(b=>b.cat===c.key).length} bloc(s)</div></div>`).join('') +
     `<div class="p-3 rounded-xl border-2 border-slate-800 bg-slate-800 text-white text-center"><div class="text-xs font-bold uppercase">TOTAL TRAVAILLÉ</div><div class="text-2xl font-black">${fmt(t.total)}h</div><div class="text-[10px] opacity-70 font-semibold">${list.length} blocs</div></div>`;
-  const etp = etpOf(viewedUid);
-  const capBase = capWeekOf(viewedUid);
-  const capW = weightOf(viewedUid, currentWeek) * capBase;
-  const absTxt = t.absences ? ` (+ ${fmt(t.absences)}h 🌴)` : '';
+  const capW = capWeekOf(viewedUid);
   const st = document.getElementById('agent-status');
   if (viewedUid === me.uid && !meSaisit()) st.innerHTML = `🧭 <span class="text-slate-600">Compte gestion uniquement — aucune saisie attendue</span>`;
   else if (currentWeek === 'TYPE') st.innerHTML = `📐 <span class="text-indigo-600">Semaine type de référence (non comptée dans les statistiques réelles)</span>`;
-  else if (t.total > capW + 2) st.innerHTML = `⚠️ <span class="text-red-600">${fmt(t.total)}h travaillées pour ${fmt(capW)}h disponibles${absTxt} (ETP ${etp}) → Débordement</span>`;
-  else if (t.total >= capW - 1) st.innerHTML = `✅ <span class="text-green-600">Semaine cohérente : ${fmt(t.total)}h travaillées${absTxt} / ${fmt(capBase)}h (ETP ${etp})</span>`;
-  else st.innerHTML = `ℹ️ <span class="text-slate-600">${fmt(t.total)}h travaillées${absTxt} / ${fmt(capW)}h disponibles (ETP ${etp})</span>`;
+  else if (t.total > capW + 2) st.innerHTML = `⚠️ <span class="text-red-600">${fmt(t.total)}h travaillées pour ${fmt(capW)}h de capacité réelle (ETP ${etpOf(viewedUid)} × rend. ${rendementOf(viewedUid).toFixed(2)} × congés déduits) → Débordement</span>`;
+  else if (t.total >= capW - 1) st.innerHTML = `✅ <span class="text-green-600">Semaine cohérente : ${fmt(t.total)}h travaillées / ${fmt(capW)}h de capacité réelle</span>`;
+  else st.innerHTML = `ℹ️ <span class="text-slate-600">${fmt(t.total)}h travaillées / ${fmt(capW)}h de capacité réelle (ETP ${etpOf(viewedUid)} × rend. ${rendementOf(viewedUid).toFixed(2)})</span>`;
 }
 
 /* ---------- RÉFÉRENTIELS ---------- */
 function renderRefPanel() {
   const editable = isAdmin();
   const panel = document.getElementById('ref-panel');
-  panel.innerHTML = CATS.filter(c => c.key !== 'projet').map(c => `<div class="bg-white rounded-xl border border-slate-200 p-3">
+  panel.innerHTML = WORK_CATS.map(c => `<div class="bg-white rounded-xl border border-slate-200 p-3">
     <div class="font-black text-xs mb-2" style="color:${c.color}">${c.label}</div>
     <div class="flex flex-wrap gap-1 mb-2">${(refs[c.key]||[]).map((r,i) => `<span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-100 text-slate-700 text-[11px] font-semibold">${esc(r)}${editable ? `<button data-del-ref="${c.key}" data-idx="${i}" class="text-red-400 hover:text-red-600 font-black">✕</button>` : ''}</span>`).join('') || '<span class="text-[11px] text-slate-400 italic">Vide</span>'}</div>
     ${editable ? `<div class="flex gap-1"><input type="text" id="ref-input-${c.key}" placeholder="Nouvelle activité…" class="flex-1 min-w-0 p-1.5 rounded-lg border border-slate-200 text-[11px] outline-none focus:border-blue-500"><button data-add-ref="${c.key}" class="bg-slate-800 text-white px-2 rounded-lg text-xs font-black">+</button></div>` : ''}
@@ -854,7 +863,7 @@ function renderRefPanel() {
   });
 }
 
-/* ---------- ENVELOPPES : CRUD + SUPPRESSION ---------- */
+/* ---------- ENVELOPPES : CRUD ---------- */
 window.newProject = () => { editingProjectId = null; ['pj-code','pj-name','pj-budget'].forEach(id => document.getElementById(id).value = ''); document.getElementById('pj-cat').value = 'projet'; document.getElementById('pj-active').checked = true; document.getElementById('proj-form').classList.remove('hidden'); };
 window.cancelProject = () => { document.getElementById('proj-form').classList.add('hidden'); editingProjectId = null; };
 window.editProject = id => {
@@ -873,7 +882,7 @@ window.deleteProject = async id => {
   const p = allProjects.find(x => x.id === id); if (!p) return;
   const cons = projectConsumed(p);
   if (!confirm('🗑️ Supprimer définitivement l\'enveloppe ' + (p.code || p.name) + ' ?\n\nCette action est irréversible.')) return;
-  if (cons > 0 && !confirm('⚠️ Cette enveloppe a déjà ' + fmt(cons) + 'h consommées.\n\nLes blocs saisis resteront dans leurs catégories (charge, courbes, agrégats) mais ne seront plus rattachés à aucune enveloppe budgétaire.\n\nConfirmer la suppression ?')) return;
+  if (cons > 0 && !confirm('⚠️ Cette enveloppe a déjà ' + fmt(cons) + 'h consommées.\n\nLes blocs saisis resteront dans leurs catégories mais ne seront plus rattachés à aucune enveloppe budgétaire.\n\nConfirmer la suppression ?')) return;
   try {
     await deleteDoc(doc(db, PATHS.projects, id));
   } catch (e) {
@@ -942,14 +951,18 @@ function renderProjects() {
 function loadConfigInputs() {
   document.getElementById('cfg-hours-week').value = config.hoursWeek;
   document.getElementById('cfg-weeks').value = config.weeks;
+  document.getElementById('cfg-conge').value = config.congeDays ?? 46;
   document.getElementById('cfg-etp').value = config.etp;
   document.getElementById('cfg-taux').value = config.taux;
+  document.getElementById('cfg-formule').textContent =
+    'Capacité hebdo = heures contrat × ETP × rendement × ((' + (config.weeks*5) + ' j ouvrés − ' + (config.congeDays??46) + ' j congés) ÷ ' + (config.weeks*5) + ') = ' + (config.weeks*5) + ' → ' + joursTravaillesAn() + ' j travaillés/an · soit ' + fmt(stdCapWeek()) + ' h/sem pour 1 ETP à rendement 0,85.';
 }
 window.saveConfigFromInputs = () => {
   if (!isAdmin()) return;
   setDoc(doc(db, PATHS.config, 'main'), {
     hoursWeek: parseFloat(document.getElementById('cfg-hours-week').value) || 35,
-    weeks: parseFloat(document.getElementById('cfg-weeks').value) || 47,
+    weeks: parseFloat(document.getElementById('cfg-weeks').value) || 52,
+    congeDays: parseFloat(document.getElementById('cfg-conge').value) || 46,
     etp: parseFloat(document.getElementById('cfg-etp').value) || 10,
     taux: parseFloat(document.getElementById('cfg-taux').value) || 55
   }, { merge: true });
@@ -972,11 +985,11 @@ window.createUser = async () => {
   if (etp < 0.1 || etp > 1) { alert('ETP doit être entre 0.1 et 1'); return; }
   try {
     const cred = await createUserWithEmailAndPassword(secondaryAuth, email, pass);
-    await setDoc(doc(db, PATHS.users, cred.user.uid), { name, email, role, etp, active: true, createdAt: Date.now() });
+    await setDoc(doc(db, PATHS.users, cred.user.uid), { name, email, role, etp, rendement: 0.85, active: true, createdAt: Date.now() });
     await signOut(secondaryAuth);
     ['nu-name','nu-email','nu-pass'].forEach(id => document.getElementById(id).value = '');
     document.getElementById('nu-etp').value = '1';
-    alert('✅ Compte créé pour ' + name + ' (rôle ' + role + ', ETP ' + etp + ')');
+    alert('✅ Compte créé pour ' + name + ' (rôle ' + role + ', ETP ' + etp + ', rendement 0,85)');
   } catch (e) { alert('❌ ' + e.message); }
 };
 window.changeRole = (uid, role) => updateDoc(doc(db, PATHS.users, uid), { role });
@@ -984,6 +997,11 @@ window.changeEtp = (uid, val) => {
   const etp = parseFloat(val);
   if (isNaN(etp) || etp < 0.1 || etp > 1) { alert('ETP doit être entre 0.1 et 1'); renderUsers(); return; }
   updateDoc(doc(db, PATHS.users, uid), { etp });
+};
+window.changeRendement = (uid, val) => {
+  const r = parseFloat(val);
+  if (isNaN(r) || r < 0.1 || r > 1) { alert('Rendement doit être entre 0.1 et 1 (ex : 0.85)'); renderManager(); renderUsers(); return; }
+  updateDoc(doc(db, PATHS.users, uid), { rendement: r });
 };
 window.toggleActive = uid => updateDoc(doc(db, PATHS.users, uid), { active: allUsers[uid].active === false });
 window.toggleSaisie = uid => updateDoc(doc(db, PATHS.users, uid), { saisit: allUsers[uid].saisit === false });
@@ -998,7 +1016,8 @@ function renderUsers() {
     <tr class="border-b border-slate-100 hover:bg-slate-50">
       <td class="p-3 font-bold text-slate-800">${esc(u.name)} ${uid === me.uid ? '<span class="text-[10px] text-slate-400">(vous)</span>' : ''}</td>
       <td class="p-3 text-slate-500 text-xs">${esc(u.email)}</td>
-      <td class="p-3 text-center"><input type="number" value="${u.etp || 1.0}" min="0.1" max="1" step="0.1" onchange="changeEtp('${uid}', this.value)" class="w-16 p-1.5 rounded-lg border border-slate-200 text-xs font-bold outline-none text-center focus:border-blue-500" title="ETP : 1 = temps plein, 0.8 = 80%"></td>
+      <td class="p-3 text-center"><input type="number" value="${u.etp || 1.0}" min="0.1" max="1" step="0.1" onchange="changeEtp('${uid}', this.value)" class="w-16 p-1.5 rounded-lg border border-slate-200 text-xs font-bold outline-none text-center focus:border-blue-500"></td>
+      <td class="p-3 text-center"><input type="number" value="${(u.rendement ?? 0.85)}" min="0.1" max="1" step="0.05" onchange="changeRendement('${uid}', this.value)" class="w-16 p-1.5 rounded-lg border border-slate-200 text-xs font-bold outline-none text-center focus:border-blue-500"></td>
       <td class="p-3 text-center"><select onchange="changeRole('${uid}', this.value)" class="p-1.5 rounded-lg border border-slate-200 text-xs font-bold outline-none ${ROLE_STYLE[u.role][1]}">
         <option value="agent" ${u.role==='agent'?'selected':''}>🟢 Agent</option>
         <option value="manager" ${u.role==='manager'?'selected':''}>🔵 Manager</option>
@@ -1032,51 +1051,48 @@ function renderManager() {
   const users = Object.entries(allUsers).filter(([uid, u]) => saisit(u));
   const gestion = Object.entries(allUsers).filter(([uid, u]) => !saisit(u));
 
-  let totalP = 0, sumCapP = 0, sumWeeksN = 0, totalAbs = 0, sumEtp = 0;
+  let totalP = 0, sumCapP = 0, sumWeeksN = 0, sumEtp = 0, sumRend = 0;
   document.getElementById('manager-table-body').innerHTML = users.map(([uid,u]) => {
     const buAll = blocksP.filter(b => b.owner === uid);
     const bu = buAll.filter(b => b.cat !== 'absences');
     const hours = bu.reduce((s,b) => s + b.duration, 0);
-    const abs = buAll.reduce((s,b) => s + (b.cat === 'absences' ? b.duration : 0), 0);
     const weeksN = new Set(buAll.map(b => weekOf(b))).size;
-    const wSet = new Set(buAll.map(b => weekOf(b)));
-    const etp = etpOf(uid);
-    sumEtp += etp;
-    let capU = 0; wSet.forEach(w => { capU += weightOf(uid, w) * capWeekOf(uid); });
-    const avg = weeksN ? hours / weeksN : 0;
+    const etp = etpOf(uid), rend = rendementOf(uid), capW = capWeekOf(uid);
+    const capU = weeksN * capW;
     const taux = capU ? Math.round(hours / capU * 100) : 0;
-    totalP += hours; sumCapP += capU; sumWeeksN += weeksN; totalAbs += abs;
+    totalP += hours; sumCapP += capU; sumWeeksN += weeksN; sumEtp += etp; sumRend += rend;
     const badge = taux > 110 ? '🔴 Surcharge' : taux > 100 ? '🟠 Tendu' : taux > 80 ? '🟡 Vigilance' : weeksN ? '🟢 OK' : '⚪ Sans saisie';
     return `<tr class="border-b border-slate-100 hover:bg-slate-50">
       <td class="p-3 font-bold text-slate-800">${esc(u.name)} <span class="text-[10px] ${ROLE_STYLE[u.role][1]} px-1.5 py-0.5 rounded font-black">${u.role}</span></td>
       <td class="text-center p-3 font-black text-blue-600">${etp.toFixed(1)}</td>
+      <td class="text-center p-3"><input type="number" value="${rend}" min="0.1" max="1" step="0.05" onchange="changeRendement('${uid}', this.value)" class="w-16 p-1.5 rounded-lg border border-slate-200 text-xs font-bold outline-none text-center focus:border-blue-500" title="Taux de rendement (défaut 0,85)"></td>
+      <td class="text-center p-3 font-black text-slate-600">${fmt(capW)}h</td>
       <td class="text-center p-3 font-black">${fmt(hours)}h</td>
-      <td class="text-center p-3 font-bold text-violet-600">${abs ? fmt(abs) + 'h' : '—'}</td>
       <td class="text-center p-3 font-bold ${weeksN === 0 ? 'text-red-500' : 'text-slate-600'}">${weeksN} / ${weeksP}</td>
-      <td class="text-center p-3 font-black">${fmt(avg)}h</td>
       <td class="text-center p-3 font-black">${capU ? taux + '% ' + badge : badge}</td></tr>`;
   }).join('');
 
   const teamWeekAvg = sumWeeksN ? (totalP / sumWeeksN) : 0;
   const tauxTeam = sumCapP ? Math.round(totalP / sumCapP * 100) : 0;
+  const avgRend = users.length ? sumRend / users.length : 0;
   document.getElementById('manager-table-foot').innerHTML = `<tr><td class="p-3">TOTAL (${users.length} comptes)</td>
     <td class="text-center p-3 text-lg font-black text-blue-600">${sumEtp.toFixed(1)} ETP</td>
+    <td class="text-center p-3">${avgRend.toFixed(2)}</td>
+    <td class="text-center p-3">${fmt(users.reduce((s,[uid]) => s + capWeekOf(uid), 0))}h/sem</td>
     <td class="text-center p-3 text-lg">${fmt(totalP)}h</td>
-    <td class="text-center p-3 text-violet-600">${fmt(totalAbs)}h</td>
-    <td class="text-center p-3">${sumWeeksN} sem.-agent</td>
-    <td class="text-center p-3 text-lg">${fmt(teamWeekAvg)}h/sem</td>
+    <td class="text-center p-3">${sumWeeksN} sem.</td>
     <td class="text-center p-3"><span class="px-3 py-1.5 bg-slate-900 text-white rounded-lg font-black">${tauxTeam}%</span></td></tr>`;
 
   const fillRate = (users.length && weeksP) ? Math.round(sumWeeksN / (users.length * weeksP) * 100) : 0;
   const top = aggregateBlocks(blocksP)[0];
   document.getElementById('period-stats').innerHTML = `
-    <div class="flex justify-between"><span class="text-slate-500">Effectif réel (somme ETP)</span><strong class="text-blue-600">${sumEtp.toFixed(1)} ETP</strong></div>
-    <div class="flex justify-between"><span class="text-slate-500">Effectif cible (paramètre)</span><strong>${config.etp} ETP</strong></div>
-    <div class="flex justify-between"><span class="text-slate-500">Semaines dans la période</span><strong>${weeksP}</strong></div>
-    <div class="flex justify-between"><span class="text-slate-500">Semaines-agent saisies</span><strong>${sumWeeksN}</strong></div>
+    <div class="flex justify-between"><span class="text-slate-500">Effectif réel (Σ ETP)</span><strong class="text-blue-600">${sumEtp.toFixed(1)} ETP</strong></div>
+    <div class="flex justify-between"><span class="text-slate-500">Rendement moyen</span><strong>${avgRend.toFixed(2)}</strong></div>
+    <div class="flex justify-between"><span class="text-slate-500">Jours travaillés / an</span><strong>${joursTravaillesAn()} j (${config.weeks*5} ouvrés − ${config.congeDays??46} congés)</strong></div>
+    <div class="flex justify-between"><span class="text-slate-500">Capacité hebdo équipe</span><strong>${fmt(users.reduce((s,[uid]) => s + capWeekOf(uid), 0))} h</strong></div>
+    <div class="flex justify-between"><span class="text-slate-500">Capacité annuelle équipe</span><strong>${fmt(users.reduce((s,[uid]) => s + capYearOf(uid), 0))} h</strong></div>
+    <div class="flex justify-between"><span class="text-slate-500">Semaines-agent saisies</span><strong>${sumWeeksN} / ${users.length * weeksP}</strong></div>
     <div class="flex justify-between"><span class="text-slate-500">Taux de saisie équipe</span><strong class="${fillRate < 80 ? 'text-red-600' : 'text-green-600'}">${fillRate}%</strong></div>
-    <div class="flex justify-between"><span class="text-slate-500">Absences 🌴</span><strong class="text-violet-600">${fmt(totalAbs)}h</strong></div>
-    <div class="flex justify-between"><span class="text-slate-500">Charge moyenne / semaine saisie</span><strong>${fmt(teamWeekAvg)}h (capacité proratisée ${fmt(sumCapP)}h)</strong></div>
     <div class="flex justify-between"><span class="text-slate-500">Activité n°1</span><strong>${top ? esc(top.label) + ' (' + fmt(top.hours) + 'h)' : '—'}</strong></div>
     <div class="flex justify-between"><span class="text-slate-500">Comptes « gestion seule »</span><strong>${gestion.length ? gestion.map(([uid,u]) => esc(u.name)).join(', ') : '—'}</strong></div>`;
 
@@ -1087,7 +1103,7 @@ function renderManager() {
       labels: weeksSorted.map(w => 'S' + w.slice(6)),
       datasets: [
         { label: 'Charge équipe (h)', data: weeksSorted.map(w => blocksP.filter(b => weekOf(b) === w && b.cat !== 'absences').reduce((s,b) => s + b.duration, 0)), borderColor: '#2563eb', backgroundColor: 'rgba(37,99,235,0.15)', fill: true, tension: 0.3 },
-        { label: 'Capacité proratisée ETP+absences (h)', data: weeksSorted.map(w => users.reduce((s,[uid]) => s + weightOf(uid, w) * capWeekOf(uid), 0)), borderColor: '#16a34a', borderDash: [6,4], pointRadius: 0 }
+        { label: 'Capacité réelle (ETP×rendement×congés)', data: weeksSorted.map(() => users.reduce((s,[uid]) => s + capWeekOf(uid), 0)), borderColor: '#16a34a', borderDash: [6,4], pointRadius: 0 }
       ] },
     options: { responsive: true, plugins: { legend: { position: 'bottom' } }, scales: { y: { beginAtZero: true } } } });
 
@@ -1110,24 +1126,20 @@ function renderDashboard() {
   const nbGestion = Object.values(allUsers).filter(u => !saisit(u)).length;
   const sumEtp = users.reduce((s,[uid]) => s + etpOf(uid), 0);
 
-  let sumWeeksEq = 0;
-  users.forEach(([uid]) => {
-    const wSet = new Set(real.filter(b => b.owner === uid).map(b => weekOf(b)));
-    wSet.forEach(w => { sumWeeksEq += weightOf(uid, w); });
-  });
-  const hasReal = sumWeeksEq > 0;
-  const capAgentEtp = config.hoursWeek * config.weeks;
-  const capTotale = capAgentEtp * Math.max(0.1, sumEtp);
+  let sumWeeks = 0;
+  users.forEach(([uid]) => { sumWeeks += new Set(real.filter(b => b.owner === uid).map(b => weekOf(b))).size; });
+  const hasReal = sumWeeks > 0;
+  const capTotale = users.reduce((s,[uid]) => s + capYearOf(uid), 0);
+  const capAnnuelStd = stdCapWeek() * config.weeks;
 
   const catWeekAvg = c => hasReal
-    ? work.filter(b => b.cat === c).reduce((s,b) => s + b.duration, 0) / sumWeeksEq
+    ? work.filter(b => b.cat === c).reduce((s,b) => s + b.duration, 0) / sumWeeks
     : totalsOfList(allBlocks.filter(b => weekOf(b) === 'TYPE'))[c] / Math.max(1, users.length);
 
   const perUser = users.map(([uid,u]) => {
     const bu = work.filter(b => b.owner === uid);
-    const wSet = new Set(real.filter(b => b.owner === uid).map(b => weekOf(b)));
-    let eq = 0; wSet.forEach(w => { eq += weightOf(uid, w); });
-    const hebdo = eq ? bu.reduce((s,b) => s + b.duration, 0) / eq : totalsOfList(bu.length ? bu : allBlocks.filter(b => b.owner === uid && weekOf(b) === 'TYPE')).total;
+    const wn = new Set(real.filter(b => b.owner === uid).map(b => weekOf(b))).size;
+    const hebdo = wn ? bu.reduce((s,b) => s + b.duration, 0) / wn : 0;
     return { name: u.name, hebdo, cap: capWeekOf(uid) };
   });
 
@@ -1138,9 +1150,9 @@ function renderDashboard() {
   const ecart = charge - capTotale, cout = Math.max(0,ecart)*config.taux;
 
   document.getElementById('dash-effectif').textContent = sumEtp.toFixed(1);
-  document.getElementById('dash-source').textContent = hasReal ? `Base : ${fmt(sumWeeksEq)} sem. équivalentes · cible ${config.etp} ETP` : 'Base : semaines types · cible ' + config.etp + ' ETP';
+  document.getElementById('dash-source').textContent = (hasReal ? `Base : ${sumWeeks} sem. saisies · ` : '') + joursTravaillesAn() + ' j travaillés/an · rendements individuels';
   document.getElementById('dash-kpis').innerHTML = `
-    <div class="p-5 border border-slate-200 rounded-xl bg-white fade-in"><div class="text-xs font-bold text-slate-500 uppercase">Capacité annuelle</div><div class="text-3xl font-black text-slate-800 my-2">${Math.round(capTotale).toLocaleString('fr-FR')} h</div><div class="text-xs text-slate-500">${sumEtp.toFixed(1)} ETP réels × ${Math.round(capAgentEtp)}h/an · cible ${config.etp}</div></div>
+    <div class="p-5 border border-slate-200 rounded-xl bg-white fade-in"><div class="text-xs font-bold text-slate-500 uppercase">Capacité annuelle</div><div class="text-3xl font-black text-slate-800 my-2">${Math.round(capTotale).toLocaleString('fr-FR')} h</div><div class="text-xs text-slate-500">${sumEtp.toFixed(1)} ETP × rendements × ${joursTravaillesAn()} j · 1 ETP à 0,85 = ${Math.round(capAnnuelStd)} h</div></div>
     <div class="p-5 border border-slate-200 rounded-xl bg-white fade-in"><div class="text-xs font-bold text-slate-500 uppercase">Charge projetée</div><div class="text-3xl font-black my-2" style="color:${taux>100?'#dc2626':'#1a2744'}">${Math.round(charge).toLocaleString('fr-FR')} h</div><div class="text-xs ${taux>100?'text-red-600 font-bold':'text-slate-500'}">${taux>100?'▲ +'+(taux-100).toFixed(1)+'% vs capacité':'▼ '+(100-taux)+'% de marge'}</div></div>
     <div class="p-5 border border-slate-200 rounded-xl bg-white fade-in"><div class="text-xs font-bold text-slate-500 uppercase">Taux de saturation</div><div class="text-3xl font-black my-2" style="color:${taux>100?'#dc2626':taux>85?'#ea580c':'#16a34a'}">${taux}%</div><div class="text-xs">${taux>110?'⚠️ Surcharge critique':taux>100?'⚠️ Surcharge':taux>85?'⚡ Vigilance':'✅ Maîtrisé'}</div></div>
     <div class="p-5 border border-slate-200 rounded-xl bg-white fade-in"><div class="text-xs font-bold text-slate-500 uppercase">Coût surcharge</div><div class="text-3xl font-black my-2 text-slate-800">${Math.round(cout).toLocaleString('fr-FR')} €</div><div class="text-xs text-slate-500">Dépassement × ${config.taux}€/h</div></div>`;
@@ -1153,17 +1165,16 @@ function renderDashboard() {
   if (chartAgents) chartAgents.destroy();
   chartAgents = new Chart(ctx, { type:'bar', data:{ labels: perUser.map(a=>a.name.split(' ')[0]), datasets:[
     { label:'Charge moyenne hebdo (h)', data: perUser.map(a=>a.hebdo), backgroundColor: perUser.map(a=>a.hebdo>a.cap?'#dc2626':'#2563eb'), borderRadius:6 },
-    { label:'Capacité contractuelle (h = 35×ETP)', data: perUser.map(a=>a.cap), backgroundColor:'rgba(22,163,74,0.25)', borderColor:'#16a34a', borderWidth:1, borderRadius:6 }]},
+    { label:'Capacité réelle (h/sem)', data: perUser.map(a=>a.cap), backgroundColor:'rgba(22,163,74,0.25)', borderColor:'#16a34a', borderWidth:1, borderRadius:6 }]},
     options:{ responsive:true, plugins:{legend:{position:'bottom'}}, scales:{ y:{beginAtZero:true}, x:{grid:{display:false}} } } });
 
   const nowKey = isoWeekKey(new Date());
   const weeksY = weeksListInRange(periodRange('year')).filter(w => w <= nowKey);
-  const uids = users.map(([uid]) => uid);
   let cumC = 0, cumCap = 0;
   const dataC = [], dataCap = [];
   weeksY.forEach(w => {
     cumC += work.filter(b => weekOf(b) === w).reduce((s,b) => s + b.duration, 0);
-    cumCap += uids.reduce((s,uid) => s + weightOf(uid, w) * capWeekOf(uid), 0);
+    cumCap += users.reduce((s,[uid]) => s + capWeekOf(uid), 0);
     dataC.push(Math.round(cumC));
     dataCap.push(Math.round(cumCap));
   });
@@ -1173,7 +1184,7 @@ function renderDashboard() {
       labels: weeksY.map(w => 'S' + w.slice(6)),
       datasets: [
         { label: 'Charge cumulée (h)', data: dataC, borderColor: '#2563eb', backgroundColor: 'rgba(37,99,235,0.12)', fill: true, tension: 0.3 },
-        { label: 'Capacité cumulée (ETP+absences)', data: dataCap, borderColor: '#16a34a', borderDash: [6,4], pointRadius: 0 }
+        { label: 'Capacité cumulée (ETP×rendement×congés)', data: dataCap, borderColor: '#16a34a', borderDash: [6,4], pointRadius: 0 }
       ] },
     options: { responsive: true, plugins: { legend: { position: 'bottom' } }, scales: { y: { beginAtZero: true } } } });
 
@@ -1202,8 +1213,8 @@ function renderDashboard() {
     const badge = pct>35?'<span class="px-2 py-1 bg-red-100 text-red-700 rounded text-xs font-bold">Surcharge</span>':pct>25?'<span class="px-2 py-1 bg-orange-100 text-orange-700 rounded text-xs font-bold">Tendu</span>':'<span class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-bold">Maîtrisé</span>';
     return `<tr class="border-b border-slate-100"><td class="p-3 font-bold text-slate-800">${r.a}</td><td class="p-3 text-slate-600 text-xs">${r.t}</td><td class="text-center p-3 font-semibold">${fmt(r.v)}h/sem</td><td class="text-center p-3 font-black">${Math.round(r.ch).toLocaleString('fr-FR')}</td><td class="text-center p-3 font-bold">${pct}%</td><td class="text-center p-3">${badge}</td></tr>`; }).join('');
 
-  const rec = document.getElementById('dash-recommandation'), etpManq = ecart > 0 ? (ecart/capAgentEtp).toFixed(1) : 0;
-  if (taux > 110) { rec.className='rounded-xl p-6 border-l-4 border-red-500 bg-red-50'; rec.innerHTML=`<h3 class="font-black text-red-800 text-lg mb-3">⚠️ Diagnostic & Recommandations</h3><ul class="space-y-2 text-slate-700 text-sm"><li><strong>Saturation :</strong> ${taux}% de la capacité réelle (${sumEtp.toFixed(1)} ETP)</li><li><strong>Surcharge :</strong> ${Math.round(ecart).toLocaleString('fr-FR')}h/an = <strong>${etpManq} ETP</strong> manquants</li><li><strong>Préconisation :</strong> +${Math.ceil(parseFloat(etpManq))} ETP pour revenir à 95%</li><li><strong>Coût de l'inaction :</strong> ${Math.round(cout).toLocaleString('fr-FR')}€/an</li></ul>`; }
+  const rec = document.getElementById('dash-recommandation'), etpManq = ecart > 0 ? (ecart/capAnnuelStd).toFixed(1) : 0;
+  if (taux > 110) { rec.className='rounded-xl p-6 border-l-4 border-red-500 bg-red-50'; rec.innerHTML=`<h3 class="font-black text-red-800 text-lg mb-3">⚠️ Diagnostic & Recommandations</h3><ul class="space-y-2 text-slate-700 text-sm"><li><strong>Saturation :</strong> ${taux}% de la capacité réelle (${sumEtp.toFixed(1)} ETP × rendements)</li><li><strong>Surcharge :</strong> ${Math.round(ecart).toLocaleString('fr-FR')}h/an = <strong>${etpManq} ETP</strong> manquants</li><li><strong>Préconisation :</strong> +${Math.ceil(parseFloat(etpManq))} ETP pour revenir à 95%</li><li><strong>Coût de l'inaction :</strong> ${Math.round(cout).toLocaleString('fr-FR')}€/an</li></ul>`; }
   else if (taux > 100) { rec.className='rounded-xl p-6 border-l-4 border-orange-500 bg-orange-50'; rec.innerHTML=`<h3 class="font-black text-orange-800 text-lg mb-3">🟠 Tension</h3><ul class="space-y-2 text-slate-700 text-sm"><li>Dépassement de ${Math.round(ecart).toLocaleString('fr-FR')}h/an — renfort de ${etpManq} ETP ou gel des P3</li></ul>`; }
   else if (taux > 85) { rec.className='rounded-xl p-6 border-l-4 border-yellow-500 bg-yellow-50'; rec.innerHTML=`<h3 class="font-black text-yellow-800 text-lg mb-3">⚡ Vigilance</h3><ul class="space-y-2 text-slate-700 text-sm"><li>Marge restante : ${Math.round(capTotale-charge).toLocaleString('fr-FR')}h/an</li></ul>`; }
   else { rec.className='rounded-xl p-6 border-l-4 border-green-500 bg-green-50'; rec.innerHTML=`<h3 class="font-black text-green-800 text-lg mb-3">✅ Charge maîtrisée</h3><ul class="space-y-2 text-slate-700 text-sm"><li>Marge : ${Math.round(capTotale-charge).toLocaleString('fr-FR')}h/an</li></ul>`; }
