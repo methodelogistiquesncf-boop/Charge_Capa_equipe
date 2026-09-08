@@ -109,7 +109,7 @@ body { font-family: 'Inter', sans-serif; }
     </div>
 
     <div id="readonly-banner" class="hidden px-6 py-3 bg-orange-50 border-b border-orange-200 text-orange-700 text-sm font-bold">👁️ Consultation seule — vous ne pouvez pas modifier le planning d'un autre collaborateur.</div>
-    <div id="nosaisie-banner" class="hidden px-6 py-3 bg-slate-100 border-b border-slate-200 text-slate-600 text-sm font-bold">🧭 Votre compte est en mode « gestion uniquement » : aucune saisie attendue. Consultez les plannings de l'équipe via le sélecteur.</div>
+    <div id="nosaisie-banner" class="hidden px-6 py-3 bg-slate-100 border-b border-slate-200 text-slate-600 text-sm font-bold">🧭 Votre compte est en mode « gestion uniquement » : aucune saisie attendue.</div>
     <div class="p-4 bg-slate-50 border-b border-slate-200 flex flex-wrap gap-4 text-xs font-bold" id="legend"></div>
     <div id="calendar-wrap" class="p-4 overflow-x-auto"></div>
     <div id="agent-summary" class="p-6 bg-slate-50 border-t border-slate-200">
@@ -130,7 +130,7 @@ body { font-family: 'Inter', sans-serif; }
       <div><label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Catégorie</label>
         <select id="m-cat" onchange="refreshModalDatalist(); updateProjWrap()" class="w-full p-3 rounded-xl bg-slate-50 border border-slate-200 font-bold text-sm outline-none">
           <option value="projet">🚀 Projets</option><option value="mco">🔧 MCO</option>
-          <option value="support"> Support terrain</option><option value="transverse">📋 Transverse</option>
+          <option value="support">🆘 Support terrain</option><option value="transverse">📋 Transverse</option>
           <option value="absences">🌴 Absences (CP, RTT, formation…)</option>
         </select></div>
       <div id="m-proj-wrap" class="hidden"><label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Projet budgété</label>
@@ -165,7 +165,7 @@ body { font-family: 'Inter', sans-serif; }
   <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
     <div class="p-6 border-b border-slate-200 flex flex-wrap justify-between items-center gap-4">
       <div><h2 class="text-xl font-black text-slate-800">📋 Consolidation équipe</h2>
-        <p class="text-sm text-slate-500 mt-1">Semaines réelles · capacités proratisées selon absences 🌴 · budgets projets débités automatiquement</p></div>
+        <p class="text-sm text-slate-500 mt-1">Semaines réelles · capacités proratisées · budgets projets débités automatiquement</p></div>
       <div class="flex items-center gap-2">
         <select id="period-select" onchange="renderManager()" class="p-2.5 rounded-xl border border-slate-200 font-semibold text-sm outline-none">
           <option value="month">Mois en cours</option>
@@ -190,7 +190,7 @@ body { font-family: 'Inter', sans-serif; }
 
     <!-- ===== 💰 PROJETS & BUDGETS ===== -->
     <div class="p-6 bg-slate-50 border-b border-slate-200">
-      <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">💰 Projets & budgets</h3>
+      <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">💰 Projets & budgets <span class="text-[10px] font-normal text-slate-400">(gérés ici — consommation automatique)</span></h3>
       <div id="proj-form" class="hidden mb-4 p-4 bg-white rounded-xl border border-slate-200 grid grid-cols-2 md:grid-cols-6 gap-3 items-end">
         <input id="pj-code" placeholder="Code (MAG9)" class="p-2 rounded-lg border border-slate-200 text-sm font-bold outline-none focus:border-blue-500">
         <input id="pj-name" placeholder="Nom du projet" class="md:col-span-2 p-2 rounded-lg border border-slate-200 text-sm font-bold outline-none focus:border-blue-500">
@@ -210,7 +210,7 @@ body { font-family: 'Inter', sans-serif; }
           <th class="text-center p-3 font-bold text-xs uppercase">Consommé</th>
           <th class="text-center p-3 font-bold text-xs uppercase">Reste</th>
           <th class="text-center p-3 font-bold text-xs uppercase">%</th>
-          <th class="text-center p-3 font-bold text-xs uppercase">Rythme & horizon</th>
+          <th class="text-center p-3 font-bold text-xs uppercase">Rythme</th>
           <th class="text-center p-3 font-bold text-xs uppercase">État</th>
           <th class="text-center p-3 font-bold text-xs uppercase no-print">Actions</th>
         </tr></thead>
@@ -219,8 +219,8 @@ body { font-family: 'Inter', sans-serif; }
     </div>
 
     <div class="p-6 bg-slate-50 border-b border-slate-200">
-      <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">🏷️ Référentiels d'activités</h3>
-      <div class="grid grid-cols-2 md:grid-cols-5 gap-3" id="ref-panel"></div>
+      <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">🏷️ Référentiels d'activités <span class="text-[10px] font-normal text-slate-400">(MCO, support, transverse, absences — les projets sont ci-dessus)</span></h3>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3" id="ref-panel"></div>
     </div>
     <div class="p-6 border-b border-slate-200 grid grid-cols-1 lg:grid-cols-2 gap-6">
       <div class="bg-slate-50 p-4 rounded-xl"><h3 class="font-black text-slate-800 text-sm mb-3">📈 Charge hebdo équipe (h) vs capacité proratisée</h3><canvas id="chart-weeks" height="180"></canvas></div>
@@ -230,11 +230,11 @@ body { font-family: 'Inter', sans-serif; }
       <table class="w-full text-sm">
         <thead><tr class="bg-slate-800 text-white">
           <th class="text-left p-3 font-bold text-xs uppercase">Collaborateur</th>
-          <th class="text-center p-3 font-bold text-xs uppercase">Travaillé (période)</th>
+          <th class="text-center p-3 font-bold text-xs uppercase">Travaillé</th>
           <th class="text-center p-3 font-bold text-xs uppercase">Absences</th>
           <th class="text-center p-3 font-bold text-xs uppercase">Semaines saisies</th>
           <th class="text-center p-3 font-bold text-xs uppercase">Moyenne / sem</th>
-          <th class="text-center p-3 font-bold text-xs uppercase">Taux C/C (proratisé)</th>
+          <th class="text-center p-3 font-bold text-xs uppercase">Taux C/C</th>
         </tr></thead>
         <tbody id="manager-table-body"></tbody>
         <tfoot id="manager-table-foot" class="bg-slate-100 font-black"></tfoot>
@@ -389,7 +389,7 @@ const weekOf = b => b.week || 'TYPE';
 const absHoursOf = (uid, w) => allBlocks.filter(b => b.owner === uid && weekOf(b) === w && b.cat === 'absences').reduce((s,b) => s + b.duration, 0);
 const weightOf = (uid, w) => Math.max(0, 1 - absHoursOf(uid, w) / config.hoursWeek);
 
-/* ---------- PROJETS : CONSUMMATION ---------- */
+/* ---------- PROJETS : CONSOMMATION ---------- */
 const projBlocks = p => allBlocks.filter(b => b.cat === 'projet' && weekOf(b) !== 'TYPE' && (b.projectId === p.id || (!b.projectId && b.label === p.name)));
 const projectConsumed = p => projBlocks(p).reduce((s,b) => s + b.duration, 0);
 function projectElapsedWeeks(p) {
@@ -480,10 +480,10 @@ function startListeners() {
     ensureOwnRecord();
     renderUsers(); renderUserSelect(); refreshAll();
   }, err => console.warn('Écoute users refusée :', err.code)));
-  unsubs.push(onSnapshot(collection(db, PATHS.projects), snap => {
+  if (PATHS.projects) unsubs.push(onSnapshot(collection(db, PATHS.projects), snap => {
     allProjects = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     renderProjects(); refreshAll();
-  }));
+  }, err => console.warn('Écoute projects refusée :', err.code)));
   unsubs.push(onSnapshot(doc(db, PATHS.config, 'main'), snap => {
     if (snap.exists()) config = { ...config, ...snap.data() };
     loadConfigInputs(); refreshAll();
@@ -709,8 +709,9 @@ function fillModalSelects() {
 }
 window.refreshModalDatalist = () => {
   const cat = document.getElementById('m-cat').value;
-  let opts = (refs[cat] || []).slice();
-  if (cat === 'projet') opts = opts.concat(allProjects.filter(p => p.active !== false).map(p => (p.code ? p.code + ' — ' : '') + p.name));
+  const opts = cat === 'projet'
+    ? allProjects.filter(p => p.active !== false).map(p => (p.code ? p.code + ' — ' : '') + p.name)
+    : (refs[cat] || []).slice();
   document.getElementById('dl-labels').innerHTML = opts.map(r => `<option value="${esc(r)}">`).join('');
 };
 function updateProjWrap() {
@@ -807,18 +808,18 @@ function renderSummary() {
   const hw = config.hoursWeek, st = document.getElementById('agent-status');
   const capW = weightOf(viewedUid, currentWeek) * hw;
   const absTxt = t.absences ? ` (+ ${fmt(t.absences)}h 🌴 absence)` : '';
-  if (viewedUid === me.uid && !meSaisit()) st.innerHTML = `🧭 <span class="text-slate-600">Compte gestion uniquement — aucune saisie attendue, heures non comptabilisées dans la charge équipe</span>`;
+  if (viewedUid === me.uid && !meSaisit()) st.innerHTML = `🧭 <span class="text-slate-600">Compte gestion uniquement — aucune saisie attendue</span>`;
   else if (currentWeek === 'TYPE') st.innerHTML = `📐 <span class="text-indigo-600">Semaine type de référence (non comptée dans les statistiques réelles)</span>`;
   else if (t.total > capW + 2) st.innerHTML = `⚠️ <span class="text-red-600">${fmt(t.total)}h travaillées pour ${fmt(capW)}h disponibles${absTxt} → Débordement</span>`;
   else if (t.total >= capW - 1) st.innerHTML = `✅ <span class="text-green-600">Semaine cohérente : ${fmt(t.total)}h travaillées${absTxt} / ${fmt(hw)}h</span>`;
   else st.innerHTML = `ℹ️ <span class="text-slate-600">${fmt(t.total)}h travaillées${absTxt} / ${fmt(capW)}h disponibles</span>`;
 }
 
-/* ---------- RÉFÉRENTIELS ---------- */
+/* ---------- RÉFÉRENTIELS (sans projet) ---------- */
 function renderRefPanel() {
   const editable = isAdmin();
   const panel = document.getElementById('ref-panel');
-  panel.innerHTML = CATS.map(c => `<div class="bg-white rounded-xl border border-slate-200 p-3">
+  panel.innerHTML = CATS.filter(c => c.key !== 'projet').map(c => `<div class="bg-white rounded-xl border border-slate-200 p-3">
     <div class="font-black text-xs mb-2" style="color:${c.color}">${c.label}</div>
     <div class="flex flex-wrap gap-1 mb-2">${(refs[c.key]||[]).map((r,i) => `<span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-100 text-slate-700 text-[11px] font-semibold">${esc(r)}${editable ? `<button data-del-ref="${c.key}" data-idx="${i}" class="text-red-400 hover:text-red-600 font-black">✕</button>` : ''}</span>`).join('') || '<span class="text-[11px] text-slate-400 italic">Vide</span>'}</div>
     ${editable ? `<div class="flex gap-1"><input type="text" id="ref-input-${c.key}" placeholder="Nouvelle activité…" class="flex-1 min-w-0 p-1.5 rounded-lg border border-slate-200 text-[11px] outline-none focus:border-blue-500"><button data-add-ref="${c.key}" class="bg-slate-800 text-white px-2 rounded-lg text-xs font-black">+</button></div>` : ''}
@@ -848,16 +849,22 @@ window.editProject = id => {
   document.getElementById('proj-form').classList.remove('hidden');
 };
 window.toggleProject = id => { const p = allProjects.find(x => x.id === id); if (!p) return; setDoc(doc(db, PATHS.projects, id), { active: p.active === false }, { merge: true }); };
-window.saveProject = () => {
+window.saveProject = async () => {
   if (!isPrivileged()) return;
   const code = document.getElementById('pj-code').value.trim();
   const name = document.getElementById('pj-name').value.trim();
   const budgetH = parseFloat(document.getElementById('pj-budget').value) || 0;
   const active = document.getElementById('pj-active').checked;
   if (!code || !name) { alert('Code et nom requis.'); return; }
+  if (!PATHS.projects) { alert('❌ firebase.js : le bloc PATHS ne contient pas "projects". Mettez-le à jour.'); return; }
   const id = editingProjectId || ('p' + Date.now());
-  setDoc(doc(db, PATHS.projects, id), { code, name, budgetH, active });
-  cancelProject();
+  try {
+    await setDoc(doc(db, PATHS.projects, id), { code, name, budgetH, active });
+    cancelProject();
+  } catch (e) {
+    console.error('Erreur sauvegarde projet :', e);
+    alert('❌ Erreur à l\'enregistrement : ' + (e.code || e.message) + '\n\nVérifiez : 1) règles Firestore publiées avec le bloc cc_projects · 2) bloc PATHS à jour dans firebase.js');
+  }
 };
 
 function renderProjects() {
@@ -949,7 +956,7 @@ function renderUsers() {
         <option value="manager" ${u.role==='manager'?'selected':''}>🔵 Manager</option>
         <option value="admin" ${u.role==='admin'?'selected':''}>🔴 Admin</option></select></td>
       <td class="p-3 text-center"><button onclick="toggleActive('${uid}')" class="px-2 py-1 rounded-lg text-xs font-black ${u.active === false ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}">${u.active === false ? '⛔ Désactivé' : '✅ Actif'}</button></td>
-      <td class="p-3 text-center"><button onclick="toggleSaisie('${uid}')" title="Ce compte doit-il remplir un planning ?" class="px-2 py-1 rounded-lg text-xs font-black ${saisit(u) ? 'bg-blue-100 text-blue-700' : 'bg-slate-200 text-slate-500'}">${saisit(u) ? '📝 Saisit' : '🧭 Gestion seule'}</button></td>
+      <td class="p-3 text-center"><button onclick="toggleSaisie('${uid}')" class="px-2 py-1 rounded-lg text-xs font-black ${saisit(u) ? 'bg-blue-100 text-blue-700' : 'bg-slate-200 text-slate-500'}">${saisit(u) ? '📝 Saisit' : '🧭 Gestion seule'}</button></td>
       <td class="p-3 text-center font-bold text-slate-500">${weeksCountOf(uid)}</td>
     </tr>`).join('');
 }
@@ -1016,7 +1023,7 @@ function renderManager() {
     <div class="flex justify-between"><span class="text-slate-500">Absences 🌴 (CP/RTT/…)</span><strong class="text-violet-600">${fmt(totalAbs)}h</strong></div>
     <div class="flex justify-between"><span class="text-slate-500">Charge moyenne équipe / semaine</span><strong>${fmt(teamWeekAvg)}h (capacité proratisée ${fmt(sumCapP)}h)</strong></div>
     <div class="flex justify-between"><span class="text-slate-500">Activité n°1 de la période</span><strong>${top ? esc(top.label) + ' (' + fmt(top.hours) + 'h)' : '—'}</strong></div>
-    <div class="flex justify-between"><span class="text-slate-500">Comptes « gestion seule » (hors charge)</span><strong>${gestion.length ? gestion.map(([uid,u]) => esc(u.name)).join(', ') : '—'}</strong></div>`;
+    <div class="flex justify-between"><span class="text-slate-500">Comptes « gestion seule »</span><strong>${gestion.length ? gestion.map(([uid,u]) => esc(u.name)).join(', ') : '—'}</strong></div>`;
 
   const weeksSorted = [...new Set(blocksP.map(b => weekOf(b)))].sort();
   const ctxW = document.getElementById('chart-weeks').getContext('2d');
@@ -1074,10 +1081,10 @@ function renderDashboard() {
   const ecart = charge - capTotale, cout = Math.max(0,ecart)*config.taux;
 
   document.getElementById('dash-effectif').textContent = users.length;
-  document.getElementById('dash-source').textContent = hasReal ? `Base : ${fmt(sumWeeksEq)} semaines équivalentes pleines` : 'Base : semaines types (aucune semaine réelle saisie)';
+  document.getElementById('dash-source').textContent = hasReal ? `Base : ${fmt(sumWeeksEq)} semaines équivalentes pleines` : 'Base : semaines types';
   document.getElementById('dash-kpis').innerHTML = `
-    <div class="p-5 border border-slate-200 rounded-xl bg-white fade-in"><div class="text-xs font-bold text-slate-500 uppercase">Capacité annuelle</div><div class="text-3xl font-black text-slate-800 my-2">${Math.round(capTotale).toLocaleString('fr-FR')} h</div><div class="text-xs text-slate-500">${users.length} ETP saisis × ${Math.round(capAgent)}h/an${nbGestion ? ' · ' + nbGestion + ' compte(s) gestion hors charge' : ''}</div></div>
-    <div class="p-5 border border-slate-200 rounded-xl bg-white fade-in"><div class="text-xs font-bold text-slate-500 uppercase">Charge projetée (réel)</div><div class="text-3xl font-black my-2" style="color:${taux>100?'#dc2626':'#1a2744'}">${Math.round(charge).toLocaleString('fr-FR')} h</div><div class="text-xs ${taux>100?'text-red-600 font-bold':'text-slate-500'}">${taux>100?'▲ +'+(taux-100).toFixed(1)+'% vs capacité':'▼ '+(100-taux)+'% de marge'}</div></div>
+    <div class="p-5 border border-slate-200 rounded-xl bg-white fade-in"><div class="text-xs font-bold text-slate-500 uppercase">Capacité annuelle</div><div class="text-3xl font-black text-slate-800 my-2">${Math.round(capTotale).toLocaleString('fr-FR')} h</div><div class="text-xs text-slate-500">${users.length} ETP saisis × ${Math.round(capAgent)}h/an${nbGestion ? ' · ' + nbGestion + ' compte(s) gestion' : ''}</div></div>
+    <div class="p-5 border border-slate-200 rounded-xl bg-white fade-in"><div class="text-xs font-bold text-slate-500 uppercase">Charge projetée</div><div class="text-3xl font-black my-2" style="color:${taux>100?'#dc2626':'#1a2744'}">${Math.round(charge).toLocaleString('fr-FR')} h</div><div class="text-xs ${taux>100?'text-red-600 font-bold':'text-slate-500'}">${taux>100?'▲ +'+(taux-100).toFixed(1)+'% vs capacité':'▼ '+(100-taux)+'% de marge'}</div></div>
     <div class="p-5 border border-slate-200 rounded-xl bg-white fade-in"><div class="text-xs font-bold text-slate-500 uppercase">Taux de saturation</div><div class="text-3xl font-black my-2" style="color:${taux>100?'#dc2626':taux>85?'#ea580c':'#16a34a'}">${taux}%</div><div class="text-xs">${taux>110?'⚠️ Surcharge critique':taux>100?'⚠️ Surcharge':taux>85?'⚡ Vigilance':'✅ Maîtrisé'}</div></div>
     <div class="p-5 border border-slate-200 rounded-xl bg-white fade-in"><div class="text-xs font-bold text-slate-500 uppercase">Coût surcharge</div><div class="text-3xl font-black my-2 text-slate-800">${Math.round(cout).toLocaleString('fr-FR')} €</div><div class="text-xs text-slate-500">Dépassement × ${config.taux}€/h</div></div>`;
 
@@ -1113,7 +1120,6 @@ function renderDashboard() {
       ] },
     options: { responsive: true, plugins: { legend: { position: 'bottom' } }, scales: { y: { beginAtZero: true } } } });
 
-  /* --- Budgets projets --- */
   const stats = allProjects.map(p => ({ p, cons: projectConsumed(p) }));
   const totBudget = allProjects.reduce((s,p) => s + (p.budgetH||0), 0);
   const totCons = stats.reduce((s,x) => s + x.cons, 0);
@@ -1132,7 +1138,7 @@ function renderDashboard() {
 
   const agg = aggregateBlocks(work).slice(0,8), maxH = agg[0]?.hours || 1;
   document.getElementById('dash-top').innerHTML = agg.length ? agg.map(a => { const c = CATS.find(x=>x.key===a.cat);
-    return `<div class="flex items-center gap-4 mb-3"><div class="w-56 text-sm font-bold text-slate-700 truncate">${esc(a.label)}</div><div class="flex-1 h-7 bg-slate-200 rounded-lg overflow-hidden"><div class="h-full bar-fill-load" style="background:${c.color};width:${Math.round(a.hours/maxH*100)}%"></div></div><div class="w-24 text-right font-black text-sm" style="color:${c.color}">${fmt(a.hours)}h</div></div>`; }).join('') : '<p class="text-slate-400 italic text-sm">Aucune semaine réelle saisie pour le moment.</p>';
+    return `<div class="flex items-center gap-4 mb-3"><div class="w-56 text-sm font-bold text-slate-700 truncate">${esc(a.label)}</div><div class="flex-1 h-7 bg-slate-200 rounded-lg overflow-hidden"><div class="h-full bar-fill-load" style="background:${c.color};width:${Math.round(a.hours/maxH*100)}%"></div></div><div class="w-24 text-right font-black text-sm" style="color:${c.color}">${fmt(a.hours)}h</div></div>`; }).join('') : '<p class="text-slate-400 italic text-sm">Aucune semaine réelle saisie.</p>';
 
   const rows = [{a:'Projets',t:'Pilotage_Projet',v:T.projet*config.etp,ch:ann.projet},{a:'MCO',t:'Ticket_GLPI',v:T.mco*config.etp,ch:ann.mco},{a:'Support terrain',t:'Saisie planning',v:T.support*config.etp,ch:ann.support},{a:'Transverse',t:'Saisie planning',v:T.transverse*config.etp,ch:ann.transverse}];
   document.getElementById('dash-detail').innerHTML = rows.map(r => { const pct = charge ? Math.round(r.ch/charge*100) : 0;
@@ -1140,11 +1146,11 @@ function renderDashboard() {
     return `<tr class="border-b border-slate-100"><td class="p-3 font-bold text-slate-800">${r.a}</td><td class="p-3 text-slate-600 text-xs">${r.t}</td><td class="text-center p-3 font-semibold">${fmt(r.v)}h/sem</td><td class="text-center p-3 font-black">${Math.round(r.ch).toLocaleString('fr-FR')}</td><td class="text-center p-3 font-bold">${pct}%</td><td class="text-center p-3">${badge}</td></tr>`; }).join('');
 
   const rec = document.getElementById('dash-recommandation'), etpManq = ecart > 0 ? (ecart/capAgent).toFixed(1) : 0;
-  if (taux > 110) { rec.className='rounded-xl p-6 border-l-4 border-red-500 bg-red-50'; rec.innerHTML=`<h3 class="font-black text-red-800 text-lg mb-3">⚠️ Diagnostic & Recommandations</h3><ul class="space-y-2 text-slate-700 text-sm"><li><strong>Saturation :</strong> ${taux}% de la capacité réelle (mesurée sur semaines réelles)</li><li><strong>Surcharge :</strong> ${Math.round(ecart).toLocaleString('fr-FR')}h/an = <strong>${etpManq} ETP</strong> manquants</li><li><strong>Préconisation :</strong> +${Math.ceil(etpManq)} ETP pour revenir à 95%</li><li><strong>Coût de l'inaction :</strong> ${Math.round(cout).toLocaleString('fr-FR')}€/an</li></ul>`; }
+  if (taux > 110) { rec.className='rounded-xl p-6 border-l-4 border-red-500 bg-red-50'; rec.innerHTML=`<h3 class="font-black text-red-800 text-lg mb-3">⚠️ Diagnostic & Recommandations</h3><ul class="space-y-2 text-slate-700 text-sm"><li><strong>Saturation :</strong> ${taux}% de la capacité réelle</li><li><strong>Surcharge :</strong> ${Math.round(ecart).toLocaleString('fr-FR')}h/an = <strong>${etpManq} ETP</strong> manquants</li><li><strong>Préconisation :</strong> +${Math.ceil(etpManq)} ETP pour revenir à 95%</li><li><strong>Coût de l'inaction :</strong> ${Math.round(cout).toLocaleString('fr-FR')}€/an</li></ul>`; }
   else if (taux > 100) { rec.className='rounded-xl p-6 border-l-4 border-orange-500 bg-orange-50'; rec.innerHTML=`<h3 class="font-black text-orange-800 text-lg mb-3">🟠 Tension</h3><ul class="space-y-2 text-slate-700 text-sm"><li>Dépassement de ${Math.round(ecart).toLocaleString('fr-FR')}h/an — renfort de ${etpManq} ETP ou gel des P3</li></ul>`; }
-  else if (taux > 85) { rec.className='rounded-xl p-6 border-l-4 border-yellow-500 bg-yellow-50'; rec.innerHTML=`<h3 class="font-black text-yellow-800 text-lg mb-3">⚡ Vigilance</h3><ul class="space-y-2 text-slate-700 text-sm"><li>Marge restante : ${Math.round(capTotale-charge).toLocaleString('fr-FR')}h/an — arbitrer tout nouveau projet</li></ul>`; }
+  else if (taux > 85) { rec.className='rounded-xl p-6 border-l-4 border-yellow-500 bg-yellow-50'; rec.innerHTML=`<h3 class="font-black text-yellow-800 text-lg mb-3">⚡ Vigilance</h3><ul class="space-y-2 text-slate-700 text-sm"><li>Marge restante : ${Math.round(capTotale-charge).toLocaleString('fr-FR')}h/an</li></ul>`; }
   else { rec.className='rounded-xl p-6 border-l-4 border-green-500 bg-green-50'; rec.innerHTML=`<h3 class="font-black text-green-800 text-lg mb-3">✅ Charge maîtrisée</h3><ul class="space-y-2 text-slate-700 text-sm"><li>Marge : ${Math.round(capTotale-charge).toLocaleString('fr-FR')}h/an</li></ul>`; }
-  if (overrun.length) rec.innerHTML += `<p class="mt-3 text-sm text-slate-700">💰 <strong>${overrun.length} projet(s) dépassent leur budget</strong> : ${overrun.map(x => esc(x.p.code || x.p.name) + ' (+' + fmt(x.cons - (x.p.budgetH||0)) + 'h)').join(', ')} — arbitrage ou rebudgétage requis.</p>`;
+  if (overrun.length) rec.innerHTML += `<p class="mt-3 text-sm text-slate-700">💰 <strong>${overrun.length} projet(s) dépassent leur budget</strong> : ${overrun.map(x => esc(x.p.code || x.p.name) + ' (+' + fmt(x.cons - (x.p.budgetH||0)) + 'h)').join(', ')}.</p>`;
 }
 </script>
 
