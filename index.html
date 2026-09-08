@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Planning Activités — Charge / Capacité</title>
-<!-- ===== PWA ===== -->
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#1a2744">
 <link rel="icon" type="image/svg+xml" href="icons/logo.svg">
@@ -13,7 +12,6 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Planning Activités">
-<!-- ===== Styles & libs ===== -->
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
@@ -93,14 +91,14 @@ body { font-family: 'Inter', sans-serif; }
     <div class="p-6 border-b border-slate-200 flex flex-wrap justify-between items-center gap-4">
       <div>
         <h2 class="text-xl font-black text-slate-800">🗓️ <span id="calendar-owner-title">Calendrier</span></h2>
-        <p class="text-sm text-slate-500 mt-1">Clic créneau vide = ajouter · Glisser-déposer = déplacer · Clic bloc = modifier</p>
+        <p class="text-sm text-slate-500 mt-1">Clic créneau vide = ajouter · Glisser-déposer = déplacer · <strong class="text-emerald-600">Ctrl+glisser = copier</strong> · Clic bloc = modifier (boutons « dupliquer »)</p>
       </div>
       <div id="agent-controls" class="hidden items-center gap-2">
         <select id="agent-select" onchange="selectUser(this.value)" class="p-2.5 rounded-xl border border-slate-200 font-semibold text-sm outline-none focus:border-blue-500"></select>
       </div>
     </div>
 
-    <!-- Barre de semaine -->
+    <!-- Barre de semaine + jours disponibles -->
     <div id="week-bar" class="p-4 border-b border-slate-200 flex flex-wrap items-center gap-2 bg-white">
       <button onclick="shiftWeekView(-1)" class="px-3 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 font-black text-sm no-print">◀</button>
       <div id="week-title" class="font-black text-slate-800 text-sm min-w-[230px] text-center px-2"></div>
@@ -108,6 +106,11 @@ body { font-family: 'Inter', sans-serif; }
       <button onclick="goCurrentWeek()" class="px-3 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 font-bold text-xs no-print">Aujourd'hui</button>
       <button onclick="goTypeWeek()" class="px-3 py-2 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs no-print">📐 Semaine type</button>
       <button onclick="copyPrevWeek()" id="copy-prev-btn" class="px-3 py-2 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs no-print">⧉ Copier semaine préc.</button>
+      <div class="flex items-center gap-2 ml-auto">
+        <label class="text-xs font-bold text-slate-500 whitespace-nowrap" title="Jours travaillés disponibles cette semaine (absences déduites)">📅 Jours dispo :</label>
+        <input type="number" id="week-days" min="0" max="5" step="0.5" value="5" class="w-20 p-2 rounded-lg border border-slate-200 text-sm font-bold text-center outline-none focus:border-blue-500" oninput="saveWeekInfo()">
+        <input type="text" id="week-note" placeholder="motif (CP, RTT, formation…)" class="hidden md:block w-44 p-2 rounded-lg border border-slate-200 text-xs outline-none focus:border-blue-500" oninput="saveWeekInfo()">
+      </div>
     </div>
 
     <div id="readonly-banner" class="hidden px-6 py-3 bg-orange-50 border-b border-orange-200 text-orange-700 text-sm font-bold">👁️ Consultation seule — vous ne pouvez pas modifier le planning d'un autre collaborateur.</div>
@@ -143,6 +146,10 @@ body { font-family: 'Inter', sans-serif; }
         <div><label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Durée</label><select id="m-dur" class="w-full p-3 rounded-xl bg-slate-50 border border-slate-200 font-bold text-sm outline-none"></select></div>
       </div>
     </div>
+    <div id="m-dup" class="hidden pt-4 mt-4 border-t border-slate-100">
+      <label class="block text-xs font-black text-slate-500 uppercase mb-2">⧉ Dupliquer ce bloc vers…</label>
+      <div class="flex gap-1 flex-wrap" id="m-dup-days"></div>
+    </div>
     <div class="flex gap-3 mt-6">
       <button id="m-delete" onclick="deleteBlock()" class="px-4 py-2.5 rounded-xl bg-red-50 text-red-600 font-bold text-sm hover:bg-red-100">🗑️</button>
       <button onclick="closeModal()" class="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-bold text-sm hover:bg-slate-50">Annuler</button>
@@ -156,7 +163,7 @@ body { font-family: 'Inter', sans-serif; }
   <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
     <div class="p-6 border-b border-slate-200 flex flex-wrap justify-between items-center gap-4">
       <div><h2 class="text-xl font-black text-slate-800">📋 Consolidation équipe</h2>
-        <p class="text-sm text-slate-500 mt-1">Semaines réelles saisies par les agents</p></div>
+        <p class="text-sm text-slate-500 mt-1">Semaines réelles saisies · capacités proratisées selon les jours dispo</p></div>
       <div class="flex items-center gap-2">
         <select id="period-select" onchange="renderManager()" class="p-2.5 rounded-xl border border-slate-200 font-semibold text-sm outline-none">
           <option value="month">Mois en cours</option>
@@ -183,7 +190,7 @@ body { font-family: 'Inter', sans-serif; }
       <div class="grid md:grid-cols-4 gap-4" id="ref-panel"></div>
     </div>
     <div class="p-6 border-b border-slate-200 grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <div class="bg-slate-50 p-4 rounded-xl"><h3 class="font-black text-slate-800 text-sm mb-3">📈 Charge hebdo équipe (h)</h3><canvas id="chart-weeks" height="180"></canvas></div>
+      <div class="bg-slate-50 p-4 rounded-xl"><h3 class="font-black text-slate-800 text-sm mb-3">📈 Charge hebdo équipe (h) vs capacité proratisée</h3><canvas id="chart-weeks" height="180"></canvas></div>
       <div class="bg-slate-50 p-4 rounded-xl"><h3 class="font-black text-slate-800 text-sm mb-3">🧮 Chiffres de la période</h3><div id="period-stats" class="text-sm space-y-2"></div></div>
     </div>
     <div class="overflow-x-auto">
@@ -193,7 +200,7 @@ body { font-family: 'Inter', sans-serif; }
           <th class="text-center p-3 font-bold text-xs uppercase">Total période</th>
           <th class="text-center p-3 font-bold text-xs uppercase">Semaines saisies</th>
           <th class="text-center p-3 font-bold text-xs uppercase">Moyenne / sem</th>
-          <th class="text-center p-3 font-bold text-xs uppercase">Taux C/C</th>
+          <th class="text-center p-3 font-bold text-xs uppercase">Taux C/C (proratisé)</th>
         </tr></thead>
         <tbody id="manager-table-body"></tbody>
         <tfoot id="manager-table-foot" class="bg-slate-100 font-black"></tfoot>
@@ -224,7 +231,7 @@ body { font-family: 'Inter', sans-serif; }
         </select>
         <button onclick="createUser()" class="bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold text-sm">Créer</button>
       </div>
-      <p class="text-[11px] text-slate-400 mt-2">Rôles : <strong>agent</strong> = son planning seul · <strong>manager</strong> = vision équipe + dashboard · <strong>admin</strong> = tout. Mode de saisie réglable ensuite par compte : <strong>📝 Saisit</strong> ou <strong>🧭 Gestion seule</strong>.</p>
+      <p class="text-[11px] text-slate-400 mt-2">Rôles : <strong>agent</strong> = son planning seul · <strong>manager</strong> = vision équipe + dashboard · <strong>admin</strong> = tout. Mode de saisie : <strong>📝 Saisit</strong> ou <strong>🧭 Gestion seule</strong>.</p>
     </div>
     <div class="overflow-x-auto">
       <table class="w-full text-sm">
@@ -292,13 +299,15 @@ const JOURS = ['Lundi','Mardi','Mercredi','Jeudi','Vendredi'];
 const DAY_START = 8, DAY_END = 18, ROW_H = 46;
 const ROLE_STYLE = { agent: ['🟢','bg-green-100 text-green-700'], manager: ['🔵','bg-blue-100 text-blue-700'], admin: ['🔴','bg-red-100 text-red-700'] };
 
-let me = null, allUsers = {}, allBlocks = [];
+let me = null, allUsers = {}, allBlocks = {}, allWeeks = {};
 let config = { hoursWeek: 35, weeks: 47, etp: 10, taux: 55 };
 let refs = { projet: [], mco: [], support: [], transverse: [] };
 let viewedUid = null, editingBlockId = null, draggedBlockId = null;
-let chartAgents = null, chartWeeks = null, bootstrapped = false, blocksListenerOn = false;
+let chartAgents = null, chartWeeks = null, bootstrapped = false;
+let blocksListenerOn = false, weeksListenerOn = false;
 let unsubs = [];
 let currentWeek = isoWeekKey(new Date());
+let dupDone = {}, copyDrag = false, weekSaveTimer = null;
 
 /* ---------- SEMAINES ISO ---------- */
 function isoWeekKey(date) {
@@ -331,6 +340,11 @@ function weekLabel(key) {
 }
 const weekOf = b => b.week || 'TYPE';
 
+/* ---------- JOURS DISPONIBLES / ABSENCES ---------- */
+const weekKeyOf = (uid, w) => uid + '_' + w;
+const daysOf = (uid, w) => { const d = allWeeks[weekKeyOf(uid, w)]; return d && typeof d.days === 'number' ? Math.max(0, Math.min(5, d.days)) : 5; };
+const weightOf = (uid, w) => daysOf(uid, w) / 5;
+
 /* ---------- PÉRIODES MANAGER ---------- */
 function periodRange(kind) {
   const now = new Date(), y = now.getFullYear(), m = now.getMonth();
@@ -348,11 +362,11 @@ function inPeriod(key, range) {
   const mon = mondayOf(key);
   return mon >= range[0] && mon <= range[1];
 }
-function weeksInRange(range) {
+function weeksListInRange(range) {
+  const list = [];
   const cur = mondayOf(isoWeekKey(range[0]));
-  let n = 0;
-  while (cur <= range[1] && n < 60) { n++; cur.setUTCDate(cur.getUTCDate() + 7); }
-  return n;
+  while (cur <= range[1] && list.length < 60) { list.push(isoWeekKey(cur)); cur.setUTCDate(cur.getUTCDate() + 7); }
+  return list;
 }
 
 /* ---------- UTILITAIRES ---------- */
@@ -361,7 +375,7 @@ const fmt = n => n.toFixed(1).replace('.0','');
 const fmtHour = h => Math.floor(h) + 'h' + (h % 1 ? '30' : '00');
 const blocksOf = uid => allBlocks.filter(b => b.owner === uid);
 const viewBlocks = () => allBlocks.filter(b => b.owner === viewedUid && weekOf(b) === currentWeek);
-const saisit = u => !u || u.saisit !== false;          // champ absent = saisit (rétrocompatible)
+const saisit = u => !u || u.saisit !== false;
 const meSaisit = () => saisit(allUsers[me?.uid]);
 const canEdit = () => (viewedUid === me?.uid && meSaisit()) || (viewedUid !== me?.uid && me?.role === 'admin');
 const isAdmin = () => me?.role === 'admin';
@@ -396,14 +410,14 @@ onAuthStateChanged(auth, user => {
     startListeners();
   } else {
     clearListeners();
-    me = null; viewedUid = null; allBlocks = []; allUsers = {};
+    me = null; viewedUid = null; allBlocks = []; allUsers = {}; allWeeks = {};
     document.getElementById('login-screen').classList.remove('hidden');
     document.getElementById('session-badge').classList.add('hidden');
     document.getElementById('session-badge').classList.remove('flex');
   }
 });
 
-function clearListeners() { unsubs.forEach(u => u()); unsubs = []; blocksListenerOn = false; }
+function clearListeners() { unsubs.forEach(u => u()); unsubs = []; blocksListenerOn = false; weeksListenerOn = false; }
 
 function startListeners() {
   unsubs.push(onSnapshot(collection(db, PATHS.users), snap => {
@@ -435,6 +449,19 @@ function setupBlocksListener() {
   }, err => console.warn('Accès blocs refusé :', err.code)));
 }
 
+function setupWeeksListener() {
+  if (weeksListenerOn || !me || !me.role) return;
+  weeksListenerOn = true;
+  const target = (me.role === 'agent')
+    ? query(collection(db, PATHS.weeks), where('owner', '==', me.uid))
+    : collection(db, PATHS.weeks);
+  unsubs.push(onSnapshot(target, snap => {
+    allWeeks = {};
+    snap.forEach(d => { const v = d.data(); if (v && v.owner && v.week) allWeeks[v.owner + '_' + v.week] = v; });
+    refreshAll();
+  }, err => console.warn('Accès semaines refusé :', err.code)));
+}
+
 function ensureOwnRecord() {
   if (!me || bootstrapped) return;
   const rec = allUsers[me.uid];
@@ -444,6 +471,7 @@ function ensureOwnRecord() {
     if (rec.active === false) { alert('Compte désactivé. Contactez votre administrateur.'); signOut(auth); return; }
     enterApp();
     setupBlocksListener();
+    setupWeeksListener();
   } else {
     bootstrapped = true;
     const role = (Object.keys(allUsers).length === 0 || me.email === ADMIN_EMAIL) ? 'admin' : 'agent';
@@ -452,6 +480,7 @@ function ensureOwnRecord() {
       .catch(err => console.error('❌ Création du profil impossible :', err.code));
     enterApp();
     setupBlocksListener();
+    setupWeeksListener();
   }
 }
 
@@ -508,7 +537,7 @@ function renderUserSelect() {
 function selectUser(uid) { viewedUid = uid; renderCalendar(); renderSummary(); }
 window.selectUser = selectUser;
 
-/* ---------- BARRE DE SEMAINE ---------- */
+/* ---------- BARRE DE SEMAINE + JOURS DISPO ---------- */
 window.shiftWeekView = d => {
   if (currentWeek === 'TYPE') currentWeek = isoWeekKey(new Date());
   currentWeek = shiftWeek(currentWeek, d);
@@ -527,6 +556,17 @@ window.copyPrevWeek = () => {
     const id = 'b' + Date.now() + Math.random().toString(36).slice(2, 6);
     setDoc(doc(db, PATHS.blocks, id), { cat: b.cat, label: b.label, day: b.day, start: b.start, duration: b.duration, owner: viewedUid, week: currentWeek, id });
   });
+};
+window.saveWeekInfo = () => {
+  if (!canEdit() || currentWeek === 'TYPE') return;
+  clearTimeout(weekSaveTimer);
+  weekSaveTimer = setTimeout(() => {
+    let days = parseFloat(document.getElementById('week-days').value);
+    if (isNaN(days)) days = 5;
+    days = Math.max(0, Math.min(5, days));
+    const note = document.getElementById('week-note').value.trim();
+    setDoc(doc(db, PATHS.weeks, weekKeyOf(viewedUid, currentWeek)), { owner: viewedUid, week: currentWeek, days, note }, { merge: true });
+  }, 400);
 };
 
 /* ---------- CALENDRIER ---------- */
@@ -552,6 +592,14 @@ function renderCalendar() {
 
   document.getElementById('week-title').textContent = weekLabel(currentWeek);
   document.getElementById('copy-prev-btn').classList.toggle('hidden', !editable || currentWeek === 'TYPE');
+
+  const wdoc = allWeeks[weekKeyOf(viewedUid, currentWeek)];
+  const wdIn = document.getElementById('week-days');
+  const wnIn = document.getElementById('week-note');
+  wdIn.value = wdoc && typeof wdoc.days === 'number' ? wdoc.days : 5;
+  wnIn.value = wdoc?.note || '';
+  const wdis = !editable || currentWeek === 'TYPE';
+  wdIn.disabled = wdis; wnIn.disabled = wdis;
 
   document.getElementById('calendar-owner-title').textContent =
     viewedUid === me.uid ? 'Mon calendrier' : `Calendrier de ${owner?.name || '?'}`;
@@ -581,7 +629,7 @@ function renderCalendar() {
         ${editable ? 'draggable="true" ondragstart="onDragStart(event,\''+b.id+'\')" ondragend="onDragEnd(event)"' : ''}
         onclick="openModal(null,null,'${b.id}')"
         style="top:${(b.start-DAY_START)*ROW_H+1}px;height:${Math.max(18,b.duration*ROW_H-3)}px;left:calc(${pos.lane*w}% + 2px);width:calc(${w}% - 4px);background:${c.color};z-index:10"
-        title="${esc(b.label)} — ${fmtHour(b.start)}→${fmtHour(b.start+b.duration)}">
+        title="${esc(b.label)} — ${fmtHour(b.start)}→${fmtHour(b.start+b.duration)} · Ctrl+glisser = copier">
         <div class="font-black text-[10px] leading-tight truncate">⠿ ${esc(b.label) || '(sans libellé)'}</div>
         ${b.duration >= 1 ? `<div class="text-[9px] opacity-80 font-bold">${fmtHour(b.start)}-${fmtHour(b.start+b.duration)} · ${fmt(b.duration)}h</div>` : ''}</div>`;
     });
@@ -592,10 +640,10 @@ function renderCalendar() {
   document.getElementById('legend').innerHTML = CATS.map(c => `<span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full" style="background:${c.color}"></span>${c.label}</span>`).join('');
 }
 
-/* ---------- DRAG & DROP ---------- */
-window.onDragStart = (e, id) => { if (!canEdit()) { e.preventDefault(); return; } draggedBlockId = id; e.dataTransfer.setData('text/plain', id); e.dataTransfer.effectAllowed = 'move'; setTimeout(() => e.target.classList.add('dragging'), 0); };
-window.onDragEnd = e => { e.target.classList.remove('dragging'); draggedBlockId = null; document.querySelectorAll('.day-col.drag-over').forEach(el => el.classList.remove('drag-over')); };
-window.onDragOver = e => { if (!canEdit()) return; e.preventDefault(); e.dataTransfer.dropEffect = 'move'; e.currentTarget.classList.add('drag-over'); };
+/* ---------- DRAG & DROP (+ COPIE AVEC CTRL) ---------- */
+window.onDragStart = (e, id) => { if (!canEdit()) { e.preventDefault(); return; } draggedBlockId = id; copyDrag = e.ctrlKey || e.metaKey; e.dataTransfer.setData('text/plain', id); e.dataTransfer.effectAllowed = copyDrag ? 'copy' : 'move'; setTimeout(() => e.target.classList.add('dragging'), 0); };
+window.onDragEnd = e => { e.target.classList.remove('dragging'); draggedBlockId = null; copyDrag = false; document.querySelectorAll('.day-col.drag-over').forEach(el => el.classList.remove('drag-over')); };
+window.onDragOver = e => { if (!canEdit()) return; e.preventDefault(); e.dataTransfer.dropEffect = copyDrag ? 'copy' : 'move'; e.currentTarget.classList.add('drag-over'); };
 window.onDragLeave = e => { if (!e.currentTarget.contains(e.relatedTarget)) e.currentTarget.classList.remove('drag-over'); };
 window.onDrop = (e, day) => {
   e.preventDefault(); e.currentTarget.classList.remove('drag-over');
@@ -605,10 +653,16 @@ window.onDrop = (e, day) => {
   const rect = e.currentTarget.getBoundingClientRect();
   let start = DAY_START + Math.floor(((e.clientY - rect.top) / ROW_H) * 2) / 2;
   start = Math.min(Math.max(start, DAY_START), DAY_END - b.duration);
-  updateDoc(doc(db, PATHS.blocks, id), { day, start });
+  if (copyDrag || e.ctrlKey || e.metaKey) {
+    const nid = 'b' + Date.now() + Math.random().toString(36).slice(2, 6);
+    setDoc(doc(db, PATHS.blocks, nid), { id: nid, owner: b.owner, week: b.week || currentWeek, cat: b.cat, label: b.label, day, start, duration: b.duration });
+  } else {
+    updateDoc(doc(db, PATHS.blocks, id), { day, start });
+  }
+  copyDrag = false;
 };
 
-/* ---------- MODAL BLOC ---------- */
+/* ---------- MODAL BLOC + DUPLICATION ---------- */
 function fillModalSelects() {
   document.getElementById('m-day').innerHTML = JOURS.map(j => `<option value="${j}">${j}</option>`).join('');
   let o = ''; for (let h = DAY_START; h < DAY_END; h += 0.5) o += `<option value="${h}">${fmtHour(h)}</option>`;
@@ -628,6 +682,9 @@ window.openModal = (day, start, blockId) => {
   document.getElementById('m-start').value = b ? b.start : start;
   document.getElementById('m-dur').value = b ? b.duration : 1;
   document.getElementById('m-delete').classList.toggle('hidden', !b);
+  dupDone = {};
+  document.getElementById('m-dup').classList.toggle('hidden', !b);
+  if (b) renderDupButtons(b);
   refreshModalDatalist();
   document.getElementById('block-modal').classList.remove('hidden');
 };
@@ -644,6 +701,21 @@ window.saveBlock = () => {
 };
 window.deleteBlock = () => { if (editingBlockId && canEdit()) deleteDoc(doc(db, PATHS.blocks, editingBlockId)); closeModal(); };
 
+function renderDupButtons(b) {
+  document.getElementById('m-dup-days').innerHTML = JOURS.map(j => {
+    const off = j === b.day || dupDone[j];
+    return `<button onclick="dupToDay('${j}')" ${off ? 'disabled' : ''} class="px-3 py-1.5 rounded-lg text-xs font-bold border transition ${off ? 'bg-slate-100 text-slate-300 border-slate-100 cursor-not-allowed' : 'bg-white hover:bg-blue-50 text-slate-700 border-slate-200'}">${dupDone[j] ? '✅ ' : ''}${j}</button>`;
+  }).join('') + `<button onclick="dupToAll()" class="px-3 py-1.5 rounded-lg text-xs font-black bg-blue-600 hover:bg-blue-700 text-white">⇉ Tous les jours</button>`;
+}
+function dupBlock(day) {
+  const b = allBlocks.find(x => x.id === editingBlockId); if (!b) return;
+  const id = 'b' + Date.now() + Math.random().toString(36).slice(2, 6);
+  setDoc(doc(db, PATHS.blocks, id), { id, owner: b.owner, week: b.week || currentWeek, cat: b.cat, label: b.label, day, start: b.start, duration: b.duration });
+  dupDone[day] = true;
+}
+window.dupToDay = day => { if (!canEdit()) return; dupBlock(day); renderDupButtons(allBlocks.find(x => x.id === editingBlockId)); };
+window.dupToAll = () => { if (!canEdit()) return; const b = allBlocks.find(x => x.id === editingBlockId); if (!b) return; JOURS.forEach(j => { if (j !== b.day && !dupDone[j]) dupBlock(j); }); renderDupButtons(b); };
+
 /* ---------- SYNTHÈSE ---------- */
 function totalsOfList(list) {
   const t = { projet:0, mco:0, support:0, transverse:0 };
@@ -658,11 +730,12 @@ function renderSummary() {
     <div class="p-3 rounded-xl border border-slate-200 bg-white text-center"><div class="text-xs font-bold text-slate-500 uppercase">${c.label}</div><div class="text-2xl font-black" style="color:${c.color}">${fmt(t[c.key])}h</div><div class="text-[10px] text-slate-400 font-semibold">${list.filter(b=>b.cat===c.key).length} activité(s)</div></div>`).join('') +
     `<div class="p-3 rounded-xl border-2 border-slate-800 bg-slate-800 text-white text-center"><div class="text-xs font-bold uppercase">TOTAL SEMAINE</div><div class="text-2xl font-black">${fmt(t.total)}h</div><div class="text-[10px] opacity-70 font-semibold">${list.length} blocs</div></div>`;
   const hw = config.hoursWeek, st = document.getElementById('agent-status');
+  const capW = weightOf(viewedUid, currentWeek) * hw;
   if (viewedUid === me.uid && !meSaisit()) st.innerHTML = `🧭 <span class="text-slate-600">Compte gestion uniquement — aucune saisie attendue, heures non comptabilisées dans la charge équipe</span>`;
   else if (currentWeek === 'TYPE') st.innerHTML = `📐 <span class="text-indigo-600">Semaine type de référence (non comptée dans les statistiques réelles)</span>`;
-  else if (t.total > hw + 2) st.innerHTML = `⚠️ <span class="text-red-600">${fmt(t.total)}h placées pour ${hw}h contractuelles → Débordement</span>`;
-  else if (t.total >= hw - 1) st.innerHTML = `✅ <span class="text-green-600">Semaine cohérente (${fmt(t.total)}h / ${hw}h)</span>`;
-  else st.innerHTML = `ℹ️ <span class="text-slate-600">${fmt(t.total)}h placées / ${hw}h contractuelles</span>`;
+  else if (t.total > capW + 2) st.innerHTML = `⚠️ <span class="text-red-600">${fmt(t.total)}h posées pour ${fmt(capW)}h disponibles → Débordement</span>`;
+  else if (t.total >= capW - 1) st.innerHTML = `✅ <span class="text-green-600">Semaine cohérente (${fmt(t.total)}h / ${fmt(capW)}h disponibles)</span>`;
+  else st.innerHTML = `ℹ️ <span class="text-slate-600">${fmt(t.total)}h posées / ${fmt(capW)}h disponibles</span>`;
 }
 
 /* ---------- RÉFÉRENTIELS ---------- */
@@ -748,7 +821,7 @@ function renderUsers() {
     </tr>`).join('');
 }
 
-/* ---------- MANAGER ---------- */
+/* ---------- MANAGER (capacités proratisées) ---------- */
 function aggregateBlocks(list) {
   const agg = {};
   list.forEach(b => {
@@ -764,42 +837,49 @@ function renderManager() {
   loadConfigInputs(); renderRefPanel();
   const kind = document.getElementById('period-select').value;
   const range = periodRange(kind);
+  const weekList = weeksListInRange(range);
+  const weeksP = weekList.length;
   const blocksP = allBlocks.filter(b => inPeriod(weekOf(b), range));
   const users = Object.entries(allUsers).filter(([uid, u]) => saisit(u));
   const gestion = Object.entries(allUsers).filter(([uid, u]) => !saisit(u));
-  const weeksP = weeksInRange(range);
 
-  let totalP = 0, sumWeeksN = 0;
+  let totalP = 0, sumCapP = 0, sumWeeksN = 0;
   document.getElementById('manager-table-body').innerHTML = users.map(([uid,u]) => {
     const bu = blocksP.filter(b => b.owner === uid);
     const hours = bu.reduce((s,b) => s + b.duration, 0);
     const weeksN = new Set(bu.map(b => weekOf(b))).size;
+    const wSet = new Set(bu.map(b => weekOf(b)));
+    Object.values(allWeeks).forEach(v => { if (v.owner === uid && v.days < 5 && inPeriod(v.week, range)) wSet.add(v.week); });
+    let capU = 0; wSet.forEach(w => { capU += weightOf(uid, w) * config.hoursWeek; });
     const avg = weeksN ? hours / weeksN : 0;
-    const taux = Math.round(avg / config.hoursWeek * 100);
-    totalP += hours; sumWeeksN += weeksN;
+    const taux = capU ? Math.round(hours / capU * 100) : 0;
+    totalP += hours; sumCapP += capU; sumWeeksN += weeksN;
     const badge = taux > 110 ? '🔴 Surcharge' : taux > 100 ? '🟠 Tendu' : taux > 80 ? '🟡 Vigilance' : weeksN ? '🟢 OK' : '⚪ Sans saisie';
     return `<tr class="border-b border-slate-100 hover:bg-slate-50">
       <td class="p-3 font-bold text-slate-800">${esc(u.name)} <span class="text-[10px] ${ROLE_STYLE[u.role][1]} px-1.5 py-0.5 rounded font-black">${u.role}</span></td>
       <td class="text-center p-3 font-black">${fmt(hours)}h</td>
       <td class="text-center p-3 font-bold ${weeksN === 0 ? 'text-red-500' : 'text-slate-600'}">${weeksN} / ${weeksP}</td>
       <td class="text-center p-3 font-black">${fmt(avg)}h</td>
-      <td class="text-center p-3 font-black">${weeksN ? taux + '% ' + badge : badge}</td></tr>`;
+      <td class="text-center p-3 font-black">${capU ? taux + '% ' + badge : badge}</td></tr>`;
   }).join('');
 
   const teamWeekAvg = sumWeeksN ? (totalP / sumWeeksN) * users.length : 0;
-  const tauxTeam = Math.round(teamWeekAvg / config.hoursWeek * 100);
+  const tauxTeam = sumCapP ? Math.round(totalP / sumCapP * 100) : 0;
   document.getElementById('manager-table-foot').innerHTML = `<tr><td class="p-3">TOTAL (${users.length})</td>
     <td class="text-center p-3 text-lg">${fmt(totalP)}h</td><td class="text-center p-3">${sumWeeksN} sem.-agent</td>
     <td class="text-center p-3 text-lg">${fmt(teamWeekAvg)}h/sem</td>
     <td class="text-center p-3"><span class="px-3 py-1.5 bg-slate-900 text-white rounded-lg font-black">${tauxTeam}%</span></td></tr>`;
 
+  let absH = 0;
+  users.forEach(([uid]) => weekList.forEach(w => { absH += (1 - weightOf(uid, w)) * config.hoursWeek; }));
   const fillRate = (users.length && weeksP) ? Math.round(sumWeeksN / (users.length * weeksP) * 100) : 0;
   const top = aggregateBlocks(blocksP)[0];
   document.getElementById('period-stats').innerHTML = `
     <div class="flex justify-between"><span class="text-slate-500">Semaines dans la période</span><strong>${weeksP}</strong></div>
     <div class="flex justify-between"><span class="text-slate-500">Semaines-agent saisies</span><strong>${sumWeeksN}</strong></div>
     <div class="flex justify-between"><span class="text-slate-500">Taux de saisie équipe</span><strong class="${fillRate < 80 ? 'text-red-600' : 'text-green-600'}">${fillRate}%</strong></div>
-    <div class="flex justify-between"><span class="text-slate-500">Charge moyenne équipe / semaine</span><strong>${fmt(teamWeekAvg)}h (capacité ${fmt(users.length * config.hoursWeek)}h)</strong></div>
+    <div class="flex justify-between"><span class="text-slate-500">Absences déclarées (CP/RTT/…)</span><strong class="text-orange-600">${fmt(absH)}h</strong></div>
+    <div class="flex justify-between"><span class="text-slate-500">Charge moyenne équipe / semaine</span><strong>${fmt(teamWeekAvg)}h (capacité proratisée ${fmt(sumCapP)}h)</strong></div>
     <div class="flex justify-between"><span class="text-slate-500">Activité n°1 de la période</span><strong>${top ? esc(top.label) + ' (' + fmt(top.hours) + 'h)' : '—'}</strong></div>
     <div class="flex justify-between"><span class="text-slate-500">Comptes « gestion seule » (hors charge)</span><strong>${gestion.length ? gestion.map(([uid,u]) => esc(u.name)).join(', ') : '—'}</strong></div>`;
 
@@ -810,7 +890,7 @@ function renderManager() {
       labels: weeksSorted.map(w => 'S' + w.slice(6)),
       datasets: [
         { label: 'Charge équipe (h)', data: weeksSorted.map(w => blocksP.filter(b => weekOf(b) === w).reduce((s,b) => s + b.duration, 0)), borderColor: '#2563eb', backgroundColor: 'rgba(37,99,235,0.15)', fill: true, tension: 0.3 },
-        { label: 'Capacité équipe (h)', data: weeksSorted.map(() => users.length * config.hoursWeek), borderColor: '#16a34a', borderDash: [6,4], pointRadius: 0 }
+        { label: 'Capacité proratisée (h)', data: weeksSorted.map(w => users.reduce((s,[uid]) => s + weightOf(uid, w) * config.hoursWeek, 0)), borderColor: '#16a34a', borderDash: [6,4], pointRadius: 0 }
       ] },
     options: { responsive: true, plugins: { legend: { position: 'bottom' } }, scales: { y: { beginAtZero: true } } } });
 
@@ -825,23 +905,31 @@ function renderManager() {
   }).join('');
 }
 
-/* ---------- DASHBOARD (basé sur le RÉEL, hors comptes gestion) ---------- */
+/* ---------- DASHBOARD (réel, proratisé, hors comptes gestion) ---------- */
 function renderDashboard() {
   const real = allBlocks.filter(b => weekOf(b) !== 'TYPE');
   const users = Object.entries(allUsers).filter(([uid, u]) => saisit(u));
   const nbGestion = Object.values(allUsers).filter(u => !saisit(u)).length;
-  const sumWeeks = users.reduce((s,[uid]) => s + new Set(real.filter(b => b.owner === uid).map(b => weekOf(b))).size, 0);
-  const hasReal = sumWeeks > 0;
+
+  let sumWeeksEq = 0;
+  users.forEach(([uid]) => {
+    const wSet = new Set(real.filter(b => b.owner === uid).map(b => weekOf(b)));
+    Object.values(allWeeks).forEach(v => { if (v.owner === uid && v.days < 5) wSet.add(v.week); });
+    wSet.forEach(w => { sumWeeksEq += weightOf(uid, w); });
+  });
+  const hasReal = sumWeeksEq > 0;
   const capAgent = config.hoursWeek * config.weeks, capTotale = capAgent * Math.max(1, users.length);
 
   const catWeekAvg = c => hasReal
-    ? real.filter(b => b.cat === c).reduce((s,b) => s + b.duration, 0) / sumWeeks
+    ? real.filter(b => b.cat === c).reduce((s,b) => s + b.duration, 0) / sumWeeksEq
     : totalsOfList(allBlocks.filter(b => weekOf(b) === 'TYPE'))[c] / Math.max(1, users.length);
 
   const perUser = users.map(([uid,u]) => {
     const bu = real.filter(b => b.owner === uid);
-    const wn = new Set(bu.map(b => weekOf(b))).size;
-    const hebdo = wn ? bu.reduce((s,b) => s + b.duration, 0) / wn : totalsOfList(bu.length ? bu : allBlocks.filter(b => b.owner === uid && weekOf(b) === 'TYPE')).total;
+    const wSet = new Set(bu.map(b => weekOf(b)));
+    Object.values(allWeeks).forEach(v => { if (v.owner === uid && v.days < 5) wSet.add(v.week); });
+    let eq = 0; wSet.forEach(w => { eq += weightOf(uid, w); });
+    const hebdo = eq ? bu.reduce((s,b) => s + b.duration, 0) / eq : totalsOfList(bu.length ? bu : allBlocks.filter(b => b.owner === uid && weekOf(b) === 'TYPE')).total;
     return { name: u.name, hebdo };
   });
 
@@ -852,7 +940,7 @@ function renderDashboard() {
   const ecart = charge - capTotale, cout = Math.max(0,ecart)*config.taux;
 
   document.getElementById('dash-effectif').textContent = users.length;
-  document.getElementById('dash-source').textContent = hasReal ? `Base : ${sumWeeks} semaines réelles saisies` : 'Base : semaines types (aucune semaine réelle saisie)';
+  document.getElementById('dash-source').textContent = hasReal ? `Base : ${fmt(sumWeeksEq)} semaines équivalentes pleines` : 'Base : semaines types (aucune semaine réelle saisie)';
   document.getElementById('dash-kpis').innerHTML = `
     <div class="p-5 border border-slate-200 rounded-xl bg-white fade-in"><div class="text-xs font-bold text-slate-500 uppercase">Capacité annuelle</div><div class="text-3xl font-black text-slate-800 my-2">${Math.round(capTotale).toLocaleString('fr-FR')} h</div><div class="text-xs text-slate-500">${users.length} ETP saisis × ${Math.round(capAgent)}h/an${nbGestion ? ' · ' + nbGestion + ' compte(s) gestion hors charge' : ''}</div></div>
     <div class="p-5 border border-slate-200 rounded-xl bg-white fade-in"><div class="text-xs font-bold text-slate-500 uppercase">Charge projetée (réel)</div><div class="text-3xl font-black my-2" style="color:${taux>100?'#dc2626':'#1a2744'}">${Math.round(charge).toLocaleString('fr-FR')} h</div><div class="text-xs ${taux>100?'text-red-600 font-bold':'text-slate-500'}">${taux>100?'▲ +'+(taux-100).toFixed(1)+'% vs capacité':'▼ '+(100-taux)+'% de marge'}</div></div>
@@ -887,7 +975,7 @@ function renderDashboard() {
 }
 </script>
 
-<!-- ===== Enregistrement du Service Worker (PWA) ===== -->
+<!-- ===== Service Worker (PWA) ===== -->
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
