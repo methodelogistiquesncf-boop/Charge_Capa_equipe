@@ -4,6 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Aide — Planning Activités</title>
+<!-- ===== PWA ===== -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1a2744">
+<link rel="icon" type="image/svg+xml" href="icons/logo.svg">
+<link rel="apple-touch-icon" href="icons/icon-512.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Planning Activités">
+<!-- ===== Styles ===== -->
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
@@ -17,7 +27,7 @@ body { font-family: 'Inter', sans-serif; }
 <header class="text-white sticky top-0 z-50 shadow-lg no-print" style="background: linear-gradient(135deg, #1a2744 0%, #2d4373 100%);">
   <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between gap-3">
     <div class="flex items-center gap-3">
-      <div class="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center font-black text-sm">?</div>
+      <img src="icons/logo.svg" alt="" class="w-9 h-9 rounded-xl shadow-sm">
       <div>
         <h1 class="text-base md:text-lg font-black">Aide — Planning Activités</h1>
         <p class="text-white/60 text-[11px]">Guide d'utilisation par rôle · Équipe Performance & Méthodes logistique</p>
@@ -50,7 +60,7 @@ body { font-family: 'Inter', sans-serif; }
     <h3 class="font-black text-slate-800">🔑 Se connecter</h3>
     <div class="flex gap-4 items-start p-4 bg-slate-50 rounded-xl">
       <div class="w-8 h-8 shrink-0 rounded-full bg-blue-600 text-white font-black flex items-center justify-center">1</div>
-      <p class="text-sm text-slate-700">Ouvrez l'application, saisissez l'<strong>email</strong> et le <strong>mot de passe</strong> remis par votre administrateur, puis « Se connecter ». Mot de passe oublié ? Cliquez sur <strong>« 🔑 Mot de passe oublié ? »</strong> : un email de réinitialisation vous sera envoyé.</p>
+      <p class="text-sm text-slate-700">Ouvrez l'application (installée ou via le navigateur), saisissez l'<strong>email</strong> et le <strong>mot de passe</strong> remis par votre administrateur, puis « Se connecter ». Mot de passe oublié ? Cliquez sur <strong>« 🔑 Mot de passe oublié ? »</strong> : un email de réinitialisation vous sera envoyé.</p>
     </div>
     <div class="flex gap-4 items-start p-4 bg-slate-50 rounded-xl">
       <div class="w-8 h-8 shrink-0 rounded-full bg-blue-600 text-white font-black flex items-center justify-center">2</div>
@@ -75,7 +85,7 @@ body { font-family: 'Inter', sans-serif; }
     <div class="grid md:grid-cols-2 gap-4 text-sm">
       <div class="p-4 bg-slate-50 rounded-xl"><strong class="text-blue-700">➕ Ajouter</strong><p class="text-slate-600 mt-1">Cliquez sur un <strong>créneau vide</strong> du calendrier (un « + » apparaît). Choisissez catégorie, libellé précis (ex : MAG9, Lean Picking…), jour, heure de début et durée.</p></div>
       <div class="p-4 bg-slate-50 rounded-xl"><strong class="text-indigo-700">✏️ Modifier</strong><p class="text-slate-600 mt-1">Cliquez sur un <strong>bloc coloré</strong> : la même fenêtre s'ouvre pour tout changer (ou supprimer avec 🗑️).</p></div>
-      <div class="p-4 bg-slate-50 rounded-xl"><strong class="text-emerald-700">↔️ Déplacer</strong><p class="text-slate-600 mt-1"><strong>Glissez-déposez</strong> le bloc sur un autre jour / une autre heure. Il se cale automatiquement à la demi-heure près.</p></div>
+      <div class="p-4 bg-slate-50 rounded-xl"><strong class="text-emerald-700">↔️ Déplacer</strong><p class="text-slate-600 mt-1"><strong>Glissez-déposez</strong> le bloc sur un autre jour / une autre heure (souris). Il se cale automatiquement à la demi-heure près.</p></div>
       <div class="p-4 bg-slate-50 rounded-xl"><strong class="text-slate-700">📅 Changer de semaine</strong><p class="text-slate-600 mt-1">Barre au-dessus du calendrier : <strong>◀ ▶</strong> pour naviguer, <strong>« Aujourd'hui »</strong> pour revenir, <strong>« 📐 Semaine type »</strong> pour voir la référence.</p></div>
     </div>
   </div>
@@ -99,6 +109,10 @@ body { font-family: 'Inter', sans-serif; }
 
   <div class="bg-blue-50 border-l-4 border-blue-500 rounded-xl p-5 text-sm text-slate-700">
     <strong class="text-blue-800">📐 Semaine type vs semaines réelles :</strong> la <em>semaine type</em> est votre référence théorique (remplie une fois). Les <em>semaines réelles</em> sont celles que vous remplissez chaque semaine. Les statistiques de l'équipe sont calculées sur le <strong>réel</strong> : c'est ce qui fait la force de l'argumentaire effectifs.
+  </div>
+
+  <div class="bg-slate-50 border-l-4 border-slate-400 rounded-xl p-5 text-sm text-slate-700">
+    <strong class="text-slate-800">📲 Installer l'application sur votre téléphone / PC :</strong> Android/Chrome → menu ⋮ → « Installer l'application » · iPhone/Safari → Partager → « Sur l'écran d'accueil » · PC Chrome/Edge → icône ⊕ dans la barre d'adresse. L'icône calendrier apparaît alors sur votre écran d'accueil.
   </div>
 </section>
 
@@ -197,10 +211,12 @@ body { font-family: 'Inter', sans-serif; }
   <div class="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
     <h3 class="font-black text-slate-800">❓ Questions fréquentes</h3>
     <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">🔑 Mot de passe oublié ?</summary><p class="text-sm text-slate-600 mt-2">Cliquez sur « Mot de passe oublié ? » depuis l'écran de connexion : un email de réinitialisation vous est envoyé. Sinon, contactez votre administrateur.</p></details>
+    <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">📲 Comment installer l'application sur mon téléphone / PC ?</summary><p class="text-sm text-slate-600 mt-2">Android/Chrome : menu ⋮ → « Installer l'application ». iPhone/Safari : Partager → « Sur l'écran d'accueil ». PC Chrome/Edge : icône ⊕ dans la barre d'adresse. L'icône calendrier s'ajoute à votre écran d'accueil et l'app s'ouvre en plein écran.</p></details>
     <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">📅 J'ai saisi mes blocs sur la mauvaise semaine ?</summary><p class="text-sm text-slate-600 mt-2">Naviguez avec ◀ ▶ jusqu'à la bonne semaine, puis cliquez sur chaque bloc pour corriger jour/date, ou repartez de « ⧉ Copier semaine préc. ».</p></details>
     <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">🚫 Je ne peux ni cliquer ni glisser les blocs ?</summary><p class="text-sm text-slate-600 mt-2">Deux cas : vous consultez le planning d'un autre (bandeau orange « Consultation seule », réservé manager/admin), ou vous êtes sur la « 📐 Semaine type ». Vérifiez le nom en haut du calendrier et la barre de semaine.</p></details>
     <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">👀 Qui voit mes semaines ?</summary><p class="text-sm text-slate-600 mt-2">Un agent ne voit <strong>que son propre calendrier</strong>. Les managers et admins voient tout (c'est leur fonction), mais sans pouvoir modifier vos blocs (manager). Personne d'autre.</p></details>
     <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">☁️ Mes données sont-elles sauvegardées si je ferme l'onglet ?</summary><p class="text-sm text-slate-600 mt-2">Oui : chaque modification est envoyée immédiatement au serveur (badge « ☁️ Synchronisé »). Vous pouvez fermer, changer de machine, reprendre plus tard.</p></details>
+    <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">📴 L'application fonctionne-t-elle sans réseau ?</summary><p class="text-sm text-slate-600 mt-2">L'interface installée s'ouvre hors connexion (coquille en cache), mais la lecture et l'écriture des données nécessitent du réseau : c'est un outil d'équipe en temps réel.</p></details>
     <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">⚠️ « Identifiants incorrects » au login ?</summary><p class="text-sm text-slate-600 mt-2">Vérifiez majuscules/espaces. Si le message persiste : compte non créé ou désactivé → voyez l'administrateur.</p></details>
     <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">🧮 Pourquoi mon total de semaine n'affiche pas 35 h ?</summary><p class="text-sm text-slate-600 mt-2">Le total reflète ce que vous avez <strong>placé dans le calendrier</strong>. Entre 34 et 36 h : cohérent. Très en dessous : il manque des blocs (pensez au transverse : réunions, reporting…). Très au-dessus : semaine de débordement — c'est précisément ce que l'outil doit montrer.</p></details>
   </div>
