@@ -48,33 +48,34 @@ body { font-family: 'Inter', sans-serif; }
 
 <main class="max-w-5xl mx-auto px-4 py-6 space-y-6">
 
+<!-- ================= DÉMARRAGE ================= -->
 <section id="view-start" class="space-y-6">
   <div class="bg-indigo-50 border-l-4 border-indigo-500 rounded-xl p-5">
     <h2 class="font-black text-indigo-800 text-lg">🚀 Bien démarrer en 5 minutes</h2>
-    <p class="text-sm text-slate-700 mt-1">Cette application dit <strong>où passent vos heures chaque semaine</strong>. Les données accumulées deviennent l'argumentaire chiffré de l'équipe : effectifs (ETP), surcharge, arbitrages, budgets projets et MCO.</p>
+    <p class="text-sm text-slate-700 mt-1">Cette application dit <strong>où passent vos heures chaque semaine</strong>. Les données accumulées deviennent l'argumentaire chiffré de l'équipe : effectifs (ETP), surcharge, arbitrages, budgets projets et MCO. <strong>Les congés ne se saisissent plus</strong> : ils sont déduits automatiquement de la capacité.</p>
   </div>
 
   <div class="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
     <h3 class="font-black text-slate-800">🔑 Se connecter & installer</h3>
     <div class="flex gap-4 items-start p-4 bg-slate-50 rounded-xl">
       <div class="w-8 h-8 shrink-0 rounded-full bg-blue-600 text-white font-black flex items-center justify-center">1</div>
-      <p class="text-sm text-slate-700">Email + mot de passe. <strong>« 🔑 Mot de passe oublié ? »</strong> envoie un email de réinitialisation.</p>
+      <p class="text-sm text-slate-700">Email + mot de passe fournis par l'administrateur. <strong>« 🔑 Mot de passe oublié ? »</strong> envoie un email de réinitialisation.</p>
     </div>
     <div class="flex gap-4 items-start p-4 bg-slate-50 rounded-xl">
       <div class="w-8 h-8 shrink-0 rounded-full bg-blue-600 text-white font-black flex items-center justify-center">2</div>
-      <p class="text-sm text-slate-700"><strong>Installer l'app</strong> : Android/Chrome ⋮ → « Installer » · iPhone/Safari → Partager → écran d'accueil · PC Chrome/Edge → icône ⊕.</p>
+      <p class="text-sm text-slate-700"><strong>Installer l'app</strong> (recommandé) : Android/Chrome ⋮ → « Installer l'application » · iPhone/Safari → Partager → « Sur l'écran d'accueil » · PC Chrome/Edge → icône ⊕ dans la barre d'adresse.</p>
     </div>
     <div class="flex gap-4 items-start p-4 bg-slate-50 rounded-xl">
       <div class="w-8 h-8 shrink-0 rounded-full bg-blue-600 text-white font-black flex items-center justify-center">3</div>
-      <p class="text-sm text-slate-700">Chaque vendredi : <strong>« ⧉ Copier semaine préc. »</strong> (ou « 📐 Copier semaine type » la 1ʳ fois), ajustez 2-3 blocs. <strong>2 minutes.</strong></p>
+      <p class="text-sm text-slate-700">Chaque vendredi : semaine courante → <strong>« ⧉ Copier semaine préc. »</strong> (ou « 📐 Copier semaine type » la première fois), ajustez 2-3 blocs. <strong>2 minutes maximum.</strong></p>
     </div>
   </div>
 
   <div class="bg-white rounded-2xl border border-slate-200 p-6">
-    <h3 class="font-black text-slate-800 mb-3">🧮 L'ETP, c'est quoi ?</h3>
-    <p class="text-sm text-slate-600 mb-3"><strong>ETP = Équivalent Temps Plein</strong> : unité qui mesure la force de travail sur la base d'un temps plein.</p>
-    <table class="w-full text-sm border border-slate-200 rounded-lg overflow-hidden">
-      <thead><tr class="bg-slate-800 text-white"><th class="text-left p-2">Situation</th><th class="text-center p-2">ETP</th><th class="text-center p-2">Capacité hebdo (base 35 h)</th></tr></thead>
+    <h3 class="font-black text-slate-800 mb-3">🧮 Les deux notions clés : ETP & rendement</h3>
+    <p class="text-sm text-slate-600 mb-3"><strong>ETP = Équivalent Temps Plein</strong> : force de travail d'une personne sur la base d'un temps plein.</p>
+    <table class="w-full text-sm border border-slate-200 rounded-lg overflow-hidden mb-4">
+      <thead><tr class="bg-slate-800 text-white"><th class="text-left p-2">Situation</th><th class="text-center p-2">ETP</th><th class="text-center p-2">Heures contrat / sem.</th></tr></thead>
       <tbody>
         <tr class="border-b border-slate-100"><td class="p-2">Temps plein</td><td class="p-2 text-center font-black">1.0</td><td class="p-2 text-center">35 h</td></tr>
         <tr class="border-b border-slate-100"><td class="p-2">80 %</td><td class="p-2 text-center font-black">0.8</td><td class="p-2 text-center">28 h</td></tr>
@@ -82,142 +83,236 @@ body { font-family: 'Inter', sans-serif; }
         <tr><td class="p-2">Équipe : 6 TP + 2 à 80 %</td><td class="p-2 text-center font-black">7.6</td><td class="p-2 text-center">266 h</td></tr>
       </tbody>
     </table>
+    <p class="text-sm text-slate-600 mb-2"><strong>Taux de rendement</strong> (défaut <strong>0,85</strong>, réglé par personne) : part du temps réellement productive (aléas, temps masqués, pauses techniques…). Il est modifiable par le <strong>manager</strong> dans le tableau de consolidation, et par l'<strong>admin</strong> dans Utilisateurs.</p>
   </div>
 
   <div class="bg-white rounded-2xl border border-slate-200 p-6">
-    <h3 class="font-black text-slate-800 mb-3">🎨 Les 5 catégories</h3>
+    <h3 class="font-black text-slate-800 mb-3">⚙️ La capacité réelle, calculée automatiquement</h3>
+    <div class="p-4 bg-slate-50 rounded-xl text-sm font-mono text-slate-700 mb-3">
+      Capacité hebdo = heures contrat × ETP × rendement × ((jours ouvrés − jours congés) ÷ jours ouvrés)
+    </div>
+    <ul class="text-sm text-slate-600 space-y-2 list-disc pl-5">
+      <li><strong>Jours ouvrés</strong> = semaines/an × 5 (ex : 52 × 5 = 260 j).</li>
+      <li><strong>Jours congés</strong> = paramètre annuel (défaut <strong>46 j</strong>, CP + RTT) → 260 − 46 = <strong>214 j travaillés/an</strong>.</li>
+      <li>Exemple pour 1 ETP à 35 h, rendement 0,85 : 35 × 0,85 × (214 ÷ 260) = <strong>24,5 h/semaine</strong> de capacité réelle.</li>
+      <li><strong>Aucun congé à saisir</strong> : la déduction est automatique, pour tout le monde, toute l'année.</li>
+    </ul>
+  </div>
+
+  <div class="bg-white rounded-2xl border border-slate-200 p-6">
+    <h3 class="font-black text-slate-800 mb-3">🎨 Les 4 catégories d'activité</h3>
     <div class="flex flex-wrap gap-2 mb-4">
       <span class="px-3 py-1.5 rounded-lg text-xs font-bold text-white" style="background:#2563eb">🚀 Projets</span>
       <span class="px-3 py-1.5 rounded-lg text-xs font-bold text-white" style="background:#dc2626">🔧 MCO</span>
       <span class="px-3 py-1.5 rounded-lg text-xs font-bold text-white" style="background:#ea580c">🆘 Support terrain</span>
       <span class="px-3 py-1.5 rounded-lg text-xs font-bold text-white" style="background:#475569">📋 Transverse</span>
-      <span class="px-3 py-1.5 rounded-lg text-xs font-bold text-white" style="background:#7c3aed">🌴 Absences</span>
     </div>
     <ul class="text-sm text-slate-600 space-y-1 list-disc pl-5">
       <li><strong>Projets</strong> : rattachés à une enveloppe budget via la liste « Projet budgété ».</li>
-      <li><strong>MCO / Support / Transverse</strong> : débitent automatiquement l'enveloppe « auto » de leur catégorie.</li>
-      <li><strong>Absences 🌴</strong> : CP/RTT/formation posées dans le calendrier → capacité proratisée.</li>
+      <li><strong>MCO / Support / Transverse</strong> : débitent automatiquement l'enveloppe « auto » de leur catégorie si elle existe.</li>
+      <li>Les anciens blocs 🌴 (congés) restent visibles en historique mais n'ont plus aucun effet sur les calculs.</li>
     </ul>
   </div>
 
   <div class="grid md:grid-cols-2 gap-4">
-    <div class="bg-blue-50 border-l-4 border-blue-500 rounded-xl p-5 text-sm text-slate-700"><strong class="text-blue-800">📐 Semaine type vs réelles</strong><p class="mt-1">La semaine type = référence théorique. Les semaines réelles = saisies du vendredi. Les stats équipe utilisent le <strong>réel</strong>.</p></div>
-    <div class="bg-violet-50 border-l-4 border-violet-500 rounded-xl p-5 text-sm text-slate-700"><strong class="text-violet-800">🌴 Absences = blocs violets</strong><p class="mt-1">Capacité réduite automatiquement (35 h − 7 h = 28 h). Zéro fausse « sous-charge ».</p></div>
-    <div class="bg-emerald-50 border-l-4 border-emerald-500 rounded-xl p-5 text-sm text-slate-700"><strong class="text-emerald-800">💰 Enveloppes & budgets</strong><p class="mt-1">Projets = rattachement explicite. MCO/support/transverse = consommation automatique de tous les blocs de la catégorie.</p></div>
-    <div class="bg-slate-50 border-l-4 border-slate-400 rounded-xl p-5 text-sm text-slate-700"><strong class="text-slate-800">🔒 Confidentialité</strong><p class="mt-1">Un agent ne voit que son planning. Managers/admins voient l'équipe. Garanti côté serveur.</p></div>
+    <div class="bg-blue-50 border-l-4 border-blue-500 rounded-xl p-5 text-sm text-slate-700"><strong class="text-blue-800">📐 Semaine type vs semaines réelles</strong><p class="mt-1">La <em>semaine type</em> = référence théorique remplie une fois. Les <em>semaines réelles</em> = saisies du vendredi. Toutes les statistiques équipe utilisent le <strong>réel</strong>.</p></div>
+    <div class="bg-emerald-50 border-l-4 border-emerald-500 rounded-xl p-5 text-sm text-slate-700"><strong class="text-emerald-800">💰 Enveloppes & budgets</strong><p class="mt-1">Projets = rattachement explicite bloc par bloc. MCO/support/transverse = consommation automatique de tous les blocs de la catégorie. Suivi : consommé, reste, %, rythme, horizon.</p></div>
+    <div class="bg-violet-50 border-l-4 border-violet-500 rounded-xl p-5 text-sm text-slate-700"><strong class="text-violet-800">🧭 Mode « gestion seule »</strong><p class="mt-1">Certains managers/admins ne remplissent pas de planning : leur compte est en « 🧭 Gestion seule » (réglé par l'admin). Ils pilotent sans saisir, et ne comptent pas dans la charge.</p></div>
+    <div class="bg-slate-50 border-l-4 border-slate-400 rounded-xl p-5 text-sm text-slate-700"><strong class="text-slate-800">🔒 Confidentialité</strong><p class="mt-1">Un agent ne voit que son planning. Managers/admins voient l'équipe (lecture seule pour les blocs des autres). Garanti côté serveur par les règles Firestore.</p></div>
   </div>
 </section>
 
+<!-- ================= AGENT ================= -->
 <section id="view-agent" class="space-y-6 hidden">
   <div class="bg-green-50 border-l-4 border-green-500 rounded-xl p-5">
     <h2 class="font-black text-green-800 text-lg">🟢 Agent : 2 minutes par semaine</h2>
-    <p class="text-sm text-slate-700 mt-1">Sauvegarde automatique (☁️). Votre capacité affichée tient compte de <strong>votre ETP</strong> et de vos absences 🌴.</p>
+    <p class="text-sm text-slate-700 mt-1">Sauvegarde automatique (☁️) : aucun bouton « enregistrer » pour les blocs. Vous ne saisissez <strong>que vos activités</strong> — jamais vos congés.</p>
   </div>
+
   <div class="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
-    <h3 class="font-black text-slate-800">🧱 Manipuler les blocs</h3>
+    <h3 class="font-black text-slate-800">📅 La barre de semaine</h3>
+    <ul class="text-sm text-slate-600 space-y-2 list-disc pl-5">
+      <li><strong>◀ ▶</strong> : naviguer entre les semaines · <strong>« Aujourd'hui »</strong> : revenir à la semaine courante.</li>
+      <li><strong>« 📐 Semaine type »</strong> : votre référence théorique (non comptée dans les stats).</li>
+      <li><strong>« ⧉ Copier semaine préc. »</strong> : recopie tous les blocs de la semaine d'avant → base de départ du vendredi.</li>
+      <li><strong>« 📐 Copier semaine type »</strong> : pour la toute première semaine réelle, part de votre référence.</li>
+    </ul>
+  </div>
+
+  <div class="bg-white rounded-2xl border border-slate-200 p-6">
+    <h3 class="font-black text-slate-800 mb-4">🧱 Manipuler les blocs</h3>
     <div class="grid md:grid-cols-2 gap-4 text-sm">
-      <div class="p-4 bg-slate-50 rounded-xl"><strong class="text-blue-700">➕ Ajouter</strong><p class="text-slate-600 mt-1">Clic créneau vide → catégorie, enveloppe/activité, jour, heure, durée.</p></div>
-      <div class="p-4 bg-slate-50 rounded-xl"><strong class="text-indigo-700">✏️ Modifier / 🗑️</strong><p class="text-slate-600 mt-1">Clic sur un bloc coloré.</p></div>
-      <div class="p-4 bg-slate-50 rounded-xl"><strong class="text-emerald-700">↔️ Déplacer</strong><p class="text-slate-600 mt-1">Glisser-déposer, calage demi-heure.</p></div>
-      <div class="p-4 bg-slate-50 rounded-xl"><strong class="text-teal-700">⧉ Dupliquer</strong><p class="text-slate-600 mt-1">Boutons jours / « ⇉ Tous les jours », ou Ctrl+glisser.</p></div>
+      <div class="p-4 bg-slate-50 rounded-xl"><strong class="text-blue-700">➕ Ajouter</strong><p class="text-slate-600 mt-1">Clic sur un <strong>créneau vide</strong> (un « + » apparaît) → catégorie, projet/enveloppe, libellé, jour, heure, durée.</p></div>
+      <div class="p-4 bg-slate-50 rounded-xl"><strong class="text-indigo-700">✏️ Modifier / 🗑️ Supprimer</strong><p class="text-slate-600 mt-1">Clic sur un <strong>bloc coloré</strong> : la fenêtre s'ouvre avec tous les champs.</p></div>
+      <div class="p-4 bg-slate-50 rounded-xl"><strong class="text-emerald-700">↔️ Déplacer</strong><p class="text-slate-600 mt-1"><strong>Glisser-déposer</strong> (souris) sur un autre jour / une autre heure. Calage automatique à la demi-heure.</p></div>
+      <div class="p-4 bg-slate-50 rounded-xl"><strong class="text-teal-700">⧉ Dupliquer</strong><p class="text-slate-600 mt-1">Clic bloc → zone <strong>« ⧉ Dupliquer ce bloc vers… »</strong> : boutons [Lundi]…[Vendredi] ou <strong>« ⇉ Tous les jours »</strong>. Ou <strong>Ctrl + glisser</strong> (⌘ Mac) pour copier vers un créneau précis.</p></div>
     </div>
   </div>
+
   <div class="bg-white rounded-2xl border border-slate-200 p-6">
-    <h3 class="font-black text-slate-800 mb-3">🌴 Poser une absence</h3>
+    <h3 class="font-black text-slate-800 mb-3">🧮 Votre capacité affichée</h3>
     <ul class="text-sm text-slate-600 space-y-2 list-disc pl-5">
-      <li>Catégorie 🌴 → libellé CP/RTT/… → durée 7 h (= 1 jour).</li>
-      <li>Capacité de la semaine réduite automatiquement.</li>
-      <li>Semaine complète de CP : dupliquez le bloc sur 5 jours (« ⇉ Tous les jours »).</li>
+      <li>Le message sous vos totaux compare vos heures travaillées à votre <strong>capacité réelle</strong> = heures contrat × votre ETP × votre rendement × congés déduits.</li>
+      <li>Exemple : 35 h × 1 ETP × 0,85 × (214/260) = <strong>24,5 h/semaine</strong>.</li>
+      <li>✅ Semaine cohérente · ⚠️ débordement · ℹ️ semaine légère : suivez le message, c'est lui votre boussole.</li>
+      <li>Votre ETP et votre rendement sont réglés par l'admin / le manager : demandez-leur si la valeur vous semble incorrecte.</li>
     </ul>
   </div>
+
   <div class="bg-white rounded-2xl border border-slate-200 p-6">
-    <h3 class="font-black text-slate-800 mb-3">💰 Projets & MCO : ce que ça débite</h3>
+    <h3 class="font-black text-slate-800 mb-3">💰 Projets & enveloppes : ce que ça débite</h3>
     <ul class="text-sm text-slate-600 space-y-2 list-disc pl-5">
-      <li>Catégorie 🚀 → choisissez dans « Projet budgété » : les heures débitent ce projet.</li>
-      <li>Catégorie 🔧 MCO (ou 🆘/) : si une enveloppe « auto » existe pour la catégorie, <strong>toutes</strong> vos heures de la catégorie la débitent — vous n'avez rien à rattacher.</li>
-      <li>⚠️ Message informatif si l'enveloppe choisie est déjà &gt; 100 %.</li>
+      <li>Catégorie 🚀 → liste <strong>« Projet budgété »</strong> : vos heures débitent l'enveloppe de ce projet.</li>
+      <li>Catégorie 🔧 / 🆘 / 📋 : si une enveloppe « auto » existe pour la catégorie, <strong>toutes</strong> vos heures de la catégorie la débitent — vous n'avez rien à rattacher.</li>
+      <li>⚠️ Message informatif si l'enveloppe choisie est déjà dépassée : prévenez votre manager, ce n'est pas bloquant.</li>
     </ul>
+  </div>
+
+  <div class="bg-slate-50 border-l-4 border-slate-400 rounded-xl p-5 text-sm text-slate-700">
+    <strong class="text-slate-800">👀 Qui voit quoi ?</strong> Votre planning n'est visible que par vous, et en <strong>lecture seule</strong> par managers/admins. Personne d'autre.
   </div>
 </section>
 
+<!-- ================= MANAGER ================= -->
 <section id="view-manager" class="space-y-6 hidden">
   <div class="bg-blue-50 border-l-4 border-blue-500 rounded-xl p-5">
-    <h2 class="font-black text-blue-800 text-lg">🔵 Manager : piloter en ETP & budgets</h2>
-    <p class="text-sm text-slate-700 mt-1">Consolidation, enveloppes budgétaires, dashboard. Capacités calculées avec les <strong>ETP réels</strong> + absences.</p>
+    <h2 class="font-black text-blue-800 text-lg">🔵 Manager : piloter en ETP, rendements & budgets</h2>
+    <p class="text-sm text-slate-700 mt-1">Consolidation équipe, enveloppes budgétaires, dashboard direction. Les capacités intègrent automatiquement ETP, rendements individuels et congés déduits.</p>
   </div>
+
   <div class="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
-    <h3 class="font-black text-slate-800">💰 Budgétiser le MCO (méthode)</h3>
+    <h3 class="font-black text-slate-800">🎚️ Taux de rendement par agent</h3>
     <ul class="text-sm text-slate-600 space-y-2 list-disc pl-5">
-      <li><strong>1. Mesurer le run-rate</strong> : période « 12 derniers mois » → « Où partent les heures » → total MCO ÷ semaines saisies = h/semaine récurrentes.</li>
-      <li><strong>2. Construire l'enveloppe</strong> : run-rate × 47 semaines = budget annuel. Ex : 25 h/sem × 47 = 1 175 h (= 0,71 ETP).</li>
-      <li><strong>3. Créer l'enveloppe</strong> : « ➕ Nouvelle enveloppe » → catégorie <strong>🔧 MCO (auto)</strong> → code MCO-26 → budget 1 175 h.</li>
-      <li><strong>4. Suivre</strong> : chaque bloc 🔧 saisi par l'équipe débite l'enveloppe. Colonne Rythme + horizon « ≈ X sem. rest. » = signal de dérive.</li>
-      <li><strong>🗑️ Supprimer</strong> : suppression définitive après double confirmation. Les blocs déjà saisis restent dans leurs catégories (charge, courbes) mais perdent leur rattachement budgétaire. Pour conserver l'historique sans le suivre, préférez <strong>⚪ clôturer</strong>.</li>
+      <li>Colonne <strong>« Rendement »</strong> du tableau de consolidation : modifiable directement (défaut <strong>0,85</strong>, pas de 0,05).</li>
+      <li>Il reflète la part de temps réellement productive de chaque personne (aléas, temps masqués…).</li>
+      <li>Impact immédiat : capacité hebdo de l'agent, courbes, taux C/C, dashboard, recommandation ETP.</li>
+      <li>Règle de sécurité : en tant que manager, vous ne pouvez modifier <strong>que</strong> le rendement (pas les rôles ni les ETP, réservés à l'admin).</li>
     </ul>
-    <p class="text-xs text-slate-500 mt-2">⚠️ Une seule enveloppe « auto » active par catégorie (sinon double comptage).</p>
   </div>
+
   <div class="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
     <h3 class="font-black text-slate-800">📋 Lire la consolidation</h3>
     <ul class="text-sm text-slate-600 space-y-2 list-disc pl-5">
-      <li><strong>Colonne ETP</strong> : contrat de chaque agent. Pied de tableau : <strong>somme des ETP</strong> = effectif réel.</li>
-      <li><strong>Courbe</strong> : capacité verte = Σ (ETP × 35 h) − absences, semaine par semaine.</li>
-      <li><strong>Taux C/C</strong> = heures travaillées ÷ capacité disponible de l'agent.</li>
+      <li><strong>Période</strong> : mois, mois dernier, trimestre, année, 12 mois, tout.</li>
+      <li><strong>Colonnes</strong> : ETP · Rendement · Capacité/sem (calculée) · Travaillé · Semaines saisies / semaines de la période · Taux C/C.</li>
+      <li><strong>Taux C/C</strong> = heures travaillées ÷ capacité réelle de la personne sur ses semaines saisies. 🟢 ≤ 100 % · 🟡 80-100 % vigilance inversée… en pratique : 🔴 &gt; 110 % surcharge · 🟠 100-110 % tendu · 🟡 80-100 % vigilance · 🟢 OK.</li>
+      <li><strong>📈 Courbe</strong> : charge équipe vs capacité réelle (ETP × rendements × congés déduits), semaine par semaine.</li>
+      <li><strong>🧮 Chiffres de période</strong> : Σ ETP, rendement moyen, jours travaillés/an, capacité hebdo & annuelle équipe, taux de saisie, activité n°1, comptes « gestion seule ».</li>
+      <li><strong>« Où partent les heures ? »</strong> : agrégat par activité précise, tous agents confondus.</li>
     </ul>
   </div>
+
+  <div class="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
+    <h3 class="font-black text-slate-800">💰 Enveloppes & budgets</h3>
+    <ul class="text-sm text-slate-600 space-y-2 list-disc pl-5">
+      <li><strong>Projet (rattachement explicite)</strong> : se débite uniquement quand un bloc 🚀 lui est rattaché.</li>
+      <li><strong>Auto (MCO / support / transverse)</strong> : débite <strong>tous</strong> les blocs de la catégorie, sans action des agents — adapté aux charges récurrentes. Une seule enveloppe auto active par catégorie.</li>
+      <li><strong>Méthode MCO</strong> : période « 12 derniers mois » → « Où partent les heures » → total MCO ÷ semaines saisies = run-rate h/sem → × semaines/an = budget annuel (ex : 25 h/sem × 52 = 1 300 h ≈ 0,87 ETP à rendement 0,85… à comparer à la capacité).</li>
+      <li><strong>Suivi</strong> : consommé, reste, %, rythme (h/sem), horizon « ≈ X sem. rest. », état 🟢🟡🟠🔴.</li>
+      <li><strong>Actions</strong> : ✏️ modifier · <strong>⚪/♻️ clôturer/rouvrir</strong> (recommandé en fin de projet : historique conservé) · <strong>🗑️ supprimer</strong> (double confirmation ; les blocs saisis restent dans leurs catégories mais perdent le rattachement budgétaire).</li>
+    </ul>
+  </div>
+
   <div class="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
     <h3 class="font-black text-slate-800">📊 Dashboard direction</h3>
     <ul class="text-sm text-slate-600 space-y-2 list-disc pl-5">
-      <li>Capacité annuelle = <strong>somme ETP réels</strong> × 35 h × 47 sem (comparée à la cible).</li>
-      <li>Bloc 💰 : budget total, consommé, reste, enveloppes dépassées + top consommation.</li>
-      <li>Recommandation : « il manque X ETP » calculé sur l'écart réel. 🖨️ PDF pour le CODIR.</li>
+      <li>Capacité annuelle = Σ (ETP × rendement × jours travaillés) de chaque compte « 📝 Saisit ».</li>
+      <li>Courbe cumulée depuis janvier : bleue au-dessus de la verte = surcharge <strong>structurelle</strong>.</li>
+      <li>Bloc 💰 : budget total, consommé, reste, enveloppes dépassées, top consommation.</li>
+      <li>Recommandation automatique : « il manque X ETP » + coût de l'inaction en €.</li>
+      <li><strong>🖨️ Imprimer PDF</strong> : le support CODIR / revue annuelle.</li>
+    </ul>
+  </div>
+
+  <div class="bg-orange-50 border-l-4 border-orange-500 rounded-xl p-5 text-sm text-slate-700">
+    <strong class="text-orange-800">🗓️ Rituel conseillé</strong>
+    <ul class="list-disc pl-5 mt-2 space-y-1">
+      <li><strong>Lundi matin</strong> : colonne « Semaines saisies » → relancer les manquants (objectif ≥ 80 %).</li>
+      <li><strong>En continu</strong> : ajuster les rendements quand la réalité terrain change.</li>
+      <li><strong>Fin de mois</strong> : période « Mois dernier » + budgets → PDF dashboard pour le CODIR.</li>
     </ul>
   </div>
 </section>
 
+<!-- ================= ADMIN ================= -->
 <section id="view-admin" class="space-y-6 hidden">
   <div class="bg-red-50 border-l-4 border-red-500 rounded-xl p-5">
-    <h2 class="font-black text-red-800 text-lg">🔴 Admin : comptes, ETP, référentiels</h2>
+    <h2 class="font-black text-red-800 text-lg">🔴 Admin : comptes, ETP, rendements, paramètres</h2>
+    <p class="text-sm text-slate-700 mt-1">Tous les droits : utilisateurs, édition de tous les calendriers, référentiels, paramètres de calcul, purge.</p>
   </div>
+
   <div class="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
-    <h3 class="font-black text-slate-800">👥 Utilisateurs & ETP</h3>
+    <h3 class="font-black text-slate-800">👥 Utilisateurs</h3>
     <div class="flex gap-4 items-start p-4 bg-slate-50 rounded-xl">
       <div class="w-8 h-8 shrink-0 rounded-full bg-red-500 text-white font-black flex items-center justify-center">1</div>
-      <p class="text-sm text-slate-700"><strong>Créer un compte</strong> : nom, email, mdp temporaire, rôle, <strong>ETP</strong> (1 = TP, 0.8 = 80 %, 0.5 = mi-temps).</p>
+      <p class="text-sm text-slate-700"><strong>Créer un compte</strong> : nom, email, mot de passe temporaire (6 car. min), rôle, <strong>ETP</strong> (1 = temps plein, 0.8 = 80 %…). Le rendement est créé à <strong>0,85</strong> par défaut.</p>
     </div>
     <div class="flex gap-4 items-start p-4 bg-slate-50 rounded-xl">
       <div class="w-8 h-8 shrink-0 rounded-full bg-red-500 text-white font-black flex items-center justify-center">2</div>
-      <p class="text-sm text-slate-700"><strong>Modifier un ETP</strong> directement dans le tableau : effet immédiat sur tous les calculs de capacité.</p>
+      <p class="text-sm text-slate-700"><strong>Régler ETP & rendement</strong> directement dans le tableau (champs numériques) : effet immédiat sur toutes les capacités et le dashboard.</p>
     </div>
     <div class="flex gap-4 items-start p-4 bg-slate-50 rounded-xl">
       <div class="w-8 h-8 shrink-0 rounded-full bg-red-500 text-white font-black flex items-center justify-center">3</div>
-      <p class="text-sm text-slate-700"><strong>Mode saisie</strong> 📝/ et <strong>accès</strong> ✅/⛔ comme avant.</p>
+      <p class="text-sm text-slate-700"><strong>Mode de saisie</strong> : « 📝 Saisit » = remplit un planning et compte dans la charge · « 🧭 Gestion seule » = pilote sans saisir, hors charge. <strong>Accès</strong> : ✅ Actif / ⛔ Désactivé.</p>
     </div>
   </div>
+
   <div class="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
-    <h3 class="font-black text-slate-800">⚙️ Paramètres</h3>
+    <h3 class="font-black text-slate-800">⚙️ Paramètres de projection (onglet Manager)</h3>
     <ul class="text-sm text-slate-600 space-y-2 list-disc pl-5">
-      <li><strong>Heures contrat / sem (1 ETP)</strong> : base de calcul (35 h).</li>
-      <li><strong>Effectif cible ETP</strong> : référence direction, comparée à l'effectif réel.</li>
-      <li>Référentiels : MCO, support, transverse, absences (les enveloppes projets/MCO sont dans « 💰 »).</li>
+      <li><strong>Heures contrat / sem. (1 ETP)</strong> : base de calcul (35 h).</li>
+      <li><strong>Semaines / an</strong> : ex. 52 → jours ouvrés = 52 × 5 = 260 j.</li>
+      <li><strong>Jours congés+RTT / an</strong> : défaut <strong>46</strong> → 260 − 46 = 214 j travaillés/an. La formule complète s'affiche sous les paramètres.</li>
+      <li><strong>Effectif cible ETP</strong> : référence direction, comparée à l'effectif réel (Σ ETP saisis).</li>
+      <li><strong>Taux horaire (€)</strong> : conversion des budgets et du coût de surcharge en euros.</li>
     </ul>
+  </div>
+
+  <div class="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
+    <h3 class="font-black text-slate-800">🏷️ Référentiels & purge</h3>
+    <ul class="text-sm text-slate-600 space-y-2 list-disc pl-5">
+      <li><strong>Référentiels</strong> : suggestions de libellés pour MCO, support, transverse (les projets se gèrent dans « 💰 Enveloppes »).</li>
+      <li><strong>🗑️ Purger</strong> : supprime tous les blocs de tous les agents (double confirmation). Réservé aux tests.</li>
+    </ul>
+  </div>
+
+  <div class="bg-slate-800 text-white rounded-2xl p-6 text-sm">
+    <h3 class="font-black mb-3">🛡️ Matrice des droits</h3>
+    <table class="w-full text-xs">
+      <thead><tr class="text-left text-white/60 uppercase"><th class="p-2">Fonction</th><th class="p-2">🟢 Agent</th><th class="p-2">🔵 Manager</th><th class="p-2">🔴 Admin</th></tr></thead>
+      <tbody class="divide-y divide-white/10">
+        <tr><td class="p-2 font-bold">Son propre calendrier</td><td class="p-2">✏️ (si 📝)</td><td class="p-2">✏️ (si 📝)</td><td class="p-2">✏️ (si 📝)</td></tr>
+        <tr><td class="p-2 font-bold">Calendriers des autres</td><td class="p-2">🚫</td><td class="p-2">👁️ lecture seule</td><td class="p-2">✏️</td></tr>
+        <tr><td class="p-2 font-bold">Rendement des agents</td><td class="p-2">🚫</td><td class="p-2">✏️</td><td class="p-2">✏️</td></tr>
+        <tr><td class="p-2 font-bold">ETP, rôles, accès, mode saisie</td><td class="p-2">🚫</td><td class="p-2">🚫</td><td class="p-2">✏️</td></tr>
+        <tr><td class="p-2 font-bold">Enveloppes & budgets</td><td class="p-2">🚫 (voient les listes)</td><td class="p-2">✏️</td><td class="p-2">✏️</td></tr>
+        <tr><td class="p-2 font-bold">Consolidation + Dashboard</td><td class="p-2">🚫</td><td class="p-2">✅</td><td class="p-2">✅</td></tr>
+        <tr><td class="p-2 font-bold">Paramètres, référentiels, purge</td><td class="p-2">🚫</td><td class="p-2">👁️ / 🚫 purge</td><td class="p-2">✏️</td></tr>
+      </tbody>
+    </table>
   </div>
 </section>
 
+<!-- ================= FAQ ================= -->
 <section id="view-faq" class="space-y-6 hidden">
   <div class="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
-    <h3 class="font-black text-slate-800">❓ FAQ</h3>
-    <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">🧮 Qu'est-ce qu'un ETP ?</summary><p class="text-sm text-slate-600 mt-2">Équivalent Temps Plein : 1 ETP = temps plein. La somme des ETP = effectif réel, base de toutes les capacités.</p></details>
-    <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">💰 Quelle différence projet vs enveloppe « auto » ?</summary><p class="text-sm text-slate-600 mt-2">Un <strong>projet</strong> se débite seulement quand un bloc lui est rattaché (liste « Projet budgété »). Une enveloppe <strong>auto</strong> (MCO/support/transverse) débite <strong>tous</strong> les blocs de sa catégorie, sans action de l'agent — adapté aux charges récurrentes.</p></details>
-    <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">🗑️ Supprimer ou clôturer une enveloppe ?</summary><p class="text-sm text-slate-600 mt-2"><strong>⚪ Clôturer</strong> = garde l'historique et la consommation, retire l'enveloppe des suggestions agents (recommandé en fin de projet). <strong>🗑️ Supprimer</strong> = efface définitivement la ligne (double confirmation) ; les blocs saisis restent dans leurs catégories mais ne sont plus rattachés budgétairement.</p></details>
-    <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">🔧 Comment budgétiser le MCO ?</summary><p class="text-sm text-slate-600 mt-2">Mesurez le run-rate (h/sem sur 12 mois) × 47 semaines = budget annuel, puis créez une enveloppe « 🔧 MCO (auto) ». Voir onglet Manager.</p></details>
-    <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">🔑 Mot de passe oublié ?</summary><p class="text-sm text-slate-600 mt-2">Lien sur l'écran de connexion → email de réinitialisation.</p></details>
-    <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">🌴 À quoi sert 🌴 Absences ?</summary><p class="text-sm text-slate-600 mt-2">À poser CP/RTT/formation dans le calendrier. Capacité proratisée automatiquement.</p></details>
-    <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">⧉ Dupliquer un bloc ?</summary><p class="text-sm text-slate-600 mt-2">Clic bloc → « ⧉ Dupliquer… » → jours ou « ⇉ Tous les jours », ou Ctrl+glisser.</p></details>
-    <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">🧭 Planning en lecture seule ?</summary><p class="text-sm text-slate-600 mt-2">Compte « 🧭 Gestion seule » : demandez le passage en « 📝 Saisit ».</p></details>
-    <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">🧮 Mon total ≠ 35 h ?</summary><p class="text-sm text-slate-600 mt-2">Normal si ETP &lt; 1 ou absences 🌴 : comparez au total « disponible » affiché.</p></details>
+    <h3 class="font-black text-slate-800">❓ Questions fréquentes</h3>
+    <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">🧮 Qu'est-ce qu'un ETP ?</summary><p class="text-sm text-slate-600 mt-2">Équivalent Temps Plein : 1 ETP = une personne à temps plein. La somme des ETP de l'équipe = sa force de travail réelle, base de toutes les capacités.</p></details>
+    <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">🎚️ Qu'est-ce que le taux de rendement ?</summary><p class="text-sm text-slate-600 mt-2">La part du temps réellement productive (défaut 0,85). Il est réglé par personne : le manager le modifie dans le tableau de consolidation, l'admin dans Utilisateurs. Il s'applique à toute la capacité.</p></details>
+    <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">🌴 Comment sont gérés les congés ?</summary><p class="text-sm text-slate-600 mt-2">Automatiquement : plus aucune saisie de congés. La capacité annuelle retire les jours de congés+RTT (paramètre, défaut 46 j) des jours ouvrés (semaines/an × 5). La déduction est lissée sur toutes les semaines.</p></details>
+    <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">🧮 Pourquoi mon total ≠ 35 h ?</summary><p class="text-sm text-slate-600 mt-2">Normal : votre capacité réelle = 35 h × ETP × rendement × congés déduits (ex : 24,5 h). Comparez vos heures travaillées au total « capacité réelle » affiché sous vos totaux, pas à 35 h.</p></details>
+    <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">💰 Projet vs enveloppe « auto » ?</summary><p class="text-sm text-slate-600 mt-2">Un <strong>projet</strong> se débite seulement quand un bloc 🚀 lui est rattaché. Une enveloppe <strong>auto</strong> (MCO/support/transverse) débite tous les blocs de sa catégorie, sans action des agents — adapté aux charges récurrentes.</p></details>
+    <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">🗑️ Supprimer ou clôturer une enveloppe ?</summary><p class="text-sm text-slate-600 mt-2"><strong>⚪ Clôturer</strong> = conserve historique et consommation, retire l'enveloppe des suggestions (recommandé en fin de projet). <strong>🗑️ Supprimer</strong> = efface définitivement (double confirmation) ; les blocs saisis restent dans leurs catégories mais perdent le rattachement budgétaire.</p></details>
+    <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">🔧 Comment budgétiser le MCO ?</summary><p class="text-sm text-slate-600 mt-2">Mesurez le run-rate : période « 12 derniers mois » → « Où partent les heures » → total MCO ÷ semaines saisies = h/sem. Multipliez par les semaines/an = budget annuel. Créez ensuite une enveloppe « 🔧 MCO (auto) ».</p></details>
+    <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer"> Mot de passe oublié ?</summary><p class="text-sm text-slate-600 mt-2">Lien « 🔑 Mot de passe oublié ? » sur l'écran de connexion → email de réinitialisation automatique.</p></details>
+    <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">⧉ Dupliquer un bloc ?</summary><p class="text-sm text-slate-600 mt-2">Clic bloc → « ⧉ Dupliquer ce bloc vers… » → boutons jours ou « ⇉ Tous les jours ». Ou Ctrl + glisser (⌘ Mac) pour copier vers un créneau précis.</p></details>
+    <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">🧭 Planning en lecture seule ?</summary><p class="text-sm text-slate-600 mt-2">Deux cas : compte « 🧭 Gestion seule » (bandeau gris : aucune saisie attendue), ou consultation du planning d'un autre (bandeau orange). Pour contribuer, demandez le passage en « 📝 Saisit ».</p></details>
+    <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">📲 Installer l'application ?</summary><p class="text-sm text-slate-600 mt-2">Android/Chrome : ⋮ → « Installer l'application ». iPhone/Safari : Partager → « Sur l'écran d'accueil ». PC Chrome/Edge : icône ⊕ dans la barre d'adresse.</p></details>
+    <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">👀 Qui voit mes semaines ?</summary><p class="text-sm text-slate-600 mt-2">Vous, et en lecture seule vos managers/admins. Personne d'autre. Protection garantie côté serveur.</p></details>
+    <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">📴 Sans réseau ?</summary><p class="text-sm text-slate-600 mt-2">L'app installée s'ouvre hors connexion (coquille en cache), mais lire/écrire les données de l'équipe nécessite du réseau : c'est un outil collaboratif temps réel.</p></details>
   </div>
   <div class="bg-indigo-50 border-l-4 border-indigo-500 rounded-xl p-5 text-sm text-slate-700">
-    <strong class="text-indigo-800">🎯 Pourquoi tout ceci ?</strong> Heures saisies + ETP réels + enveloppes = dossier charge/capacité opposable en direction, chiffré en ETP manquants et en euros.
+    <strong class="text-indigo-800">🎯 Pourquoi tout ceci ?</strong> Heures saisies + ETP + rendements + congés déduits + enveloppes = un dossier charge/capacité <strong>opposable en direction</strong>, chiffré en ETP manquants et en euros, sans aucune saisie superflue côté agent.
   </div>
 </section>
 
