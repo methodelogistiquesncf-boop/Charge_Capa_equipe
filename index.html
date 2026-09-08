@@ -91,14 +91,13 @@ body { font-family: 'Inter', sans-serif; }
     <div class="p-6 border-b border-slate-200 flex flex-wrap justify-between items-center gap-4">
       <div>
         <h2 class="text-xl font-black text-slate-800">🗓️ <span id="calendar-owner-title">Calendrier</span></h2>
-        <p class="text-sm text-slate-500 mt-1">Clic créneau vide = ajouter · Glisser-déposer = déplacer · <strong class="text-emerald-600">Ctrl+glisser = copier</strong> · Clic bloc = modifier (boutons « dupliquer ») · <strong class="text-violet-600">Absences (CP, RTT…) = catégorie 🌴</strong></p>
+        <p class="text-sm text-slate-500 mt-1">Clic créneau vide = ajouter · Glisser-déposer = déplacer · <strong class="text-emerald-600">Ctrl+glisser = copier</strong> · Clic bloc = modifier · <strong class="text-violet-600">Absences = 🌴</strong></p>
       </div>
       <div id="agent-controls" class="hidden items-center gap-2">
         <select id="agent-select" onchange="selectUser(this.value)" class="p-2.5 rounded-xl border border-slate-200 font-semibold text-sm outline-none focus:border-blue-500"></select>
       </div>
     </div>
 
-    <!-- Barre de semaine -->
     <div id="week-bar" class="p-4 border-b border-slate-200 flex flex-wrap items-center gap-2 bg-white">
       <button onclick="shiftWeekView(-1)" class="px-3 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 font-black text-sm no-print">◀</button>
       <div id="week-title" class="font-black text-slate-800 text-sm min-w-[230px] text-center px-2"></div>
@@ -129,11 +128,17 @@ body { font-family: 'Inter', sans-serif; }
     </div>
     <div class="space-y-4">
       <div><label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Catégorie</label>
-        <select id="m-cat" onchange="refreshModalDatalist()" class="w-full p-3 rounded-xl bg-slate-50 border border-slate-200 font-bold text-sm outline-none">
+        <select id="m-cat" onchange="refreshModalDatalist(); updateProjWrap()" class="w-full p-3 rounded-xl bg-slate-50 border border-slate-200 font-bold text-sm outline-none">
           <option value="projet">🚀 Projets</option><option value="mco">🔧 MCO</option>
-          <option value="support">🆘 Support terrain</option><option value="transverse">📋 Transverse</option>
+          <option value="support"> Support terrain</option><option value="transverse">📋 Transverse</option>
           <option value="absences">🌴 Absences (CP, RTT, formation…)</option>
         </select></div>
+      <div id="m-proj-wrap" class="hidden"><label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Projet budgété</label>
+        <select id="m-proj" onchange="onProjChange()" class="w-full p-3 rounded-xl bg-slate-50 border border-slate-200 font-bold text-sm outline-none">
+          <option value="">— Hors budget / libellé libre —</option>
+        </select>
+        <p id="m-proj-warn" class="hidden mt-1 text-[11px] font-bold text-red-600"></p>
+      </div>
       <div><label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Activité précise</label>
         <input type="text" id="m-label" list="dl-labels" placeholder="Ex : MAG9, Lean Picking, CP…" class="w-full p-3 rounded-xl bg-slate-50 border border-slate-200 font-semibold text-sm outline-none focus:border-blue-500">
         <datalist id="dl-labels"></datalist></div>
@@ -160,7 +165,7 @@ body { font-family: 'Inter', sans-serif; }
   <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
     <div class="p-6 border-b border-slate-200 flex flex-wrap justify-between items-center gap-4">
       <div><h2 class="text-xl font-black text-slate-800">📋 Consolidation équipe</h2>
-        <p class="text-sm text-slate-500 mt-1">Semaines réelles saisies · capacités proratisées selon les absences 🌴 posées dans les calendriers</p></div>
+        <p class="text-sm text-slate-500 mt-1">Semaines réelles · capacités proratisées selon absences 🌴 · budgets projets débités automatiquement</p></div>
       <div class="flex items-center gap-2">
         <select id="period-select" onchange="renderManager()" class="p-2.5 rounded-xl border border-slate-200 font-semibold text-sm outline-none">
           <option value="month">Mois en cours</option>
@@ -182,6 +187,37 @@ body { font-family: 'Inter', sans-serif; }
         <div><label class="block text-xs font-semibold text-slate-600 mb-1.5">Taux horaire (€)</label><input type="number" id="cfg-taux" oninput="saveConfigFromInputs()" class="w-full p-2 rounded-lg border border-slate-200 text-sm font-bold text-center"></div>
       </div>
     </div>
+
+    <!-- ===== 💰 PROJETS & BUDGETS ===== -->
+    <div class="p-6 bg-slate-50 border-b border-slate-200">
+      <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">💰 Projets & budgets</h3>
+      <div id="proj-form" class="hidden mb-4 p-4 bg-white rounded-xl border border-slate-200 grid grid-cols-2 md:grid-cols-6 gap-3 items-end">
+        <input id="pj-code" placeholder="Code (MAG9)" class="p-2 rounded-lg border border-slate-200 text-sm font-bold outline-none focus:border-blue-500">
+        <input id="pj-name" placeholder="Nom du projet" class="md:col-span-2 p-2 rounded-lg border border-slate-200 text-sm font-bold outline-none focus:border-blue-500">
+        <input id="pj-budget" type="number" placeholder="Budget (h)" class="p-2 rounded-lg border border-slate-200 text-sm font-bold outline-none focus:border-blue-500">
+        <label class="flex items-center gap-2 text-xs font-bold text-slate-600 pb-2"><input id="pj-active" type="checkbox" checked class="w-4 h-4"> actif</label>
+        <div class="flex gap-2">
+          <button onclick="saveProject()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-xs font-black">Enregistrer</button>
+          <button onclick="cancelProject()" class="bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-lg text-xs font-bold">Annuler</button>
+        </div>
+      </div>
+      <button id="proj-add-btn" onclick="newProject()" class="hidden mb-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-3 py-2 rounded-lg text-xs font-black no-print">➕ Nouveau projet</button>
+      <div class="overflow-x-auto"><table class="w-full text-sm">
+        <thead><tr class="bg-slate-800 text-white">
+          <th class="text-left p-3 font-bold text-xs uppercase">Code</th>
+          <th class="text-left p-3 font-bold text-xs uppercase">Projet</th>
+          <th class="text-center p-3 font-bold text-xs uppercase">Budget</th>
+          <th class="text-center p-3 font-bold text-xs uppercase">Consommé</th>
+          <th class="text-center p-3 font-bold text-xs uppercase">Reste</th>
+          <th class="text-center p-3 font-bold text-xs uppercase">%</th>
+          <th class="text-center p-3 font-bold text-xs uppercase">Rythme & horizon</th>
+          <th class="text-center p-3 font-bold text-xs uppercase">État</th>
+          <th class="text-center p-3 font-bold text-xs uppercase no-print">Actions</th>
+        </tr></thead>
+        <tbody id="proj-table-body"></tbody>
+      </table></div>
+    </div>
+
     <div class="p-6 bg-slate-50 border-b border-slate-200">
       <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">🏷️ Référentiels d'activités</h3>
       <div class="grid grid-cols-2 md:grid-cols-5 gap-3" id="ref-panel"></div>
@@ -229,7 +265,7 @@ body { font-family: 'Inter', sans-serif; }
         </select>
         <button onclick="createUser()" class="bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold text-sm">Créer</button>
       </div>
-      <p class="text-[11px] text-slate-400 mt-2">Rôles : <strong>agent</strong> = son planning seul · <strong>manager</strong> = vision équipe + dashboard · <strong>admin</strong> = tout. Mode de saisie : <strong>📝 Saisit</strong> ou <strong>🧭 Gestion seule</strong>.</p>
+      <p class="text-[11px] text-slate-400 mt-2">Rôles : <strong>agent</strong> = son planning seul · <strong>manager</strong> = vision équipe + budgets + dashboard · <strong>admin</strong> = tout.</p>
     </div>
     <div class="overflow-x-auto">
       <table class="w-full text-sm">
@@ -265,8 +301,13 @@ body { font-family: 'Inter', sans-serif; }
       </div>
       <div class="bg-slate-50 p-6 rounded-xl mb-8">
         <h3 class="font-black text-slate-800 mb-1">📈 Trajectoire charge vs capacité (cumul depuis janvier)</h3>
-        <p class="text-xs text-slate-500 mb-3">Bleue au-dessus de la verte = surcharge structurelle : l'écart vertical final est le retard irrattrapable de l'année.</p>
+        <p class="text-xs text-slate-500 mb-3">Bleue au-dessus de la verte = surcharge structurelle.</p>
         <canvas id="chart-cumul" height="110"></canvas>
+      </div>
+      <div class="bg-slate-50 p-6 rounded-xl mb-8">
+        <h3 class="font-black text-slate-800 mb-1">💰 Budgets projets</h3>
+        <div id="dash-budget-kpis" class="grid grid-cols-2 md:grid-cols-4 gap-3 my-4"></div>
+        <div id="dash-budget-top"></div>
       </div>
       <div class="bg-slate-50 p-6 rounded-xl mb-8">
         <h3 class="font-black text-slate-800 mb-1">🔥 Top activités consommatrices (équipe)</h3>
@@ -304,10 +345,10 @@ const JOURS = ['Lundi','Mardi','Mercredi','Jeudi','Vendredi'];
 const DAY_START = 8, DAY_END = 18, ROW_H = 46;
 const ROLE_STYLE = { agent: ['🟢','bg-green-100 text-green-700'], manager: ['🔵','bg-blue-100 text-blue-700'], admin: ['🔴','bg-red-100 text-red-700'] };
 
-let me = null, allUsers = {}, allBlocks = [];
+let me = null, allUsers = {}, allBlocks = [], allProjects = [];
 let config = { hoursWeek: 35, weeks: 47, etp: 10, taux: 55 };
 let refs = { ...DEFAULT_REFS, projet: [], mco: [], support: [], transverse: [] };
-let viewedUid = null, editingBlockId = null, draggedBlockId = null;
+let viewedUid = null, editingBlockId = null, draggedBlockId = null, editingProjectId = null;
 let chartAgents = null, chartWeeks = null, chartCumul = null, bootstrapped = false, blocksListenerOn = false;
 let unsubs = [];
 let currentWeek = isoWeekKey(new Date());
@@ -348,7 +389,17 @@ const weekOf = b => b.week || 'TYPE';
 const absHoursOf = (uid, w) => allBlocks.filter(b => b.owner === uid && weekOf(b) === w && b.cat === 'absences').reduce((s,b) => s + b.duration, 0);
 const weightOf = (uid, w) => Math.max(0, 1 - absHoursOf(uid, w) / config.hoursWeek);
 
-/* ---------- PÉRIODES MANAGER ---------- */
+/* ---------- PROJETS : CONSUMMATION ---------- */
+const projBlocks = p => allBlocks.filter(b => b.cat === 'projet' && weekOf(b) !== 'TYPE' && (b.projectId === p.id || (!b.projectId && b.label === p.name)));
+const projectConsumed = p => projBlocks(p).reduce((s,b) => s + b.duration, 0);
+function projectElapsedWeeks(p) {
+  const weeks = [...new Set(projBlocks(p).map(b => weekOf(b)))].sort();
+  if (!weeks.length) return 0;
+  const first = mondayOf(weeks[0]); const now = mondayOf(isoWeekKey(new Date()));
+  return Math.max(1, Math.round((now - first) / (7*86400000)) + 1);
+}
+
+/* ---------- PÉRIODES ---------- */
 function periodRange(kind) {
   const now = new Date(), y = now.getFullYear(), m = now.getMonth();
   switch (kind) {
@@ -429,6 +480,10 @@ function startListeners() {
     ensureOwnRecord();
     renderUsers(); renderUserSelect(); refreshAll();
   }, err => console.warn('Écoute users refusée :', err.code)));
+  unsubs.push(onSnapshot(collection(db, PATHS.projects), snap => {
+    allProjects = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderProjects(); refreshAll();
+  }));
   unsubs.push(onSnapshot(doc(db, PATHS.config, 'main'), snap => {
     if (snap.exists()) config = { ...config, ...snap.data() };
     loadConfigInputs(); refreshAll();
@@ -542,7 +597,7 @@ window.copyPrevWeek = () => {
   if (dst.length && !confirm('La semaine actuelle contient déjà ' + dst.length + ' bloc(s). Ajouter la copie par-dessus ?')) return;
   src.forEach(b => {
     const id = 'b' + Date.now() + Math.random().toString(36).slice(2, 6);
-    setDoc(doc(db, PATHS.blocks, id), { cat: b.cat, label: b.label, day: b.day, start: b.start, duration: b.duration, owner: viewedUid, week: currentWeek, id });
+    setDoc(doc(db, PATHS.blocks, id), { cat: b.cat, label: b.label, day: b.day, start: b.start, duration: b.duration, owner: viewedUid, week: currentWeek, projectId: b.projectId || null, id });
   });
 };
 window.copyTypeWeek = () => {
@@ -553,7 +608,7 @@ window.copyTypeWeek = () => {
   if (dst.length && !confirm('La semaine actuelle contient déjà ' + dst.length + ' bloc(s). Ajouter la copie de la semaine type par-dessus ?')) return;
   src.forEach(b => {
     const id = 'b' + Date.now() + Math.random().toString(36).slice(2, 6);
-    setDoc(doc(db, PATHS.blocks, id), { cat: b.cat, label: b.label, day: b.day, start: b.start, duration: b.duration, owner: viewedUid, week: currentWeek, id });
+    setDoc(doc(db, PATHS.blocks, id), { cat: b.cat, label: b.label, day: b.day, start: b.start, duration: b.duration, owner: viewedUid, week: currentWeek, projectId: b.projectId || null, id });
   });
 };
 
@@ -622,7 +677,7 @@ function renderCalendar() {
   document.getElementById('legend').innerHTML = CATS.map(c => `<span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full" style="background:${c.color}"></span>${c.label}</span>`).join('');
 }
 
-/* ---------- DRAG & DROP (+ COPIE AVEC CTRL) ---------- */
+/* ---------- DRAG & DROP ---------- */
 window.onDragStart = (e, id) => { if (!canEdit()) { e.preventDefault(); return; } draggedBlockId = id; copyDrag = e.ctrlKey || e.metaKey; e.dataTransfer.setData('text/plain', id); e.dataTransfer.effectAllowed = copyDrag ? 'copy' : 'move'; setTimeout(() => e.target.classList.add('dragging'), 0); };
 window.onDragEnd = e => { e.target.classList.remove('dragging'); draggedBlockId = null; copyDrag = false; document.querySelectorAll('.day-col.drag-over').forEach(el => el.classList.remove('drag-over')); };
 window.onDragOver = e => { if (!canEdit()) return; e.preventDefault(); e.dataTransfer.dropEffect = copyDrag ? 'copy' : 'move'; e.currentTarget.classList.add('drag-over'); };
@@ -637,14 +692,14 @@ window.onDrop = (e, day) => {
   start = Math.min(Math.max(start, DAY_START), DAY_END - b.duration);
   if (copyDrag || e.ctrlKey || e.metaKey) {
     const nid = 'b' + Date.now() + Math.random().toString(36).slice(2, 6);
-    setDoc(doc(db, PATHS.blocks, nid), { id: nid, owner: b.owner, week: b.week || currentWeek, cat: b.cat, label: b.label, day, start, duration: b.duration });
+    setDoc(doc(db, PATHS.blocks, nid), { id: nid, owner: b.owner, week: b.week || currentWeek, cat: b.cat, label: b.label, day, start, duration: b.duration, projectId: b.projectId || null });
   } else {
     updateDoc(doc(db, PATHS.blocks, id), { day, start });
   }
   copyDrag = false;
 };
 
-/* ---------- MODAL BLOC + DUPLICATION ---------- */
+/* ---------- MODAL BLOC + PROJETS + DUPLICATION ---------- */
 function fillModalSelects() {
   document.getElementById('m-day').innerHTML = JOURS.map(j => `<option value="${j}">${j}</option>`).join('');
   let o = ''; for (let h = DAY_START; h < DAY_END; h += 0.5) o += `<option value="${h}">${fmtHour(h)}</option>`;
@@ -652,7 +707,34 @@ function fillModalSelects() {
   let d = ''; for (let x = 0.5; x <= 10; x += 0.5) d += `<option value="${x}">${fmt(x)}h</option>`;
   document.getElementById('m-dur').innerHTML = d;
 }
-window.refreshModalDatalist = () => { document.getElementById('dl-labels').innerHTML = (refs[document.getElementById('m-cat').value] || []).map(r => `<option value="${esc(r)}">`).join(''); };
+window.refreshModalDatalist = () => {
+  const cat = document.getElementById('m-cat').value;
+  let opts = (refs[cat] || []).slice();
+  if (cat === 'projet') opts = opts.concat(allProjects.filter(p => p.active !== false).map(p => (p.code ? p.code + ' — ' : '') + p.name));
+  document.getElementById('dl-labels').innerHTML = opts.map(r => `<option value="${esc(r)}">`).join('');
+};
+function updateProjWrap() {
+  const isProj = document.getElementById('m-cat').value === 'projet';
+  document.getElementById('m-proj-wrap').classList.toggle('hidden', !isProj);
+  if (!isProj) return;
+  const sel = document.getElementById('m-proj');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">— Hors budget / libellé libre —</option>' +
+    allProjects.filter(p => p.active !== false).sort((a,b) => (a.code||'').localeCompare(b.code||''))
+      .map(p => `<option value="${p.id}">${esc(p.code||'')} — ${esc(p.name||'')}</option>`).join('');
+  if (cur) sel.value = cur;
+  onProjChange();
+}
+window.updateProjWrap = updateProjWrap;
+window.onProjChange = () => {
+  const id = document.getElementById('m-proj').value;
+  const warn = document.getElementById('m-proj-warn');
+  const p = allProjects.find(x => x.id === id);
+  if (p && p.budgetH && projectConsumed(p) > p.budgetH) {
+    warn.textContent = '⚠️ Budget déjà dépassé (' + Math.round(projectConsumed(p)/p.budgetH*100) + '%) — informez votre manager.';
+    warn.classList.remove('hidden');
+  } else warn.classList.add('hidden');
+};
 window.openModal = (day, start, blockId) => {
   if (!canEdit()) return;
   editingBlockId = blockId || null; fillModalSelects();
@@ -664,6 +746,13 @@ window.openModal = (day, start, blockId) => {
   document.getElementById('m-start').value = b ? b.start : start;
   document.getElementById('m-dur').value = b ? b.duration : 1;
   document.getElementById('m-delete').classList.toggle('hidden', !b);
+  updateProjWrap();
+  if (b) {
+    const sel = document.getElementById('m-proj');
+    sel.value = b.projectId || '';
+    if (!sel.value) { const m = allProjects.find(p => p.name === b.label); if (m) sel.value = m.id; }
+    onProjChange();
+  }
   dupDone = {};
   document.getElementById('m-dup').classList.toggle('hidden', !b);
   if (b) renderDupButtons(b);
@@ -676,7 +765,10 @@ window.saveBlock = () => {
   let start = parseFloat(document.getElementById('m-start').value);
   let dur = parseFloat(document.getElementById('m-dur').value);
   if (start + dur > DAY_END) dur = DAY_END - start;
-  const data = { cat: document.getElementById('m-cat').value, label: document.getElementById('m-label').value.trim(), day: document.getElementById('m-day').value, start, duration: dur, week: currentWeek };
+  const projSel = document.getElementById('m-proj').value || null;
+  let label = document.getElementById('m-label').value.trim();
+  if (projSel && !label) { const p = allProjects.find(x => x.id === projSel); if (p) label = p.name; }
+  const data = { cat: document.getElementById('m-cat').value, label, day: document.getElementById('m-day').value, start, duration: dur, week: currentWeek, projectId: projSel };
   if (editingBlockId) updateDoc(doc(db, PATHS.blocks, editingBlockId), data);
   else { const id = 'b' + Date.now(); setDoc(doc(db, PATHS.blocks, id), { id, owner: viewedUid, ...data }); }
   closeModal();
@@ -692,7 +784,7 @@ function renderDupButtons(b) {
 function dupBlock(day) {
   const b = allBlocks.find(x => x.id === editingBlockId); if (!b) return;
   const id = 'b' + Date.now() + Math.random().toString(36).slice(2, 6);
-  setDoc(doc(db, PATHS.blocks, id), { id, owner: b.owner, week: b.week || currentWeek, cat: b.cat, label: b.label, day, start: b.start, duration: b.duration });
+  setDoc(doc(db, PATHS.blocks, id), { id, owner: b.owner, week: b.week || currentWeek, cat: b.cat, label: b.label, day, start: b.start, duration: b.duration, projectId: b.projectId || null });
   dupDone[day] = true;
 }
 window.dupToDay = day => { if (!canEdit()) return; dupBlock(day); renderDupButtons(allBlocks.find(x => x.id === editingBlockId)); };
@@ -741,6 +833,63 @@ function renderRefPanel() {
     if (!v || (refs[cat]||[]).includes(v)) return;
     setDoc(doc(db, PATHS.refs, 'main'), { [cat]: [...(refs[cat]||[]), v] }, { merge: true });
   });
+}
+
+/* ---------- PROJETS : CRUD + TABLEAU ---------- */
+window.newProject = () => { editingProjectId = null; ['pj-code','pj-name','pj-budget'].forEach(id => document.getElementById(id).value = ''); document.getElementById('pj-active').checked = true; document.getElementById('proj-form').classList.remove('hidden'); };
+window.cancelProject = () => { document.getElementById('proj-form').classList.add('hidden'); editingProjectId = null; };
+window.editProject = id => {
+  const p = allProjects.find(x => x.id === id); if (!p) return;
+  editingProjectId = id;
+  document.getElementById('pj-code').value = p.code || '';
+  document.getElementById('pj-name').value = p.name || '';
+  document.getElementById('pj-budget').value = p.budgetH || 0;
+  document.getElementById('pj-active').checked = p.active !== false;
+  document.getElementById('proj-form').classList.remove('hidden');
+};
+window.toggleProject = id => { const p = allProjects.find(x => x.id === id); if (!p) return; setDoc(doc(db, PATHS.projects, id), { active: p.active === false }, { merge: true }); };
+window.saveProject = () => {
+  if (!isPrivileged()) return;
+  const code = document.getElementById('pj-code').value.trim();
+  const name = document.getElementById('pj-name').value.trim();
+  const budgetH = parseFloat(document.getElementById('pj-budget').value) || 0;
+  const active = document.getElementById('pj-active').checked;
+  if (!code || !name) { alert('Code et nom requis.'); return; }
+  const id = editingProjectId || ('p' + Date.now());
+  setDoc(doc(db, PATHS.projects, id), { code, name, budgetH, active });
+  cancelProject();
+};
+
+function renderProjects() {
+  const canManage = isPrivileged();
+  document.getElementById('proj-add-btn').classList.toggle('hidden', !canManage);
+  const tbody = document.getElementById('proj-table-body');
+  if (!tbody) return;
+  if (!allProjects.length) {
+    tbody.innerHTML = '<tr><td colspan="9" class="p-6 text-center text-slate-400 italic">Aucun projet budgété.' + (canManage ? ' Cliquez sur « ➕ Nouveau projet ».' : '') + '</td></tr>';
+    return;
+  }
+  tbody.innerHTML = allProjects.slice().sort((a,b) => (a.code||'').localeCompare(b.code||'')).map(p => {
+    const cons = projectConsumed(p);
+    const rest = (p.budgetH||0) - cons;
+    const pct = p.budgetH ? Math.round(cons / p.budgetH * 100) : (cons > 0 ? 999 : 0);
+    const elapsed = projectElapsedWeeks(p);
+    const rythme = elapsed ? cons / elapsed : 0;
+    const semRest = rythme > 0 ? rest / rythme : null;
+    const state = p.active === false ? '⚪ clôturé' : pct > 100 ? '🔴 dépassé' : pct > 90 ? '🟠 critique' : pct > 70 ? '🟡 vigilance' : '🟢 ok';
+    const eur = Math.round((p.budgetH||0) * config.taux);
+    return `<tr class="border-b border-slate-100 hover:bg-slate-50 ${p.active === false ? 'opacity-50' : ''}">
+      <td class="p-3 font-black text-slate-700">${esc(p.code||'')}</td>
+      <td class="p-3 font-bold text-slate-800">${esc(p.name||'')}</td>
+      <td class="text-center p-3 font-black">${fmt(p.budgetH||0)}h <span class="text-[10px] text-slate-400">(${eur.toLocaleString('fr-FR')} €)</span></td>
+      <td class="text-center p-3 font-black">${fmt(cons)}h</td>
+      <td class="text-center p-3 font-bold ${rest < 0 ? 'text-red-600' : 'text-slate-600'}">${fmt(rest)}h</td>
+      <td class="text-center p-3 font-black">${pct}%</td>
+      <td class="text-center p-3 text-xs text-slate-600">${rythme ? fmt(rythme) + 'h/sem · ' + (semRest != null && semRest >= 0 ? '≈' + fmt(semRest) + ' sem. rest.' : '—') : '—'}</td>
+      <td class="text-center p-3 text-xs font-black">${state}</td>
+      <td class="text-center p-3 no-print">${canManage ? `<button onclick="editProject('${p.id}')" class="text-blue-600 font-black text-xs">✏️</button> <button onclick="toggleProject('${p.id}')" title="${p.active === false ? 'Rouvrir' : 'Clôturer'}" class="text-slate-500 font-black text-xs">${p.active === false ? '♻️' : '⚪'}</button>` : ''}</td>
+    </tr>`;
+  }).join('');
 }
 
 /* ---------- CONFIG ---------- */
@@ -805,7 +954,7 @@ function renderUsers() {
     </tr>`).join('');
 }
 
-/* ---------- MANAGER (capacités proratisées via absences) ---------- */
+/* ---------- MANAGER ---------- */
 function aggregateBlocks(list) {
   const agg = {};
   list.forEach(b => {
@@ -819,7 +968,7 @@ function aggregateBlocks(list) {
 }
 
 function renderManager() {
-  loadConfigInputs(); renderRefPanel();
+  loadConfigInputs(); renderRefPanel(); renderProjects();
   const kind = document.getElementById('period-select').value;
   const range = periodRange(kind);
   const weekList = weeksListInRange(range);
@@ -891,7 +1040,7 @@ function renderManager() {
   }).join('');
 }
 
-/* ---------- DASHBOARD (réel hors absences, proratisé, hors comptes gestion) ---------- */
+/* ---------- DASHBOARD ---------- */
 function renderDashboard() {
   const real = allBlocks.filter(b => weekOf(b) !== 'TYPE');
   const work = real.filter(b => b.cat !== 'absences');
@@ -964,6 +1113,23 @@ function renderDashboard() {
       ] },
     options: { responsive: true, plugins: { legend: { position: 'bottom' } }, scales: { y: { beginAtZero: true } } } });
 
+  /* --- Budgets projets --- */
+  const stats = allProjects.map(p => ({ p, cons: projectConsumed(p) }));
+  const totBudget = allProjects.reduce((s,p) => s + (p.budgetH||0), 0);
+  const totCons = stats.reduce((s,x) => s + x.cons, 0);
+  const overrun = stats.filter(x => x.p.budgetH && x.cons > x.p.budgetH);
+  document.getElementById('dash-budget-kpis').innerHTML = `
+    <div class="p-3 bg-white border border-slate-200 rounded-xl text-center"><div class="text-[10px] font-bold text-slate-500 uppercase">Budget total</div><div class="text-xl font-black text-slate-800">${fmt(totBudget)}h</div><div class="text-[10px] text-slate-400">${Math.round(totBudget*config.taux).toLocaleString('fr-FR')} €</div></div>
+    <div class="p-3 bg-white border border-slate-200 rounded-xl text-center"><div class="text-[10px] font-bold text-slate-500 uppercase">Consommé</div><div class="text-xl font-black text-blue-600">${fmt(totCons)}h</div><div class="text-[10px] text-slate-400">${totBudget ? Math.round(totCons/totBudget*100) : 0}%</div></div>
+    <div class="p-3 bg-white border border-slate-200 rounded-xl text-center"><div class="text-[10px] font-bold text-slate-500 uppercase">Reste</div><div class="text-xl font-black ${totBudget-totCons < 0 ? 'text-red-600' : 'text-green-600'}">${fmt(totBudget-totCons)}h</div><div class="text-[10px] text-slate-400">${Math.round((totBudget-totCons)*config.taux).toLocaleString('fr-FR')} €</div></div>
+    <div class="p-3 bg-white border border-slate-200 rounded-xl text-center"><div class="text-[10px] font-bold text-slate-500 uppercase">Projets dépassés</div><div class="text-xl font-black ${overrun.length ? 'text-red-600' : 'text-green-600'}">${overrun.length}</div><div class="text-[10px] text-slate-400">sur ${allProjects.length}</div></div>`;
+  const topB = stats.slice().sort((a,b) => b.cons - a.cons).slice(0,5);
+  document.getElementById('dash-budget-top').innerHTML = topB.length ? topB.map(x => {
+    const pct = x.p.budgetH ? Math.round(x.cons / x.p.budgetH * 100) : 0;
+    const col = pct > 100 ? '#dc2626' : pct > 90 ? '#ea580c' : pct > 70 ? '#f59e0b' : '#16a34a';
+    return `<div class="flex items-center gap-4 mb-2"><div class="w-56 text-sm font-bold text-slate-700 truncate">${esc(x.p.code||'')} — ${esc(x.p.name||'')}</div><div class="flex-1 h-6 bg-slate-200 rounded-lg overflow-hidden"><div class="h-full bar-fill-load" style="background:${col};width:${Math.min(100,pct)}%"></div></div><div class="w-32 text-right font-black text-xs" style="color:${col}">${fmt(x.cons)}h / ${fmt(x.p.budgetH||0)}h (${pct}%)</div></div>`;
+  }).join('') : '<p class="text-slate-400 italic text-sm">Aucun projet budgété.</p>';
+
   const agg = aggregateBlocks(work).slice(0,8), maxH = agg[0]?.hours || 1;
   document.getElementById('dash-top').innerHTML = agg.length ? agg.map(a => { const c = CATS.find(x=>x.key===a.cat);
     return `<div class="flex items-center gap-4 mb-3"><div class="w-56 text-sm font-bold text-slate-700 truncate">${esc(a.label)}</div><div class="flex-1 h-7 bg-slate-200 rounded-lg overflow-hidden"><div class="h-full bar-fill-load" style="background:${c.color};width:${Math.round(a.hours/maxH*100)}%"></div></div><div class="w-24 text-right font-black text-sm" style="color:${c.color}">${fmt(a.hours)}h</div></div>`; }).join('') : '<p class="text-slate-400 italic text-sm">Aucune semaine réelle saisie pour le moment.</p>';
@@ -978,6 +1144,7 @@ function renderDashboard() {
   else if (taux > 100) { rec.className='rounded-xl p-6 border-l-4 border-orange-500 bg-orange-50'; rec.innerHTML=`<h3 class="font-black text-orange-800 text-lg mb-3">🟠 Tension</h3><ul class="space-y-2 text-slate-700 text-sm"><li>Dépassement de ${Math.round(ecart).toLocaleString('fr-FR')}h/an — renfort de ${etpManq} ETP ou gel des P3</li></ul>`; }
   else if (taux > 85) { rec.className='rounded-xl p-6 border-l-4 border-yellow-500 bg-yellow-50'; rec.innerHTML=`<h3 class="font-black text-yellow-800 text-lg mb-3">⚡ Vigilance</h3><ul class="space-y-2 text-slate-700 text-sm"><li>Marge restante : ${Math.round(capTotale-charge).toLocaleString('fr-FR')}h/an — arbitrer tout nouveau projet</li></ul>`; }
   else { rec.className='rounded-xl p-6 border-l-4 border-green-500 bg-green-50'; rec.innerHTML=`<h3 class="font-black text-green-800 text-lg mb-3">✅ Charge maîtrisée</h3><ul class="space-y-2 text-slate-700 text-sm"><li>Marge : ${Math.round(capTotale-charge).toLocaleString('fr-FR')}h/an</li></ul>`; }
+  if (overrun.length) rec.innerHTML += `<p class="mt-3 text-sm text-slate-700">💰 <strong>${overrun.length} projet(s) dépassent leur budget</strong> : ${overrun.map(x => esc(x.p.code || x.p.name) + ' (+' + fmt(x.cons - (x.p.budgetH||0)) + 'h)').join(', ')} — arbitrage ou rebudgétage requis.</p>`;
 }
 </script>
 
