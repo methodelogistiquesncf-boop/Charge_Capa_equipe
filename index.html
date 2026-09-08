@@ -400,8 +400,6 @@ const absHoursOf = (uid, w) => allBlocks.filter(b => b.owner === uid && weekOf(b
 const weightOf = (uid, w) => Math.max(0, 1 - absHoursOf(uid, w) / capWeekOf(uid));
 
 /* ---------- ENVELOPPES : CONSOMMATION ---------- */
-/* Projet = blocs rattachés (projectId) ou libellé identique.
-   MCO / support / transverse = TOUS les blocs de la catégorie (consommation auto). */
 const projBlocks = p => {
   const cat = p.cat || 'projet';
   if (cat !== 'projet') return allBlocks.filter(b => weekOf(b) !== 'TYPE' && b.cat === cat);
@@ -856,7 +854,7 @@ function renderRefPanel() {
   });
 }
 
-/* ---------- ENVELOPPES : CRUD ---------- */
+/* ---------- ENVELOPPES : CRUD + SUPPRESSION ---------- */
 window.newProject = () => { editingProjectId = null; ['pj-code','pj-name','pj-budget'].forEach(id => document.getElementById(id).value = ''); document.getElementById('pj-cat').value = 'projet'; document.getElementById('pj-active').checked = true; document.getElementById('proj-form').classList.remove('hidden'); };
 window.cancelProject = () => { document.getElementById('proj-form').classList.add('hidden'); editingProjectId = null; };
 window.editProject = id => {
@@ -870,6 +868,19 @@ window.editProject = id => {
   document.getElementById('proj-form').classList.remove('hidden');
 };
 window.toggleProject = id => { const p = allProjects.find(x => x.id === id); if (!p) return; setDoc(doc(db, PATHS.projects, id), { active: p.active === false }, { merge: true }); };
+window.deleteProject = async id => {
+  if (!isPrivileged()) return;
+  const p = allProjects.find(x => x.id === id); if (!p) return;
+  const cons = projectConsumed(p);
+  if (!confirm('🗑️ Supprimer définitivement l\'enveloppe ' + (p.code || p.name) + ' ?\n\nCette action est irréversible.')) return;
+  if (cons > 0 && !confirm('⚠️ Cette enveloppe a déjà ' + fmt(cons) + 'h consommées.\n\nLes blocs saisis resteront dans leurs catégories (charge, courbes, agrégats) mais ne seront plus rattachés à aucune enveloppe budgétaire.\n\nConfirmer la suppression ?')) return;
+  try {
+    await deleteDoc(doc(db, PATHS.projects, id));
+  } catch (e) {
+    console.error('Erreur suppression enveloppe :', e);
+    alert('❌ Erreur à la suppression : ' + (e.code || e.message));
+  }
+};
 window.saveProject = async () => {
   if (!isPrivileged()) return;
   const cat = document.getElementById('pj-cat').value;
@@ -922,7 +933,7 @@ function renderProjects() {
       <td class="text-center p-3 font-black">${pct}%</td>
       <td class="text-center p-3 text-xs text-slate-600">${rythme ? fmt(rythme) + 'h/sem · ' + (semRest != null && semRest >= 0 ? '≈' + fmt(semRest) + ' sem. rest.' : '—') : '—'}</td>
       <td class="text-center p-3 text-xs font-black">${state}</td>
-      <td class="text-center p-3 no-print">${canManage ? `<button onclick="editProject('${p.id}')" class="text-blue-600 font-black text-xs">✏️</button> <button onclick="toggleProject('${p.id}')" title="${p.active === false ? 'Rouvrir' : 'Clôturer'}" class="text-slate-500 font-black text-xs">${p.active === false ? '♻️' : '⚪'}</button>` : ''}</td>
+      <td class="text-center p-3 no-print">${canManage ? `<button onclick="editProject('${p.id}')" class="text-blue-600 font-black text-xs">✏️</button> <button onclick="toggleProject('${p.id}')" title="${p.active === false ? 'Rouvrir' : 'Clôturer'}" class="text-slate-500 font-black text-xs">${p.active === false ? '♻️' : '⚪'}</button> <button onclick="deleteProject('${p.id}')" title="Supprimer définitivement" class="text-red-500 hover:text-red-700 font-black text-xs">🗑️</button>` : ''}</td>
     </tr>`;
   }).join('');
 }
