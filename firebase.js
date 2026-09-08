@@ -27,10 +27,11 @@ const firebaseConfig = {
 
 /* ---------- 2. Noms des collections Firestore ---------- */
 export const PATHS = {
-  users:  "cc_users",
-  blocks: "cc_blocks",
-  config: "cc_config",
-  refs:   "cc_refs"
+  users:    "cc_users",
+  blocks:   "cc_blocks",
+  projects: "cc_projects",
+  config:   "cc_config",
+  refs:     "cc_refs"
 };
 
 /* ---------- 3. Initialisation ---------- */
