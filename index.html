@@ -136,7 +136,7 @@ body { font-family: 'Inter', sans-serif; }
       <div><label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Catégorie</label>
         <select id="m-cat" onchange="refreshModalDatalist()" class="w-full p-3 rounded-xl bg-slate-50 border border-slate-200 font-bold text-sm outline-none">
           <option value="projet">🚀 Projets</option><option value="mco">🔧 MCO</option>
-          <option value="support"> Support terrain</option><option value="transverse">📋 Transverse</option>
+          <option value="support">🆘 Support terrain</option><option value="transverse">📋 Transverse</option>
         </select></div>
       <div><label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Activité précise</label>
         <input type="text" id="m-label" list="dl-labels" placeholder="Ex : MAG9, Lean Picking…" class="w-full p-3 rounded-xl bg-slate-50 border border-slate-200 font-semibold text-sm outline-none focus:border-blue-500">
@@ -267,6 +267,11 @@ body { font-family: 'Inter', sans-serif; }
         <div class="bg-slate-50 p-6 rounded-xl"><h3 class="font-black text-slate-800 mb-4">Charge vs Capacité par collaborateur</h3><canvas id="chart-agents" height="250"></canvas></div>
       </div>
       <div class="bg-slate-50 p-6 rounded-xl mb-8">
+        <h3 class="font-black text-slate-800 mb-1">📈 Trajectoire charge vs capacité (cumul depuis janvier)</h3>
+        <p class="text-xs text-slate-500 mb-3">Bleue au-dessus de la verte = surcharge structurelle : l'écart vertical final est le retard irrattrapable de l'année.</p>
+        <canvas id="chart-cumul" height="110"></canvas>
+      </div>
+      <div class="bg-slate-50 p-6 rounded-xl mb-8">
         <h3 class="font-black text-slate-800 mb-1">🔥 Top activités consommatrices (équipe)</h3>
         <div id="dash-top" class="mt-4"></div>
       </div>
@@ -304,7 +309,7 @@ let me = null, allUsers = {}, allBlocks = [], allWeeks = {};
 let config = { hoursWeek: 35, weeks: 47, etp: 10, taux: 55 };
 let refs = { projet: [], mco: [], support: [], transverse: [] };
 let viewedUid = null, editingBlockId = null, draggedBlockId = null;
-let chartAgents = null, chartWeeks = null, bootstrapped = false;
+let chartAgents = null, chartWeeks = null, chartCumul = null, bootstrapped = false;
 let blocksListenerOn = false, weeksListenerOn = false;
 let unsubs = [];
 let currentWeek = isoWeekKey(new Date());
@@ -346,7 +351,6 @@ const weekKeyOf = (uid, w) => uid + '_' + w;
 const daysOf = (uid, w) => { const d = allWeeks[weekKeyOf(uid, w)]; return d && typeof d.days === 'number' ? Math.max(0, Math.min(5, d.days)) : 5; };
 const weightOf = (uid, w) => daysOf(uid, w) / 5;
 
-/* Légende live à côté du champ "Jours dispo" */
 function updateWeekHint() {
   let days = parseFloat(document.getElementById('week-days').value);
   if (isNaN(days)) days = 5;
@@ -568,7 +572,7 @@ window.copyPrevWeek = () => {
 };
 window.saveWeekInfo = () => {
   if (!canEdit() || currentWeek === 'TYPE') return;
-  updateWeekHint();                       // feedback immédiat pendant la frappe
+  updateWeekHint();
   clearTimeout(weekSaveTimer);
   weekSaveTimer = setTimeout(() => {
     let days = parseFloat(document.getElementById('week-days').value);
@@ -968,6 +972,28 @@ function renderDashboard() {
     { label:'Charge moyenne hebdo (h)', data: perUser.map(a=>a.hebdo), backgroundColor: perUser.map(a=>a.hebdo>config.hoursWeek?'#dc2626':'#2563eb'), borderRadius:6 },
     { label:'Capacité hebdo (h)', data: perUser.map(()=>config.hoursWeek), type:'line', borderColor:'#16a34a', borderDash:[6,4], pointRadius:0, borderWidth:2 }]},
     options:{ responsive:true, plugins:{legend:{position:'bottom'}}, scales:{ y:{beginAtZero:true}, x:{grid:{display:false}} } } });
+
+  /* --- Courbe cumulée charge vs capacité (année en cours) --- */
+  const nowKey = isoWeekKey(new Date());
+  const weeksY = weeksListInRange(periodRange('year')).filter(w => w <= nowKey);
+  const uids = users.map(([uid]) => uid);
+  let cumC = 0, cumCap = 0;
+  const dataC = [], dataCap = [];
+  weeksY.forEach(w => {
+    cumC += real.filter(b => weekOf(b) === w).reduce((s,b) => s + b.duration, 0);
+    cumCap += uids.reduce((s,uid) => s + weightOf(uid, w) * config.hoursWeek, 0);
+    dataC.push(Math.round(cumC));
+    dataCap.push(Math.round(cumCap));
+  });
+  const ctxC = document.getElementById('chart-cumul').getContext('2d');
+  if (chartCumul) chartCumul.destroy();
+  chartCumul = new Chart(ctxC, { type: 'line', data: {
+      labels: weeksY.map(w => 'S' + w.slice(6)),
+      datasets: [
+        { label: 'Charge cumulée (h)', data: dataC, borderColor: '#2563eb', backgroundColor: 'rgba(37,99,235,0.12)', fill: true, tension: 0.3 },
+        { label: 'Capacité cumulée (h)', data: dataCap, borderColor: '#16a34a', borderDash: [6,4], pointRadius: 0 }
+      ] },
+    options: { responsive: true, plugins: { legend: { position: 'bottom' } }, scales: { y: { beginAtZero: true } } } });
 
   const agg = aggregateBlocks(real).slice(0,8), maxH = agg[0]?.hours || 1;
   document.getElementById('dash-top').innerHTML = agg.length ? agg.map(a => { const c = CATS.find(x=>x.key===a.cat);
