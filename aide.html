@@ -51,7 +51,7 @@ body { font-family: 'Inter', sans-serif; }
 <section id="view-start" class="space-y-6">
   <div class="bg-indigo-50 border-l-4 border-indigo-500 rounded-xl p-5">
     <h2 class="font-black text-indigo-800 text-lg">🚀 Bien démarrer en 5 minutes</h2>
-    <p class="text-sm text-slate-700 mt-1">Cette application dit <strong>où passent vos heures chaque semaine</strong>. Les données accumulées deviennent l'argumentaire chiffré de l'équipe : effectifs (ETP), surcharge, arbitrages, budgets projets.</p>
+    <p class="text-sm text-slate-700 mt-1">Cette application dit <strong>où passent vos heures chaque semaine</strong>. Les données accumulées deviennent l'argumentaire chiffré de l'équipe : effectifs (ETP), surcharge, arbitrages, budgets projets et MCO.</p>
   </div>
 
   <div class="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
@@ -66,13 +66,13 @@ body { font-family: 'Inter', sans-serif; }
     </div>
     <div class="flex gap-4 items-start p-4 bg-slate-50 rounded-xl">
       <div class="w-8 h-8 shrink-0 rounded-full bg-blue-600 text-white font-black flex items-center justify-center">3</div>
-      <p class="text-sm text-slate-700">Chaque vendredi : <strong>« ⧉ Copier semaine préc. »</strong> (ou « 📐 Copier semaine type » la 1ʳᵉ fois), ajustez 2-3 blocs. <strong>2 minutes.</strong></p>
+      <p class="text-sm text-slate-700">Chaque vendredi : <strong>« ⧉ Copier semaine préc. »</strong> (ou « 📐 Copier semaine type » la 1ʳ fois), ajustez 2-3 blocs. <strong>2 minutes.</strong></p>
     </div>
   </div>
 
   <div class="bg-white rounded-2xl border border-slate-200 p-6">
     <h3 class="font-black text-slate-800 mb-3">🧮 L'ETP, c'est quoi ?</h3>
-    <p class="text-sm text-slate-600 mb-3"><strong>ETP = Équivalent Temps Plein</strong> : unité qui mesure la force de travail d'une personne ou d'une équipe sur la base d'un temps plein.</p>
+    <p class="text-sm text-slate-600 mb-3"><strong>ETP = Équivalent Temps Plein</strong> : unité qui mesure la force de travail sur la base d'un temps plein.</p>
     <table class="w-full text-sm border border-slate-200 rounded-lg overflow-hidden">
       <thead><tr class="bg-slate-800 text-white"><th class="text-left p-2">Situation</th><th class="text-center p-2">ETP</th><th class="text-center p-2">Capacité hebdo (base 35 h)</th></tr></thead>
       <tbody>
@@ -82,7 +82,6 @@ body { font-family: 'Inter', sans-serif; }
         <tr><td class="p-2">Équipe : 6 TP + 2 à 80 %</td><td class="p-2 text-center font-black">7.6</td><td class="p-2 text-center">266 h</td></tr>
       </tbody>
     </table>
-    <p class="text-xs text-slate-500 mt-3">Dans l'outil, l'ETP de chaque agent est renseigné par l'admin. Toute la capacité (hebdo, annuelle, courbes) est calculée à partir de ces ETP réels — plus d'approximation « 10 personnes = 10 ETP ».</p>
   </div>
 
   <div class="bg-white rounded-2xl border border-slate-200 p-6">
@@ -95,15 +94,16 @@ body { font-family: 'Inter', sans-serif; }
       <span class="px-3 py-1.5 rounded-lg text-xs font-bold text-white" style="background:#7c3aed">🌴 Absences</span>
     </div>
     <ul class="text-sm text-slate-600 space-y-1 list-disc pl-5">
-      <li><strong>Projets</strong> : rattachés à un budget via la liste « Projet budgété ».</li>
-      <li><strong>Absences 🌴</strong> : CP/RTT/formation posées dans le calendrier → capacité proratisée automatiquement.</li>
+      <li><strong>Projets</strong> : rattachés à une enveloppe budget via la liste « Projet budgété ».</li>
+      <li><strong>MCO / Support / Transverse</strong> : débitent automatiquement l'enveloppe « auto » de leur catégorie.</li>
+      <li><strong>Absences 🌴</strong> : CP/RTT/formation posées dans le calendrier → capacité proratisée.</li>
     </ul>
   </div>
 
   <div class="grid md:grid-cols-2 gap-4">
     <div class="bg-blue-50 border-l-4 border-blue-500 rounded-xl p-5 text-sm text-slate-700"><strong class="text-blue-800">📐 Semaine type vs réelles</strong><p class="mt-1">La semaine type = référence théorique. Les semaines réelles = saisies du vendredi. Les stats équipe utilisent le <strong>réel</strong>.</p></div>
     <div class="bg-violet-50 border-l-4 border-violet-500 rounded-xl p-5 text-sm text-slate-700"><strong class="text-violet-800">🌴 Absences = blocs violets</strong><p class="mt-1">Capacité réduite automatiquement (35 h − 7 h = 28 h). Zéro fausse « sous-charge ».</p></div>
-    <div class="bg-emerald-50 border-l-4 border-emerald-500 rounded-xl p-5 text-sm text-slate-700"><strong class="text-emerald-800">💰 Budgets projets</strong><p class="mt-1">Chaque bloc 🚀 rattaché débite l'enveloppe du projet. Alerte si &gt; 100 %.</p></div>
+    <div class="bg-emerald-50 border-l-4 border-emerald-500 rounded-xl p-5 text-sm text-slate-700"><strong class="text-emerald-800">💰 Enveloppes & budgets</strong><p class="mt-1">Projets = rattachement explicite. MCO/support/transverse = consommation automatique de tous les blocs de la catégorie.</p></div>
     <div class="bg-slate-50 border-l-4 border-slate-400 rounded-xl p-5 text-sm text-slate-700"><strong class="text-slate-800">🔒 Confidentialité</strong><p class="mt-1">Un agent ne voit que son planning. Managers/admins voient l'équipe. Garanti côté serveur.</p></div>
   </div>
 </section>
@@ -116,7 +116,7 @@ body { font-family: 'Inter', sans-serif; }
   <div class="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
     <h3 class="font-black text-slate-800">🧱 Manipuler les blocs</h3>
     <div class="grid md:grid-cols-2 gap-4 text-sm">
-      <div class="p-4 bg-slate-50 rounded-xl"><strong class="text-blue-700">➕ Ajouter</strong><p class="text-slate-600 mt-1">Clic créneau vide → catégorie, projet/activité, jour, heure, durée.</p></div>
+      <div class="p-4 bg-slate-50 rounded-xl"><strong class="text-blue-700">➕ Ajouter</strong><p class="text-slate-600 mt-1">Clic créneau vide → catégorie, enveloppe/activité, jour, heure, durée.</p></div>
       <div class="p-4 bg-slate-50 rounded-xl"><strong class="text-indigo-700">✏️ Modifier / 🗑️</strong><p class="text-slate-600 mt-1">Clic sur un bloc coloré.</p></div>
       <div class="p-4 bg-slate-50 rounded-xl"><strong class="text-emerald-700">↔️ Déplacer</strong><p class="text-slate-600 mt-1">Glisser-déposer, calage demi-heure.</p></div>
       <div class="p-4 bg-slate-50 rounded-xl"><strong class="text-teal-700">⧉ Dupliquer</strong><p class="text-slate-600 mt-1">Boutons jours / « ⇉ Tous les jours », ou Ctrl+glisser.</p></div>
@@ -131,42 +131,44 @@ body { font-family: 'Inter', sans-serif; }
     </ul>
   </div>
   <div class="bg-white rounded-2xl border border-slate-200 p-6">
-    <h3 class="font-black text-slate-800 mb-3">💰 Projet budgété</h3>
+    <h3 class="font-black text-slate-800 mb-3">💰 Projets & MCO : ce que ça débite</h3>
     <ul class="text-sm text-slate-600 space-y-2 list-disc pl-5">
-      <li>Catégorie 🚀 → liste « Projet budgété » → les heures débitent le budget.</li>
-      <li>⚠️ Message informatif si le projet est déjà &gt; 100 %.</li>
+      <li>Catégorie 🚀 → choisissez dans « Projet budgété » : les heures débitent ce projet.</li>
+      <li>Catégorie 🔧 MCO (ou 🆘/) : si une enveloppe « auto » existe pour la catégorie, <strong>toutes</strong> vos heures de la catégorie la débitent — vous n'avez rien à rattacher.</li>
+      <li>⚠️ Message informatif si l'enveloppe choisie est déjà &gt; 100 %.</li>
     </ul>
   </div>
 </section>
 
 <section id="view-manager" class="space-y-6 hidden">
   <div class="bg-blue-50 border-l-4 border-blue-500 rounded-xl p-5">
-    <h2 class="font-black text-blue-800 text-lg">🔵 Manager : piloter en ETP</h2>
-    <p class="text-sm text-slate-700 mt-1">Consolidation, budgets projets, dashboard. Toutes les capacités sont calculées avec les <strong>ETP réels</strong> de chaque agent + absences.</p>
+    <h2 class="font-black text-blue-800 text-lg">🔵 Manager : piloter en ETP & budgets</h2>
+    <p class="text-sm text-slate-700 mt-1">Consolidation, enveloppes budgétaires, dashboard. Capacités calculées avec les <strong>ETP réels</strong> + absences.</p>
+  </div>
+  <div class="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
+    <h3 class="font-black text-slate-800">💰 Budgétiser le MCO (méthode)</h3>
+    <ul class="text-sm text-slate-600 space-y-2 list-disc pl-5">
+      <li><strong>1. Mesurer le run-rate</strong> : période « 12 derniers mois » → « Où partent les heures » → total MCO ÷ semaines saisies = h/semaine récurrentes.</li>
+      <li><strong>2. Construire l'enveloppe</strong> : run-rate × 47 semaines = budget annuel. Ex : 25 h/sem × 47 = 1 175 h (= 0,71 ETP).</li>
+      <li><strong>3. Créer l'enveloppe</strong> : « ➕ Nouvelle enveloppe » → catégorie <strong>🔧 MCO (auto)</strong> → code MCO-26 → budget 1 175 h.</li>
+      <li><strong>4. Suivre</strong> : chaque bloc 🔧 saisi par l'équipe débite l'enveloppe. Colonne Rythme + horizon « ≈ X sem. rest. » = signal de dérive.</li>
+    </ul>
+    <p class="text-xs text-slate-500 mt-2">⚠️ Une seule enveloppe « auto » active par catégorie (sinon double comptage). Même logique pour 🆘 Support et 📋 Transverse.</p>
   </div>
   <div class="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
     <h3 class="font-black text-slate-800">📋 Lire la consolidation</h3>
     <ul class="text-sm text-slate-600 space-y-2 list-disc pl-5">
       <li><strong>Colonne ETP</strong> : contrat de chaque agent. Pied de tableau : <strong>somme des ETP</strong> = effectif réel.</li>
-      <li><strong>Chiffres période</strong> : effectif réel vs cible (paramètre), taux de saisie, absences, capacité proratisée.</li>
       <li><strong>Courbe</strong> : capacité verte = Σ (ETP × 35 h) − absences, semaine par semaine.</li>
       <li><strong>Taux C/C</strong> = heures travaillées ÷ capacité disponible de l'agent.</li>
-    </ul>
-  </div>
-  <div class="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
-    <h3 class="font-black text-slate-800">💰 Projets & budgets</h3>
-    <ul class="text-sm text-slate-600 space-y-2 list-disc pl-5">
-      <li>Créez code + nom + budget (h). Consommation automatique depuis les blocs 🚀.</li>
-      <li>Rythme (h/sem) + horizon (« ≈ X sem. rest. ») + état 🟢🟡🟠🔴.</li>
-      <li>⚪/♻️ : clôturer un projet terminé.</li>
     </ul>
   </div>
   <div class="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
     <h3 class="font-black text-slate-800">📊 Dashboard direction</h3>
     <ul class="text-sm text-slate-600 space-y-2 list-disc pl-5">
       <li>Capacité annuelle = <strong>somme ETP réels</strong> × 35 h × 47 sem (comparée à la cible).</li>
-      <li>Recommandation : « il manque X ETP » calculé sur l'écart réel.</li>
-      <li>🖨️ PDF pour le CODIR.</li>
+      <li>Bloc 💰 : budget total, consommé, reste, enveloppes dépassées + top consommation.</li>
+      <li>Recommandation : « il manque X ETP » calculé sur l'écart réel. 🖨️ PDF pour le CODIR.</li>
     </ul>
   </div>
 </section>
@@ -183,7 +185,7 @@ body { font-family: 'Inter', sans-serif; }
     </div>
     <div class="flex gap-4 items-start p-4 bg-slate-50 rounded-xl">
       <div class="w-8 h-8 shrink-0 rounded-full bg-red-500 text-white font-black flex items-center justify-center">2</div>
-      <p class="text-sm text-slate-700"><strong>Modifier un ETP</strong> directement dans le tableau (champ numérique) : temps partiel, changement de contrat… effet immédiat sur tous les calculs.</p>
+      <p class="text-sm text-slate-700"><strong>Modifier un ETP</strong> directement dans le tableau : effet immédiat sur tous les calculs de capacité.</p>
     </div>
     <div class="flex gap-4 items-start p-4 bg-slate-50 rounded-xl">
       <div class="w-8 h-8 shrink-0 rounded-full bg-red-500 text-white font-black flex items-center justify-center">3</div>
@@ -193,9 +195,9 @@ body { font-family: 'Inter', sans-serif; }
   <div class="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
     <h3 class="font-black text-slate-800">⚙️ Paramètres</h3>
     <ul class="text-sm text-slate-600 space-y-2 list-disc pl-5">
-      <li><strong>Heures contrat / sem (1 ETP)</strong> : base de calcul (35 h en général).</li>
+      <li><strong>Heures contrat / sem (1 ETP)</strong> : base de calcul (35 h).</li>
       <li><strong>Effectif cible ETP</strong> : référence direction, comparée à l'effectif réel.</li>
-      <li>Référentiels : MCO, support, transverse, absences (projets gérés dans « 💰 »).</li>
+      <li>Référentiels : MCO, support, transverse, absences (les enveloppes projets/MCO sont dans « 💰 »).</li>
     </ul>
   </div>
 </section>
@@ -203,16 +205,17 @@ body { font-family: 'Inter', sans-serif; }
 <section id="view-faq" class="space-y-6 hidden">
   <div class="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
     <h3 class="font-black text-slate-800">❓ FAQ</h3>
-    <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">🧮 Qu'est-ce qu'un ETP exactement ?</summary><p class="text-sm text-slate-600 mt-2">Équivalent Temps Plein : 1 ETP = une personne à temps plein. Un 80 % = 0.8 ETP. La somme des ETP de l'équipe = sa force de travail réelle, utilisée pour toutes les capacités et projections.</p></details>
+    <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">🧮 Qu'est-ce qu'un ETP ?</summary><p class="text-sm text-slate-600 mt-2">Équivalent Temps Plein : 1 ETP = temps plein. La somme des ETP = effectif réel, base de toutes les capacités.</p></details>
+    <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">💰 Quelle différence projet vs enveloppe « auto » ?</summary><p class="text-sm text-slate-600 mt-2">Un <strong>projet</strong> se débite seulement quand un bloc lui est rattaché (liste « Projet budgété »). Une enveloppe <strong>auto</strong> (MCO/support/transverse) débite <strong>tous</strong> les blocs de sa catégorie, sans action de l'agent — adapté aux charges récurrentes.</p></details>
+    <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">🔧 Comment budgétiser le MCO ?</summary><p class="text-sm text-slate-600 mt-2">Mesurez le run-rate (h/sem sur 12 mois) × 47 semaines = budget annuel, puis créez une enveloppe « 🔧 MCO (auto) ». Voir onglet Manager.</p></details>
     <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">🔑 Mot de passe oublié ?</summary><p class="text-sm text-slate-600 mt-2">Lien sur l'écran de connexion → email de réinitialisation.</p></details>
-    <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">🌴 À quoi sert 🌴 Absences ?</summary><p class="text-sm text-slate-600 mt-2">À poser CP/RTT/formation dans le calendrier. La capacité est proratisée automatiquement.</p></details>
-    <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">💰 Comment les budgets sont consommés ?</summary><p class="text-sm text-slate-600 mt-2">Automatiquement par les blocs 🚀 rattachés à un projet.</p></details>
+    <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">🌴 À quoi sert 🌴 Absences ?</summary><p class="text-sm text-slate-600 mt-2">À poser CP/RTT/formation dans le calendrier. Capacité proratisée automatiquement.</p></details>
     <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">⧉ Dupliquer un bloc ?</summary><p class="text-sm text-slate-600 mt-2">Clic bloc → « ⧉ Dupliquer… » → jours ou « ⇉ Tous les jours », ou Ctrl+glisser.</p></details>
     <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">🧭 Planning en lecture seule ?</summary><p class="text-sm text-slate-600 mt-2">Compte « 🧭 Gestion seule » : demandez le passage en « 📝 Saisit ».</p></details>
-    <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">🧮 Mon total ≠ 35 h ?</summary><p class="text-sm text-slate-600 mt-2">Normal si ETP &lt; 1 ou absences 🌴 : comparez au total « disponible » affiché (ex : 28 h pour un 80 %).</p></details>
+    <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">🧮 Mon total ≠ 35 h ?</summary><p class="text-sm text-slate-600 mt-2">Normal si ETP &lt; 1 ou absences 🌴 : comparez au total « disponible » affiché.</p></details>
   </div>
   <div class="bg-indigo-50 border-l-4 border-indigo-500 rounded-xl p-5 text-sm text-slate-700">
-    <strong class="text-indigo-800">🎯 Pourquoi tout ceci ?</strong> Heures saisies + ETP réels + budgets = dossier charge/capacité opposable en direction, chiffré en ETP manquants et en euros.
+    <strong class="text-indigo-800">🎯 Pourquoi tout ceci ?</strong> Heures saisies + ETP réels + enveloppes = dossier charge/capacité opposable en direction, chiffré en ETP manquants et en euros.
   </div>
 </section>
 
