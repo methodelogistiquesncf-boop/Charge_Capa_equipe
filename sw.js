@@ -1,9 +1,8 @@
 /* =====================================================
    sw.js — Service Worker "Planning Activités"
-   Offline : coquille de l'app + SDK CDN mis en cache.
-   ⚠️ À chaque nouvelle version publiée : incrémentez CACHE (v2, v3…)
+   ⚠️ À chaque nouvelle version publiée : incrémentez CACHE (v3, v4…)
 ===================================================== */
-const CACHE = 'pa-cache-v1';
+const CACHE = 'pa-cache-v2';
 const SHELL = [
   './',
   './index.html',
