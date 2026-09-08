@@ -47,30 +47,30 @@ body { font-family: 'Inter', sans-serif; }
 
 <!-- ============ HEADER ============ -->
 <header class="text-white sticky top-0 z-50 shadow-lg" style="background: linear-gradient(135deg, #1a2744 0%, #2d4373 100%);">
-  <div class="max-w-7xl mx-auto px-6 py-4 flex items-center gap-4 flex-wrap">
+  <div class="max-w-[1400px] mx-auto px-4 py-3 flex items-center gap-3 flex-wrap">
 
-    <!-- GAUCHE : logo + titre (mr-auto pousse le reste vers la droite) -->
-    <div class="flex items-center gap-3 mr-auto">
-      <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center font-black">C/C</div>
-      <div>
-        <h1 class="text-lg font-black">Semaine Type - Charge / Capacité</h1>
-        <p class="text-white/60 text-xs font-medium"><span id="save-indicator" class="text-emerald-300">☁️ Synchronisé</span></p>
+    <!-- GAUCHE : logo + titre -->
+    <div class="flex items-center gap-3 mr-auto min-w-0">
+      <div class="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center font-black text-sm shrink-0">C/C</div>
+      <div class="min-w-0">
+        <h1 class="text-base md:text-lg font-black truncate">Semaine Type - Charge / Capacité</h1>
+        <p class="text-white/60 text-[11px] font-medium hidden md:block"><span id="save-indicator" class="text-emerald-300">☁️ Synchronisé</span></p>
       </div>
     </div>
 
-    <!-- CENTRE-DROIT : navigation -->
+    <!-- DROITE : navigation -->
     <nav class="flex gap-1 bg-white/10 rounded-xl p-1 no-print">
-      <button onclick="switchView('agent')" id="nav-agent" class="px-4 py-2 rounded-lg font-bold text-sm transition hover:bg-white/20">👤 Mon planning</button>
-      <button onclick="switchView('manager')" id="nav-manager" class="px-4 py-2 rounded-lg font-bold text-sm transition hover:bg-white/20">📋 Manager</button>
-      <button onclick="switchView('dashboard')" id="nav-dashboard" class="px-4 py-2 rounded-lg font-bold text-sm transition hover:bg-white/20">📊 Dashboard</button>
-      <button onclick="switchView('users')" id="nav-users" class="px-4 py-2 rounded-lg font-bold text-sm transition hover:bg-white/20">👥 Utilisateurs</button>
+      <button onclick="switchView('agent')" id="nav-agent" class="px-3 py-2 rounded-lg font-bold text-xs md:text-sm transition hover:bg-white/20">👤 Mon planning</button>
+      <button onclick="switchView('manager')" id="nav-manager" class="px-3 py-2 rounded-lg font-bold text-xs md:text-sm transition hover:bg-white/20">📋 Manager</button>
+      <button onclick="switchView('dashboard')" id="nav-dashboard" class="px-3 py-2 rounded-lg font-bold text-xs md:text-sm transition hover:bg-white/20">📊 Dashboard</button>
+      <button onclick="switchView('users')" id="nav-users" class="px-3 py-2 rounded-lg font-bold text-xs md:text-sm transition hover:bg-white/20">👥 Utilisateurs</button>
     </nav>
 
-    <!-- EXTRÊME DROITE : utilisateur connecté + déconnexion -->
-    <div id="session-badge" class="hidden items-center gap-2 bg-white/10 rounded-xl px-3 py-2 text-xs font-bold">
+    <!-- EXTRÊME DROITE : utilisateur + déconnexion -->
+    <div id="session-badge" class="hidden items-center gap-2 bg-white/10 rounded-xl px-2.5 py-2 text-[11px] font-bold shrink-0">
       <span>👤</span>
-      <span id="session-name"></span>
-      <span id="session-role" class="px-2 py-0.5 rounded-lg text-[10px] font-black"></span>
+      <span id="session-name" class="max-w-[140px] truncate"></span>
+      <span id="session-role" class="px-1.5 py-0.5 rounded-lg text-[10px] font-black"></span>
       <button onclick="window.logout()" class="no-print bg-red-500/80 hover:bg-red-600 px-2 py-1 rounded-lg text-[10px] font-black">Déconnexion</button>
     </div>
 
