@@ -1,7 +1,7 @@
 {
   "name": "Planning Activités — Charge / Capacité",
   "short_name": "Planning",
-  "description": "Saisie hebdomadaire des activités et pilotage charge/capacité + budgets projets.",
+  "description": "Saisie hebdomadaire des activités, pilotage charge/capacité en ETP et budgets projets.",
   "lang": "fr",
   "start_url": "./index.html",
   "scope": "./",
