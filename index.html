@@ -111,6 +111,7 @@ body { font-family: 'Inter', sans-serif; }
     </div>
 
     <div id="readonly-banner" class="hidden px-6 py-3 bg-orange-50 border-b border-orange-200 text-orange-700 text-sm font-bold">👁️ Consultation seule — vous ne pouvez pas modifier le planning d'un autre collaborateur.</div>
+    <div id="nosaisie-banner" class="hidden px-6 py-3 bg-slate-100 border-b border-slate-200 text-slate-600 text-sm font-bold">🧭 Votre compte est en mode « gestion uniquement » : aucune saisie attendue. Consultez les plannings de l'équipe via le sélecteur.</div>
     <div class="p-4 bg-slate-50 border-b border-slate-200 flex flex-wrap gap-4 text-xs font-bold" id="legend"></div>
     <div id="calendar-wrap" class="p-4 overflow-x-auto"></div>
     <div id="agent-summary" class="p-6 bg-slate-50 border-t border-slate-200">
@@ -173,7 +174,7 @@ body { font-family: 'Inter', sans-serif; }
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div><label class="block text-xs font-semibold text-slate-600 mb-1.5">Heures contrat / sem.</label><input type="number" id="cfg-hours-week" oninput="saveConfigFromInputs()" class="w-full p-2 rounded-lg border border-slate-200 text-sm font-bold text-center"></div>
         <div><label class="block text-xs font-semibold text-slate-600 mb-1.5">Semaines / an</label><input type="number" id="cfg-weeks" oninput="saveConfigFromInputs()" class="w-full p-2 rounded-lg border border-slate-200 text-sm font-bold text-center"></div>
-        <div><label class="block text-xs font-semibold text-slate-600 mb-1.5">Effectif cible (ETP)</label><input type="number" id="cfg-etp" oninput="saveConfigFromInputs()" class="w-full p-2 rounded-lg border border-slate-200 text-sm font-bold text-center"></div>
+        <div><label class="block text-xs font-semibold text-slate-600 mb-1.5">Effectif cible ETP (référence)</label><input type="number" id="cfg-etp" oninput="saveConfigFromInputs()" class="w-full p-2 rounded-lg border border-slate-200 text-sm font-bold text-center"></div>
         <div><label class="block text-xs font-semibold text-slate-600 mb-1.5">Taux horaire (€)</label><input type="number" id="cfg-taux" oninput="saveConfigFromInputs()" class="w-full p-2 rounded-lg border border-slate-200 text-sm font-bold text-center"></div>
       </div>
     </div>
@@ -210,7 +211,7 @@ body { font-family: 'Inter', sans-serif; }
   <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
     <div class="p-6 border-b border-slate-200">
       <h2 class="text-xl font-black text-slate-800">👥 Utilisateurs & rôles</h2>
-      <p class="text-sm text-slate-500 mt-1">Créez les comptes, attribuez les rôles, activez/désactivez les accès</p>
+      <p class="text-sm text-slate-500 mt-1">Créez les comptes, attribuez les rôles, réglez le mode de saisie, activez/désactivez les accès</p>
     </div>
     <div class="p-6 bg-slate-50 border-b border-slate-200">
       <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">➕ Créer un compte</h3>
@@ -223,7 +224,7 @@ body { font-family: 'Inter', sans-serif; }
         </select>
         <button onclick="createUser()" class="bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold text-sm">Créer</button>
       </div>
-      <p class="text-[11px] text-slate-400 mt-2">Rôles : <strong>agent</strong> = son planning seul · <strong>manager</strong> = vision équipe + dashboard · <strong>admin</strong> = tout.</p>
+      <p class="text-[11px] text-slate-400 mt-2">Rôles : <strong>agent</strong> = son planning seul · <strong>manager</strong> = vision équipe + dashboard · <strong>admin</strong> = tout. Mode de saisie réglable ensuite par compte : <strong>📝 Saisit</strong> ou <strong>🧭 Gestion seule</strong>.</p>
     </div>
     <div class="overflow-x-auto">
       <table class="w-full text-sm">
@@ -232,6 +233,7 @@ body { font-family: 'Inter', sans-serif; }
           <th class="text-left p-3 font-bold text-xs uppercase">Email</th>
           <th class="text-center p-3 font-bold text-xs uppercase">Rôle</th>
           <th class="text-center p-3 font-bold text-xs uppercase">Accès</th>
+          <th class="text-center p-3 font-bold text-xs uppercase">📝 Saisie</th>
           <th class="text-center p-3 font-bold text-xs uppercase">Semaines saisies</th>
         </tr></thead>
         <tbody id="users-table-body"></tbody>
@@ -359,7 +361,9 @@ const fmt = n => n.toFixed(1).replace('.0','');
 const fmtHour = h => Math.floor(h) + 'h' + (h % 1 ? '30' : '00');
 const blocksOf = uid => allBlocks.filter(b => b.owner === uid);
 const viewBlocks = () => allBlocks.filter(b => b.owner === viewedUid && weekOf(b) === currentWeek);
-const canEdit = () => viewedUid === me?.uid || me?.role === 'admin';
+const saisit = u => !u || u.saisit !== false;          // champ absent = saisit (rétrocompatible)
+const meSaisit = () => saisit(allUsers[me?.uid]);
+const canEdit = () => (viewedUid === me?.uid && meSaisit()) || (viewedUid !== me?.uid && me?.role === 'admin');
 const isAdmin = () => me?.role === 'admin';
 const isPrivileged = () => me?.role === 'admin' || me?.role === 'manager';
 
@@ -552,6 +556,7 @@ function renderCalendar() {
   document.getElementById('calendar-owner-title').textContent =
     viewedUid === me.uid ? 'Mon calendrier' : `Calendrier de ${owner?.name || '?'}`;
   document.getElementById('readonly-banner').classList.toggle('hidden', editable);
+  document.getElementById('nosaisie-banner').classList.toggle('hidden', !(viewedUid === me.uid && !meSaisit()));
   document.getElementById('calendar-wrap').classList.toggle('readonly', !editable);
 
   const colH = (DAY_END - DAY_START) * ROW_H;
@@ -653,7 +658,8 @@ function renderSummary() {
     <div class="p-3 rounded-xl border border-slate-200 bg-white text-center"><div class="text-xs font-bold text-slate-500 uppercase">${c.label}</div><div class="text-2xl font-black" style="color:${c.color}">${fmt(t[c.key])}h</div><div class="text-[10px] text-slate-400 font-semibold">${list.filter(b=>b.cat===c.key).length} activité(s)</div></div>`).join('') +
     `<div class="p-3 rounded-xl border-2 border-slate-800 bg-slate-800 text-white text-center"><div class="text-xs font-bold uppercase">TOTAL SEMAINE</div><div class="text-2xl font-black">${fmt(t.total)}h</div><div class="text-[10px] opacity-70 font-semibold">${list.length} blocs</div></div>`;
   const hw = config.hoursWeek, st = document.getElementById('agent-status');
-  if (currentWeek === 'TYPE') st.innerHTML = `📐 <span class="text-indigo-600">Semaine type de référence (non comptée dans les statistiques réelles)</span>`;
+  if (viewedUid === me.uid && !meSaisit()) st.innerHTML = `🧭 <span class="text-slate-600">Compte gestion uniquement — aucune saisie attendue, heures non comptabilisées dans la charge équipe</span>`;
+  else if (currentWeek === 'TYPE') st.innerHTML = `📐 <span class="text-indigo-600">Semaine type de référence (non comptée dans les statistiques réelles)</span>`;
   else if (t.total > hw + 2) st.innerHTML = `⚠️ <span class="text-red-600">${fmt(t.total)}h placées pour ${hw}h contractuelles → Débordement</span>`;
   else if (t.total >= hw - 1) st.innerHTML = `✅ <span class="text-green-600">Semaine cohérente (${fmt(t.total)}h / ${hw}h)</span>`;
   else st.innerHTML = `ℹ️ <span class="text-slate-600">${fmt(t.total)}h placées / ${hw}h contractuelles</span>`;
@@ -720,6 +726,7 @@ window.createUser = async () => {
 };
 window.changeRole = (uid, role) => updateDoc(doc(db, PATHS.users, uid), { role });
 window.toggleActive = uid => updateDoc(doc(db, PATHS.users, uid), { active: allUsers[uid].active === false });
+window.toggleSaisie = uid => updateDoc(doc(db, PATHS.users, uid), { saisit: allUsers[uid].saisit === false });
 
 function weeksCountOf(uid) {
   return new Set(blocksOf(uid).map(b => weekOf(b)).filter(w => w !== 'TYPE')).size;
@@ -736,6 +743,7 @@ function renderUsers() {
         <option value="manager" ${u.role==='manager'?'selected':''}>🔵 Manager</option>
         <option value="admin" ${u.role==='admin'?'selected':''}>🔴 Admin</option></select></td>
       <td class="p-3 text-center"><button onclick="toggleActive('${uid}')" class="px-2 py-1 rounded-lg text-xs font-black ${u.active === false ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}">${u.active === false ? '⛔ Désactivé' : '✅ Actif'}</button></td>
+      <td class="p-3 text-center"><button onclick="toggleSaisie('${uid}')" title="Ce compte doit-il remplir un planning ?" class="px-2 py-1 rounded-lg text-xs font-black ${saisit(u) ? 'bg-blue-100 text-blue-700' : 'bg-slate-200 text-slate-500'}">${saisit(u) ? '📝 Saisit' : '🧭 Gestion seule'}</button></td>
       <td class="p-3 text-center font-bold text-slate-500">${weeksCountOf(uid)}</td>
     </tr>`).join('');
 }
@@ -757,7 +765,8 @@ function renderManager() {
   const kind = document.getElementById('period-select').value;
   const range = periodRange(kind);
   const blocksP = allBlocks.filter(b => inPeriod(weekOf(b), range));
-  const users = Object.entries(allUsers);
+  const users = Object.entries(allUsers).filter(([uid, u]) => saisit(u));
+  const gestion = Object.entries(allUsers).filter(([uid, u]) => !saisit(u));
   const weeksP = weeksInRange(range);
 
   let totalP = 0, sumWeeksN = 0;
@@ -791,7 +800,8 @@ function renderManager() {
     <div class="flex justify-between"><span class="text-slate-500">Semaines-agent saisies</span><strong>${sumWeeksN}</strong></div>
     <div class="flex justify-between"><span class="text-slate-500">Taux de saisie équipe</span><strong class="${fillRate < 80 ? 'text-red-600' : 'text-green-600'}">${fillRate}%</strong></div>
     <div class="flex justify-between"><span class="text-slate-500">Charge moyenne équipe / semaine</span><strong>${fmt(teamWeekAvg)}h (capacité ${fmt(users.length * config.hoursWeek)}h)</strong></div>
-    <div class="flex justify-between"><span class="text-slate-500">Activité n°1 de la période</span><strong>${top ? esc(top.label) + ' (' + fmt(top.hours) + 'h)' : '—'}</strong></div>`;
+    <div class="flex justify-between"><span class="text-slate-500">Activité n°1 de la période</span><strong>${top ? esc(top.label) + ' (' + fmt(top.hours) + 'h)' : '—'}</strong></div>
+    <div class="flex justify-between"><span class="text-slate-500">Comptes « gestion seule » (hors charge)</span><strong>${gestion.length ? gestion.map(([uid,u]) => esc(u.name)).join(', ') : '—'}</strong></div>`;
 
   const weeksSorted = [...new Set(blocksP.map(b => weekOf(b)))].sort();
   const ctxW = document.getElementById('chart-weeks').getContext('2d');
@@ -815,13 +825,14 @@ function renderManager() {
   }).join('');
 }
 
-/* ---------- DASHBOARD (basé sur le RÉEL) ---------- */
+/* ---------- DASHBOARD (basé sur le RÉEL, hors comptes gestion) ---------- */
 function renderDashboard() {
-  const capAgent = config.hoursWeek * config.weeks, capTotale = capAgent * config.etp;
   const real = allBlocks.filter(b => weekOf(b) !== 'TYPE');
-  const users = Object.entries(allUsers);
+  const users = Object.entries(allUsers).filter(([uid, u]) => saisit(u));
+  const nbGestion = Object.values(allUsers).filter(u => !saisit(u)).length;
   const sumWeeks = users.reduce((s,[uid]) => s + new Set(real.filter(b => b.owner === uid).map(b => weekOf(b))).size, 0);
   const hasReal = sumWeeks > 0;
+  const capAgent = config.hoursWeek * config.weeks, capTotale = capAgent * Math.max(1, users.length);
 
   const catWeekAvg = c => hasReal
     ? real.filter(b => b.cat === c).reduce((s,b) => s + b.duration, 0) / sumWeeks
@@ -840,10 +851,10 @@ function renderDashboard() {
   const taux = capTotale ? Math.round(charge/capTotale*100) : 0;
   const ecart = charge - capTotale, cout = Math.max(0,ecart)*config.taux;
 
-  document.getElementById('dash-effectif').textContent = config.etp;
+  document.getElementById('dash-effectif').textContent = users.length;
   document.getElementById('dash-source').textContent = hasReal ? `Base : ${sumWeeks} semaines réelles saisies` : 'Base : semaines types (aucune semaine réelle saisie)';
   document.getElementById('dash-kpis').innerHTML = `
-    <div class="p-5 border border-slate-200 rounded-xl bg-white fade-in"><div class="text-xs font-bold text-slate-500 uppercase">Capacité annuelle</div><div class="text-3xl font-black text-slate-800 my-2">${Math.round(capTotale).toLocaleString('fr-FR')} h</div><div class="text-xs text-slate-500">${config.etp} ETP × ${Math.round(capAgent)}h/an</div></div>
+    <div class="p-5 border border-slate-200 rounded-xl bg-white fade-in"><div class="text-xs font-bold text-slate-500 uppercase">Capacité annuelle</div><div class="text-3xl font-black text-slate-800 my-2">${Math.round(capTotale).toLocaleString('fr-FR')} h</div><div class="text-xs text-slate-500">${users.length} ETP saisis × ${Math.round(capAgent)}h/an${nbGestion ? ' · ' + nbGestion + ' compte(s) gestion hors charge' : ''}</div></div>
     <div class="p-5 border border-slate-200 rounded-xl bg-white fade-in"><div class="text-xs font-bold text-slate-500 uppercase">Charge projetée (réel)</div><div class="text-3xl font-black my-2" style="color:${taux>100?'#dc2626':'#1a2744'}">${Math.round(charge).toLocaleString('fr-FR')} h</div><div class="text-xs ${taux>100?'text-red-600 font-bold':'text-slate-500'}">${taux>100?'▲ +'+(taux-100).toFixed(1)+'% vs capacité':'▼ '+(100-taux)+'% de marge'}</div></div>
     <div class="p-5 border border-slate-200 rounded-xl bg-white fade-in"><div class="text-xs font-bold text-slate-500 uppercase">Taux de saturation</div><div class="text-3xl font-black my-2" style="color:${taux>100?'#dc2626':taux>85?'#ea580c':'#16a34a'}">${taux}%</div><div class="text-xs">${taux>110?'⚠️ Surcharge critique':taux>100?'⚠️ Surcharge':taux>85?'⚡ Vigilance':'✅ Maîtrisé'}</div></div>
     <div class="p-5 border border-slate-200 rounded-xl bg-white fade-in"><div class="text-xs font-bold text-slate-500 uppercase">Coût surcharge</div><div class="text-3xl font-black my-2 text-slate-800">${Math.round(cout).toLocaleString('fr-FR')} €</div><div class="text-xs text-slate-500">Dépassement × ${config.taux}€/h</div></div>`;
