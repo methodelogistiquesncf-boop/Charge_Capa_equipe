@@ -194,7 +194,7 @@ body { font-family: 'Inter', sans-serif; }
 
     <div class="p-6 bg-slate-50 border-b border-slate-200">
       <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">💰 Enveloppes & budgets <span class="text-[10px] font-normal text-slate-400">(projets = rattachement explicite · MCO/support/transverse = consommation auto)</span></h3>
-      <div id="proj-form" class="hidden mb-4 p-4 bg-white rounded-xl border border-slate-200 grid grid-cols-2 md:grid-cols-7 gap-3 items-end">
+      <div id="proj-form" class="hidden mb-4 p-4 bg-white rounded-xl border border-slate-200 grid grid-cols-2 md:grid-cols-8 gap-3 items-end">
         <select id="pj-cat" class="p-2 rounded-lg border border-slate-200 text-sm font-bold outline-none focus:border-blue-500" title="Projet = rattachement explicite · MCO/Support/Transverse = consommation automatique de tous les blocs de la catégorie">
           <option value="projet">🚀 Projet</option>
           <option value="mco">🔧 MCO (auto)</option>
@@ -204,6 +204,11 @@ body { font-family: 'Inter', sans-serif; }
         <input id="pj-code" placeholder="Code (MAG9 / MCO-26)" class="p-2 rounded-lg border border-slate-200 text-sm font-bold outline-none focus:border-blue-500">
         <input id="pj-name" placeholder="Nom de l'enveloppe" class="md:col-span-2 p-2 rounded-lg border border-slate-200 text-sm font-bold outline-none focus:border-blue-500">
         <input id="pj-budget" type="number" placeholder="Budget (h)" class="p-2 rounded-lg border border-slate-200 text-sm font-bold outline-none focus:border-blue-500">
+        <select id="pj-prio" class="p-2 rounded-lg border border-slate-200 text-sm font-bold outline-none focus:border-blue-500" title="Priorite">
+          <option value="1">🔴 P1</option>
+          <option value="2" selected>🟠 P2</option>
+          <option value="3">🟢 P3</option>
+        </select>
         <label class="flex items-center gap-2 text-xs font-bold text-slate-600 pb-2"><input id="pj-active" type="checkbox" checked class="w-4 h-4"> actif</label>
         <div class="flex gap-2">
           <button onclick="saveProject()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-xs font-black">Enregistrer</button>
@@ -214,6 +219,7 @@ body { font-family: 'Inter', sans-serif; }
       <div class="overflow-x-auto"><table class="w-full text-sm">
         <thead><tr class="bg-slate-800 text-white">
           <th class="text-left p-3 font-bold text-xs uppercase">Code</th>
+          <th class="text-center p-3 font-bold text-xs uppercase">Priorité</th>
           <th class="text-left p-3 font-bold text-xs uppercase">Enveloppe</th>
           <th class="text-center p-3 font-bold text-xs uppercase">Budget</th>
           <th class="text-center p-3 font-bold text-xs uppercase">Consommé</th>
@@ -355,6 +361,8 @@ const CATS = [
 ];
 const WORK_CATS = CATS.filter(c => c.key !== 'absences');
 const DEFAULT_REFS = { projet: [], mco: [], support: [], transverse: [], absences: [] };
+const PRIO_LABEL = { 1: '🔴 P1', 2: '🟠 P2', 3: '🟢 P3' };
+const prioOf = p => [1,2,3].includes(p?.prio) ? p.prio : 2;
 const JOURS = ['Lundi','Mardi','Mercredi','Jeudi','Vendredi'];
 const DAY_START = 8, DAY_END = 18, ROW_H = 46;
 const ROLE_STYLE = { agent: ['🟢','bg-green-100 text-green-700'], manager: ['🔵','bg-blue-100 text-blue-700'], admin: ['🔴','bg-red-100 text-red-700'] };
@@ -868,7 +876,7 @@ function renderRefPanel() {
 }
 
 /* ---------- ENVELOPPES : CRUD ---------- */
-window.newProject = () => { editingProjectId = null; ['pj-code','pj-name','pj-budget'].forEach(id => document.getElementById(id).value = ''); document.getElementById('pj-cat').value = 'projet'; document.getElementById('pj-active').checked = true; document.getElementById('proj-form').classList.remove('hidden'); };
+window.newProject = () => { editingProjectId = null; ['pj-code','pj-name','pj-budget'].forEach(id => document.getElementById(id).value = ''); document.getElementById('pj-cat').value = 'projet'; document.getElementById('pj-active').checked = true; document.getElementById('pj-prio').value = '2'; document.getElementById('proj-form').classList.remove('hidden'); };
 window.cancelProject = () => { document.getElementById('proj-form').classList.add('hidden'); editingProjectId = null; };
 window.editProject = id => {
   const p = allProjects.find(x => x.id === id); if (!p) return;
@@ -878,6 +886,7 @@ window.editProject = id => {
   document.getElementById('pj-name').value = p.name || '';
   document.getElementById('pj-budget').value = p.budgetH || 0;
   document.getElementById('pj-active').checked = p.active !== false;
+  document.getElementById('pj-prio').value = String(prioOf(p));
   document.getElementById('proj-form').classList.remove('hidden');
 };
 window.toggleProject = id => { const p = allProjects.find(x => x.id === id); if (!p) return; setDoc(doc(db, PATHS.projects, id), { active: p.active === false }, { merge: true }); };
@@ -894,6 +903,7 @@ window.deleteProject = async id => {
     alert('❌ Erreur à la suppression : ' + (e.code || e.message));
   }
 };
+window.changePrio = (id, val) => { const n = parseInt(val, 10); if (![1,2,3].includes(n)) return; setDoc(doc(db, PATHS.projects, id), { prio: n }, { merge: true }); };
 window.saveProject = async () => {
   if (!isPrivileged()) return;
   const cat = document.getElementById('pj-cat').value;
@@ -901,6 +911,7 @@ window.saveProject = async () => {
   const name = document.getElementById('pj-name').value.trim();
   const budgetH = parseFloat(document.getElementById('pj-budget').value) || 0;
   const active = document.getElementById('pj-active').checked;
+  const prio = parseInt(document.getElementById('pj-prio').value, 10) || 2;
   if (!code || !name) { alert('Code et nom requis.'); return; }
   if (cat !== 'projet') {
     const doublon = allProjects.find(p => p.id !== editingProjectId && p.active !== false && (p.cat || 'projet') === cat);
@@ -909,7 +920,7 @@ window.saveProject = async () => {
   if (!PATHS.projects) { alert('❌ firebase.js : PATHS ne contient pas "projects".'); return; }
   const id = editingProjectId || ('p' + Date.now());
   try {
-    await setDoc(doc(db, PATHS.projects, id), { code, name, budgetH, active, cat });
+    await setDoc(doc(db, PATHS.projects, id), { code, name, budgetH, active, cat, prio });
     cancelProject();
   } catch (e) {
     console.error('Erreur sauvegarde enveloppe :', e);
@@ -923,10 +934,10 @@ function renderProjects() {
   const tbody = document.getElementById('proj-table-body');
   if (!tbody) return;
   if (!allProjects.length) {
-    tbody.innerHTML = '<tr><td colspan="9" class="p-6 text-center text-slate-400 italic">Aucune enveloppe budgétée.' + (canManage ? ' Cliquez sur « ➕ Nouvelle enveloppe ».' : '') + '</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="10" class="p-6 text-center text-slate-400 italic">Aucune enveloppe budgétée.' + (canManage ? ' Cliquez sur « ➕ Nouvelle enveloppe ».' : '') + '</td></tr>';
     return;
   }
-  tbody.innerHTML = allProjects.slice().sort((a,b) => (a.cat||'projet').localeCompare(b.cat||'projet') || (a.code||'').localeCompare(b.code||'')).map(p => {
+  tbody.innerHTML = allProjects.slice().sort((a,b) => prioOf(a)-prioOf(b) || (a.cat||'projet').localeCompare(b.cat||'projet') || (a.code||'').localeCompare(b.code||'')).map(p => {
     const cons = projectConsumed(p);
     const rest = (p.budgetH||0) - cons;
     const pct = p.budgetH ? Math.round(cons / p.budgetH * 100) : (cons > 0 ? 999 : 0);
@@ -939,6 +950,7 @@ function renderProjects() {
     const badge = cat === 'projet' ? '<span class="text-[9px] px-1 py-0.5 rounded bg-blue-100 text-blue-700 font-black">PROJET</span>' : '<span class="text-[9px] px-1 py-0.5 rounded bg-violet-100 text-violet-700 font-black">AUTO ' + cat.toUpperCase() + '</span>';
     return `<tr class="border-b border-slate-100 hover:bg-slate-50 ${p.active === false ? 'opacity-50' : ''}">
       <td class="p-3 font-black text-slate-700">${esc(p.code||'')} ${badge}</td>
+      <td class="p-3 text-center"><select onchange="changePrio('${p.id}', this.value)" class="p-1.5 rounded-lg border border-slate-200 text-xs font-bold outline-none">${[1,2,3].map(n => '<option value="' + n + '"' + (prioOf(p) === n ? ' selected' : '') + '>' + PRIO_LABEL[n] + '</option>').join('')}</select></td>
       <td class="p-3 font-bold text-slate-800">${esc(p.name||'')}</td>
       <td class="text-center p-3 font-black">${fmt(p.budgetH||0)}h <span class="text-[10px] text-slate-400">(${eur.toLocaleString('fr-FR')} €)</span></td>
       <td class="text-center p-3 font-black">${fmt(cons)}h</td>
@@ -1205,7 +1217,7 @@ function renderDashboard() {
   document.getElementById('dash-budget-top').innerHTML = topB.length ? topB.map(x => {
     const pct = x.p.budgetH ? Math.round(x.cons / x.p.budgetH * 100) : 0;
     const col = pct > 100 ? '#dc2626' : pct > 90 ? '#ea580c' : pct > 70 ? '#f59e0b' : '#16a34a';
-    return `<div class="flex items-center gap-4 mb-2"><div class="w-64 text-sm font-bold text-slate-700 truncate">${esc(x.p.code||'')} — ${esc(x.p.name||'')}</div><div class="flex-1 h-6 bg-slate-200 rounded-lg overflow-hidden"><div class="h-full bar-fill-load" style="background:${col};width:${Math.min(100,pct)}%"></div></div><div class="w-32 text-right font-black text-xs" style="color:${col}">${fmt(x.cons)}h / ${fmt(x.p.budgetH||0)}h (${pct}%)</div></div>`;
+    return `<div class="flex items-center gap-4 mb-2"><div class="w-72 text-sm font-bold text-slate-700 truncate">${PRIO_LABEL[prioOf(x.p)]} · ${esc(x.p.code||'')} — ${esc(x.p.name||'')}</div><div class="flex-1 h-6 bg-slate-200 rounded-lg overflow-hidden"><div class="h-full bar-fill-load" style="background:${col};width:${Math.min(100,pct)}%"></div></div><div class="w-32 text-right font-black text-xs" style="color:${col}">${fmt(x.cons)}h / ${fmt(x.p.budgetH||0)}h (${pct}%)</div></div>`;
   }).join('') : '<p class="text-slate-400 italic text-sm">Aucune enveloppe budgétée.</p>';
 
   const agg = aggregateBlocks(work).slice(0,8), maxH = agg[0]?.hours || 1;
