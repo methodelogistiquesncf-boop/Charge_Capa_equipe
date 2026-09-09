@@ -1226,17 +1226,6 @@ function renderDashboard() {
 }
 </script>
 
-<script>
-setTimeout(function () {
-  if (!window.login) {
-    var d = document.createElement('div');
-    d.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#dc2626;color:#fff;font:700 13px/1.4 system-ui;padding:10px 16px;z-index:999;text-align:center';
-    d.textContent = 'Module non charge (ancien cache). Appuyez sur Ctrl+F5 pour recharger.';
-    document.body.appendChild(d);
-  }
-}, 2500);
-</script>
-
 <!-- ===== Service Worker ===== -->
 <script>
 if ('serviceWorker' in navigator) {
