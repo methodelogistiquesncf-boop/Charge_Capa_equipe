@@ -972,7 +972,7 @@ function renderJalons() {
     </div>`;
   }).join('') : '<p class="text-xs text-slate-400 italic">Aucune case. Ajoutez la premiere ci-dessous.</p>';
 }
-window.openJalons = id => { editingJalonsId = id; renderJalons(); };
+window.openJalons = id => { editingJalonsId = id; renderJalons(); document.getElementById('jalon-panel').scrollIntoView({ behavior: 'smooth', block: 'center' }); };
 window.closeJalons = () => { editingJalonsId = null; document.getElementById('jalon-panel').classList.add('hidden'); };
 window.addJalon = () => {
   const p = allProjects.find(x => x.id === editingJalonsId); if (!p) return;
