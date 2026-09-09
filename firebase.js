@@ -1,17 +1,10 @@
 /* =====================================================
-   firebase.js — Planning Activités
-   Les règles Firestore se publient dans la console
-   Firebase (Firestore -> Règles), JAMAIS dans ce fichier.
+   firebase.js - Planning Activites (Charge / Capacite)
+   Regles Firestore : console Firebase > Firestore > Rules
 ===================================================== */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"\;
-import {
-  getFirestore, collection, doc, setDoc, updateDoc, deleteDoc,
-  onSnapshot, query, where, getDocs
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"\;
-import {
-  getAuth, signInWithEmailAndPassword, signOut,
-  onAuthStateChanged, createUserWithEmailAndPassword, sendPasswordResetEmail
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"\;
+import { getFirestore, collection, doc, setDoc, updateDoc, deleteDoc, onSnapshot, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"\;
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, createUserWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"\;
 
 export const ADMIN_EMAIL = "michael.frischherz@sncf.fr";
 
@@ -25,23 +18,17 @@ const firebaseConfig = {
 };
 
 export const PATHS = {
-  users:    "cc_users",
-  blocks:   "cc_blocks",
+  users: "cc_users",
+  blocks: "cc_blocks",
   projects: "cc_projects",
-  config:   "cc_config",
-  refs:     "cc_refs"
+  config: "cc_config",
+  refs: "cc_refs"
 };
 
-export const app  = initializeApp(firebaseConfig);
-export const db   = getFirestore(app);
+export const app = initializeApp(firebaseConfig);
+export const db = getFirestore(app);
 export const auth = getAuth(app);
-
-export const secondaryApp  = initializeApp(firebaseConfig, "secondary");
+export const secondaryApp = initializeApp(firebaseConfig, "secondary");
 export const secondaryAuth = getAuth(secondaryApp);
 
-export {
-  collection, doc, setDoc, updateDoc, deleteDoc,
-  onSnapshot, query, where, getDocs,
-  signInWithEmailAndPassword, signOut,
-  onAuthStateChanged, createUserWithEmailAndPassword, sendPasswordResetEmail
-};
+export { collection, doc, setDoc, updateDoc, deleteDoc, onSnapshot, query, where, getDocs, signInWithEmailAndPassword, signOut, onAuthStateChanged, createUserWithEmailAndPassword, sendPasswordResetEmail };
