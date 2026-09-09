@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Documentation — Planning Activités (Direction)</title>
+<link rel="icon" type="image/svg+xml" href="icons/logo.svg">
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
+body { font-family: 'Inter', sans-serif; }
+@media print { .no-print { display: none !important; } body { background: white; } }
+</style>
+</head>
+<body class="bg-slate-100 min-h-screen">
+
+<div id="doc-denied" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4">
+  <div class="bg-white rounded-2xl p-8 max-w-md text-center shadow-2xl">
+    <div class="text-4xl mb-3">🔒</div>
+    <h1 class="text-lg font-black text-slate-800">Accès réservé</h1>
+    <p class="text-sm text-slate-600 mt-2">Ce document est réservé aux managers et administrateurs. Connectez-vous avec un compte autorisé.</p>
+    <a href="index.html" class="inline-block mt-4 bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-bold">← Retour à l'application</a>
+  </div>
+</div>
+
+<div id="doc-content">
+<header class="no-print text-white sticky top-0 z-40 shadow-lg" style="background: linear-gradient(135deg,#1a2744,#2d4373);">
+  <div class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between gap-3">
+    <div class="flex items-center gap-3">
+      <img src="icons/logo.svg" alt="" class="w-9 h-9 rounded-xl">
+      <div><h1 class="font-black">Documentation officielle</h1><p class="text-white/60 text-[11px]">Planning Activités — Charge / Capacité · Équipe Performance & Méthodes Logistique</p></div>
+    </div>
+    <div class="flex gap-2">
+      <button onclick="window.print()" class="bg-white/10 hover:bg-white/20 px-3 py-2 rounded-lg text-xs font-bold">🖨️ Imprimer / PDF</button>
+      <a href="index.html" class="bg-blue-600 hover:bg-blue-700 px-3 py-2 rounded-lg text-xs font-black">← Application</a>
+    </div>
+  </div>
+</header>
+
+<main class="max-w-4xl mx-auto px-4 py-8 space-y-8">
+
+  <section class="bg-white rounded-2xl border border-slate-200 p-6">
+    <p class="text-xs font-bold text-slate-400 uppercase">Version 1.0 · Document de référence management</p>
+    <h2 class="text-2xl font-black text-slate-800 mt-1">Application « Planning Activités — Charge / Capacité »</h2>
+    <p class="text-sm text-slate-600 mt-3">Trois vocations : <strong>saisir</strong> chaque semaine où chaque agent passe son temps (2 minutes), <strong>mesurer</strong> en continu la charge face à la capacité réelle (temps partiels, rendement et congés inclus), et <strong>piloter</strong> : budgets par enveloppe, priorités, jalons datés et projection annuelle chiffrée en ETP et en euros pour les arbitrages de direction.</p>
+    <p class="text-sm text-slate-600 mt-2"><strong>Principe fondateur :</strong> une seule saisie (les blocs d'activité de l'agent) alimente tous les tableaux de bord. Aucune double saisie, aucun congé à déclarer : tout le reste est calculé automatiquement.</p>
+  </section>
+
+  <section class="bg-white rounded-2xl border border-slate-200 p-6">
+    <h2 class="text-lg font-black text-slate-800 border-l-4 border-blue-500 pl-3 mb-4">2. Qui fait quoi</h2>
+    <table class="w-full text-sm border border-slate-200 rounded-lg overflow-hidden">
+      <thead><tr class="bg-slate-800 text-white"><th class="text-left p-2">Rôle</th><th class="text-left p-2">Droits</th></tr></thead>
+      <tbody>
+        <tr class="border-b border-slate-100"><td class="p-2 font-bold">🟢 Agent</td><td class="p-2">Saisit son propre planning uniquement. Voit sa capacité personnelle.</td></tr>
+        <tr class="border-b border-slate-100"><td class="p-2 font-bold">🔵 Manager</td><td class="p-2">Voit toute l'équipe (lecture seule), règle les taux de rendement, gère enveloppes budgétaires, priorités et checklists, accède à la consolidation et au dashboard.</td></tr>
+        <tr><td class="p-2 font-bold">🔴 Admin</td><td class="p-2">Tout ce qui précède + création des comptes, ETP, paramètres annuels, référentiels.</td></tr>
+      </tbody>
+    </table>
+    <p class="text-xs text-slate-500 mt-3">Confidentialité garantie côté serveur : un agent ne peut techniquement pas lire le planning d'un collègue.</p>
+  </section>
+
+  <section class="bg-white rounded-2xl border border-slate-200 p-6">
+    <h2 class="text-lg font-black text-slate-800 border-l-4 border-blue-500 pl-3 mb-4">3. Fonctionnement général</h2>
+    <ul class="text-sm text-slate-600 space-y-2 list-disc pl-5">
+      <li><strong>« Mon planning »</strong> : calendrier hebdomadaire, blocs colorés (catégorie + libellé + jour + horaire + durée). Fonctions gain de temps : copier la semaine précédente, copier la semaine type, dupliquer un bloc, glisser-déposer.</li>
+      <li><strong>« Manager »</strong> : paramètres annuels, tableau des enveloppes & budgets (consommation, priorités, checklists), courbe charge/capacité, consolidation par collaborateur.</li>
+      <li><strong>« Dashboard »</strong> : vue direction — KPIs annuels, courbe cumulée, enveloppes, retards de jalons, recommandation chiffrée, export PDF.</li>
+      <li><strong>« Utilisateurs »</strong> (admin) : comptes, ETP, rendements, rôles, modes de saisie.</li>
+    </ul>
+  </section>
+
+  <section class="bg-white rounded-2xl border border-slate-200 p-6">
+    <h2 class="text-lg font-black text-slate-800 border-l-4 border-red-500 pl-3 mb-4">4. Les calculs, pas à pas</h2>
+
+    <h3 class="font-black text-slate-700 mb-2">4.1 Capacité réelle d'un agent (cœur du système)</h3>
+    <p class="text-sm text-slate-600 mb-2">La capacité n'est pas les 35 h contractuelles : elle est réduite des congés/RTT et du rendement réel.</p>
+    <table class="w-full text-sm border border-slate-200 rounded-lg overflow-hidden mb-3">
+      <thead><tr class="bg-slate-800 text-white"><th class="text-left p-2">Étape</th><th class="text-left p-2">Formule</th><th class="text-left p-2">Exemple</th></tr></thead>
+      <tbody>
+        <tr class="border-b border-slate-100"><td class="p-2">Jours ouvrés / an</td><td class="p-2">semaines/an × 5</td><td class="p-2">52 × 5 = 260 j</td></tr>
+        <tr class="border-b border-slate-100"><td class="p-2">Jours travaillés / an</td><td class="p-2">jours ouvrés − jours de congés</td><td class="p-2">260 − 46 = 214 j</td></tr>
+        <tr class="border-b border-slate-100"><td class="p-2">Facteur congés</td><td class="p-2">jours travaillés ÷ jours ouvrés</td><td class="p-2">214 ÷ 260 = 0,823</td></tr>
+        <tr class="border-b border-slate-100"><td class="p-2 font-bold">Capacité hebdomadaire</td><td class="p-2">heures contrat × ETP × rendement × facteur congés</td><td class="p-2 font-bold">35 × 1 × 0,85 × 0,823 = 24,5 h/sem</td></tr>
+        <tr><td class="p-2 font-bold">Capacité annuelle</td><td class="p-2">capacité hebdo × semaines/an</td><td class="p-2 font-bold">24,5 × 52 = 1 273 h/an</td></tr>
+      </tbody>
+    </table>
+    <p class="text-xs text-slate-500 mb-4">Exemple : un agent à 80 % (ETP 0,8) avec rendement 0,90 → 35 × 0,8 × 0,90 × 0,823 = 20,7 h/semaine de capacité réelle. Les agents n'ont aucun congé à saisir : la déduction est automatique et lissée sur l'année.</p>
+
+    <h3 class="font-black text-slate-700 mb-2">4.2 Capacité de l'équipe</h3>
+    <p class="text-sm text-slate-600 mb-4">Somme des capacités individuelles de tous les comptes en mode « 📝 Saisit » (les comptes « 🧭 Gestion seule » sont exclus de la charge). Exemple : 6 agents à 24,5 h + 2 agents à 20,7 h = 188,4 h/semaine.</p>
+
+    <h3 class="font-black text-slate-700 mb-2">4.3 Taux Charge / Capacité (C/C)</h3>
+    <p class="text-sm text-slate-600 mb-1">Par agent : heures travaillées ÷ (semaines saisies × capacité hebdo). Équipe : total heures ÷ total capacités sur les semaines saisies.</p>
+    <p class="text-sm text-slate-600 mb-4">Lecture : ≤ 100 % maîtrisé · 100-110 % tendu · &gt; 110 % surcharge avérée.</p>
+
+    <h3 class="font-black text-slate-700 mb-2">4.4 Budgets & enveloppes</h3>
+    <table class="w-full text-sm border border-slate-200 rounded-lg overflow-hidden mb-2">
+      <thead><tr class="bg-slate-800 text-white"><th class="text-left p-2">Type</th><th class="text-left p-2">Comment se débite l'enveloppe</th></tr></thead>
+      <tbody>
+        <tr class="border-b border-slate-100"><td class="p-2 font-bold">Projet (🚀)</td><td class="p-2">Uniquement les blocs que les agents rattachent explicitement au projet</td></tr>
+        <tr><td class="p-2 font-bold">Auto (🔧 MCO, 🆘 Support, 📋 Transverse)</td><td class="p-2">Tous les blocs de la catégorie, sans action des agents</td></tr>
+      </tbody>
+    </table>
+    <p class="text-sm text-slate-600 mb-4">Indicateurs : consommé (somme des heures débitées) · reste (budget − consommé) · % (consommé ÷ budget) · rythme (consommé ÷ semaines écoulées depuis la 1ʳ heure) · horizon (reste ÷ rythme → « ≈ X semaines restantes »). Conversion € via le taux horaire paramétré.</p>
+
+    <h3 class="font-black text-slate-700 mb-2">4.5 Priorités</h3>
+    <p class="text-sm text-slate-600 mb-4">Chaque enveloppe porte une priorité 🔴 P1 / 🟠 P2 / 🟢 P3 : ordre de tri (P1 en tête) et repère d'arbitrage affiché dans tous les tableaux et le dashboard. Aucun calcul associé.</p>
+
+    <h3 class="font-black text-slate-700 mb-2">4.6 Checklists de jalons</h3>
+    <p class="text-sm text-slate-600 mb-4">Chaque projet porte une liste de cases datées (preuves attendues). Avancement = cases cochées ÷ cases totales. Prochaine échéance = première case non cochée triée par date. Retard = case non cochée dont la date est dépassée → affichage rouge + nombre de jours de retard au Dashboard.</p>
+
+    <h3 class="font-black text-slate-700 mb-2">4.7 Projection annuelle & recommandation (Dashboard)</h3>
+    <table class="w-full text-sm border border-slate-200 rounded-lg overflow-hidden mb-3">
+      <thead><tr class="bg-slate-800 text-white"><th class="text-left p-2">Étape</th><th class="text-left p-2">Formule</th></tr></thead>
+      <tbody>
+        <tr class="border-b border-slate-100"><td class="p-2">Moyenne hebdo par catégorie</td><td class="p-2">heures de la catégorie ÷ nombre de semaines saisies (tous agents)</td></tr>
+        <tr class="border-b border-slate-100"><td class="p-2">Charge annuelle par catégorie</td><td class="p-2">moyenne hebdo × Σ ETP de l'équipe × semaines/an</td></tr>
+        <tr class="border-b border-slate-100"><td class="p-2 font-bold">Taux de saturation</td><td class="p-2">charge totale ÷ capacité annuelle réelle de l'équipe</td></tr>
+        <tr class="border-b border-slate-100"><td class="p-2 font-bold">ETP manquants</td><td class="p-2">(charge − capacité) ÷ capacité annuelle d'1 ETP standard (rendement 0,85)</td></tr>
+        <tr><td class="p-2 font-bold">Coût de la surcharge</td><td class="p-2">écart (si positif) × taux horaire paramétré</td></tr>
+      </tbody>
+    </table>
+    <p class="text-xs text-slate-500 mb-4">Exemple de lecture direction : « Saturation 112 % → écart +1 850 h/an → 1,4 ETP manquants → coût de l'inaction 122 100 €/an au taux de 66 €/h. »</p>
+
+    <h3 class="font-black text-slate-700 mb-2">4.8 Courbe cumulée (surcharge structurelle)</h3>
+    <p class="text-sm text-slate-600">Chaque semaine de l'année : cumul des heures saisies (bleue) vs cumul des capacités réelles (verte). Si la bleue passe durablement au-dessus de la verte, l'écart final est le retard irrattrapable de l'année : preuve graphique de la surcharge structurelle.</p>
+  </section>
+
+  <section class="bg-white rounded-2xl border border-slate-200 p-6">
+    <h2 class="text-lg font-black text-slate-800 border-l-4 border-blue-500 pl-3 mb-4">5. Paramètres pilotables</h2>
+    <table class="w-full text-sm border border-slate-200 rounded-lg overflow-hidden">
+      <thead><tr class="bg-slate-800 text-white"><th class="text-left p-2">Paramètre</th><th class="text-left p-2">Valeur actuelle</th><th class="text-left p-2">Réglé par</th></tr></thead>
+      <tbody>
+        <tr class="border-b border-slate-100"><td class="p-2">Heures contrat / semaine (1 ETP)</td><td class="p-2">35 h</td><td class="p-2">Admin</td></tr>
+        <tr class="border-b border-slate-100"><td class="p-2">Semaines / an</td><td class="p-2">52</td><td class="p-2">Admin</td></tr>
+        <tr class="border-b border-slate-100"><td class="p-2">Jours congés + RTT / an</td><td class="p-2">46 j</td><td class="p-2">Admin</td></tr>
+        <tr class="border-b border-slate-100"><td class="p-2">Effectif cible ETP (référence direction)</td><td class="p-2">5</td><td class="p-2">Admin</td></tr>
+        <tr class="border-b border-slate-100"><td class="p-2">Taux horaire</td><td class="p-2">66 €</td><td class="p-2">Admin</td></tr>
+        <tr class="border-b border-slate-100"><td class="p-2">ETP de chaque agent</td><td class="p-2">selon contrat</td><td class="p-2">Admin</td></tr>
+        <tr class="border-b border-slate-100"><td class="p-2">Rendement de chaque agent</td><td class="p-2">0,85 par défaut</td><td class="p-2">Manager / Admin</td></tr>
+        <tr><td class="p-2">Budgets, priorités, checklists</td><td class="p-2">par enveloppe</td><td class="p-2">Manager / Admin</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="bg-white rounded-2xl border border-slate-200 p-6">
+    <h2 class="text-lg font-black text-slate-800 border-l-4 border-blue-500 pl-3 mb-4">6. Rituel d'exploitation recommandé</h2>
+    <table class="w-full text-sm border border-slate-200 rounded-lg overflow-hidden">
+      <thead><tr class="bg-slate-800 text-white"><th class="text-left p-2">Qui</th><th class="text-left p-2">Quand</th><th class="text-left p-2">Action</th></tr></thead>
+      <tbody>
+        <tr class="border-b border-slate-100"><td class="p-2">Agent</td><td class="p-2">Vendredi (2 min)</td><td class="p-2">Copier la semaine précédente, ajuster les blocs</td></tr>
+        <tr class="border-b border-slate-100"><td class="p-2">Manager</td><td class="p-2">Lundi</td><td class="p-2">Dashboard → bloc rouge « cases en retard » + colonne Checklist</td></tr>
+        <tr class="border-b border-slate-100"><td class="p-2">Manager</td><td class="p-2">En continu</td><td class="p-2">Ajuster rendements, priorités, cocher les jalons atteints</td></tr>
+        <tr><td class="p-2">Manager</td><td class="p-2">Fin de mois</td><td class="p-2">Période « Mois dernier » → export PDF du dashboard pour la direction</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="bg-white rounded-2xl border border-slate-200 p-6">
+    <h2 class="text-lg font-black text-slate-800 border-l-4 border-blue-500 pl-3 mb-4">7. Glossaire express</h2>
+    <ul class="text-sm text-slate-600 space-y-1 list-disc pl-5">
+      <li><strong>ETP</strong> : Équivalent Temps Plein (1 = temps plein).</li>
+      <li><strong>Rendement</strong> : part du temps contractuel réellement productive.</li>
+      <li><strong>MCO</strong> : Maintien en Condition Opérationnelle (activité récurrente).</li>
+      <li><strong>Enveloppe</strong> : budget en heures alloué à un projet ou à une catégorie.</li>
+      <li><strong>Jalon</strong> : case datée = preuve attendue à une date.</li>
+      <li><strong>Taux C/C</strong> : Charge ÷ Capacité.</li>
+    </ul>
+  </section>
+
+</main>
+<footer class="max-w-4xl mx-auto px-4 pb-10 text-center text-xs text-slate-400">Document de référence management · Version 1.0 · Les formules décrites sont exactement celles implémentées dans l'application.</footer>
+</div>
+
+<script type="module">
+import { db, auth, PATHS, doc, onSnapshot, onAuthStateChanged } from './firebase.js';
+function deny() {
+  document.getElementById('doc-content').classList.add('hidden');
+  document.getElementById('doc-denied').classList.remove('hidden');
+}
+onAuthStateChanged(auth, user => {
+  if (!user) { deny(); return; }
+  onSnapshot(doc(db, PATHS.users, user.uid), snap => {
+    const role = snap.exists() ? (snap.data().role || 'agent') : 'agent';
+    if (role !== 'manager' && role !== 'admin') deny();
+  }, deny);
+});
+</script>
+</body>
+</html>

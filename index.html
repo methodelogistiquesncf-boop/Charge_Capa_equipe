@@ -77,6 +77,7 @@ body { font-family: 'Inter', sans-serif; }
       <button onclick="switchView('manager')" id="nav-manager" class="px-3 py-2 rounded-lg font-bold text-xs md:text-sm transition hover:bg-white/20">📋 Manager</button>
       <button onclick="switchView('dashboard')" id="nav-dashboard" class="px-3 py-2 rounded-lg font-bold text-xs md:text-sm transition hover:bg-white/20">📊 Dashboard</button>
       <button onclick="switchView('users')" id="nav-users" class="px-3 py-2 rounded-lg font-bold text-xs md:text-sm transition hover:bg-white/20">👥 Utilisateurs</button>
+      <a href="doc-chef.html" target="_blank" id="nav-doc" class="hidden px-3 py-2 rounded-lg font-bold text-xs md:text-sm transition hover:bg-white/20">📘 Doc chef</a>
       <a href="aide.html" target="_blank" class="px-3 py-2 rounded-lg font-bold text-xs md:text-sm transition hover:bg-white/20">❓ Aide</a>
     </nav>
     <div id="session-badge" class="hidden items-center gap-2 bg-white/10 rounded-xl px-2.5 py-2 text-[11px] font-bold shrink-0">
@@ -594,6 +595,7 @@ function enterApp() {
   document.getElementById('nav-manager').classList.toggle('hidden', !isPrivileged());
   document.getElementById('nav-dashboard').classList.toggle('hidden', !isPrivileged());
   document.getElementById('nav-users').classList.toggle('hidden', !isAdmin());
+  document.getElementById('nav-doc').classList.toggle('hidden', !isPrivileged());
   document.getElementById('purge-btn').classList.toggle('hidden', !isAdmin());
   document.querySelectorAll('#cfg-section input').forEach(i => i.disabled = !isAdmin());
   if (!viewedUid || !allUsers[viewedUid]) viewedUid = me.uid;
