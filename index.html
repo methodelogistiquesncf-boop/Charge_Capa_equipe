@@ -46,7 +46,10 @@ body { font-family: 'Inter', sans-serif; }
     <div class="mt-6 text-left space-y-3">
       <input type="email" id="login-email" placeholder="Email professionnel" class="w-full p-3 rounded-xl bg-slate-50 border-2 border-slate-200 outline-none focus:border-blue-500 font-semibold text-sm">
       <div>
-        <input type="password" id="login-password" placeholder="Mot de passe" class="w-full p-3 rounded-xl bg-slate-50 border-2 border-slate-200 outline-none focus:border-blue-500 font-semibold text-sm" onkeydown="if(event.key==='Enter')window.login()">
+        <div class="relative">
+          <input type="password" id="login-password" placeholder="Mot de passe" class="w-full p-3 pr-11 rounded-xl bg-slate-50 border-2 border-slate-200 outline-none focus:border-blue-500 font-semibold text-sm" onkeydown="if(event.key==='Enter')window.login()">
+          <button type="button" onclick="togglePassword()" class="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-lg hover:bg-slate-200 text-slate-500 hover:text-slate-700 transition" title="Afficher/masquer le mot de passe"><span id="toggle-pwd-icon">👁️</span></button>
+        </div>
         <div class="flex justify-end mt-1">
           <button onclick="forgotPassword()" class="text-xs font-bold text-blue-600 hover:underline">🔑 Mot de passe oublié ?</button>
         </div>
@@ -472,6 +475,12 @@ window.login = async () => {
   catch (e) { err.textContent = '❌ ' + (e.code === 'auth/invalid-credential' ? 'Identifiants incorrects' : e.message); err.classList.remove('hidden'); }
 };
 window.logout = () => signOut(auth);
+window.togglePassword = () => {
+  const input = document.getElementById('login-password');
+  const icon = document.getElementById('toggle-pwd-icon');
+  if (input.type === 'password') { input.type = 'text'; icon.textContent = '🙈'; }
+  else { input.type = 'password'; icon.textContent = '👁️'; }
+};
 window.forgotPassword = async () => {
   const email = document.getElementById('login-email').value.trim() || prompt('Email du compte :');
   if (!email) return;
