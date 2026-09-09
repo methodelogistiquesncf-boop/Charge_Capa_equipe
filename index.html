@@ -61,7 +61,7 @@ body { font-family: 'Inter', sans-serif; }
 
 <!-- ============ HEADER ============ -->
 <header class="text-white sticky top-0 z-50 shadow-lg" style="background: linear-gradient(135deg, #1a2744 0%, #2d4373 100%);">
-  <div class="max-w-[1400px] mx-auto px-4 py-3 flex items-center gap-3 flex-wrap">
+  <div class="max-w-[1920px] mx-auto px-4 py-3 flex items-center gap-3 flex-wrap">
     <div class="flex items-center gap-3 mr-auto min-w-0">
       <img src="icons/logo.svg" alt="" class="w-9 h-9 rounded-xl shadow-sm shrink-0">
       <div class="min-w-0">
@@ -86,7 +86,7 @@ body { font-family: 'Inter', sans-serif; }
 </header>
 
 <!-- ============ VUE PLANNING ============ -->
-<section id="view-agent" class="max-w-7xl mx-auto px-6 py-8">
+<section id="view-agent" class="max-w-[1920px] mx-auto px-6 py-8">
   <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
     <div class="p-6 border-b border-slate-200 flex flex-wrap justify-between items-center gap-4">
       <div>
@@ -160,7 +160,7 @@ body { font-family: 'Inter', sans-serif; }
 </div>
 
 <!-- ============ VUE MANAGER ============ -->
-<section id="view-manager" class="max-w-7xl mx-auto px-6 py-8 hidden">
+<section id="view-manager" class="max-w-[1920px] mx-auto px-6 py-8 hidden">
   <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
     <div class="p-6 border-b border-slate-200 flex flex-wrap justify-between items-center gap-4">
       <div><h2 class="text-xl font-black text-slate-800">📋 Consolidation équipe</h2>
@@ -255,7 +255,7 @@ body { font-family: 'Inter', sans-serif; }
 </section>
 
 <!-- ============ VUE UTILISATEURS (ADMIN) ============ -->
-<section id="view-users" class="max-w-5xl mx-auto px-6 py-8 hidden">
+<section id="view-users" class="max-w-[1920px] mx-auto px-6 py-8 hidden">
   <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
     <div class="p-6 border-b border-slate-200">
       <h2 class="text-xl font-black text-slate-800">👥 Utilisateurs & rôles</h2>
@@ -294,7 +294,7 @@ body { font-family: 'Inter', sans-serif; }
 </section>
 
 <!-- ============ VUE DASHBOARD ============ -->
-<section id="view-dashboard" class="max-w-7xl mx-auto px-6 py-8 hidden">
+<section id="view-dashboard" class="max-w-[1920px] mx-auto px-6 py-8 hidden">
   <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
     <div class="p-8 text-white" style="background: linear-gradient(135deg, #1a2744 0%, #2d4373 100%);">
       <div class="flex justify-between items-start flex-wrap gap-4">
@@ -955,7 +955,7 @@ function loadConfigInputs() {
   document.getElementById('cfg-etp').value = config.etp;
   document.getElementById('cfg-taux').value = config.taux;
   document.getElementById('cfg-formule').textContent =
-    'Capacité hebdo = heures contrat × ETP × rendement × ((' + (config.weeks*5) + ' j ouvrés − ' + (config.congeDays??46) + ' j congés) ÷ ' + (config.weeks*5) + ') = ' + (config.weeks*5) + ' → ' + joursTravaillesAn() + ' j travaillés/an · soit ' + fmt(stdCapWeek()) + ' h/sem pour 1 ETP à rendement 0,85.';
+    'Capacité hebdo = heures contrat × ETP × rendement × ((' + (config.weeks*5) + ' j ouvrés − ' + (config.congeDays??46) + ' j congés) ÷ ' + (config.weeks*5) + ') → ' + joursTravaillesAn() + ' j travaillés/an · soit ' + fmt(stdCapWeek()) + ' h/sem pour 1 ETP à rendement 0,85.';
 }
 window.saveConfigFromInputs = () => {
   if (!isAdmin()) return;
