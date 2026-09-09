@@ -226,11 +226,24 @@ body { font-family: 'Inter', sans-serif; }
           <th class="text-center p-3 font-bold text-xs uppercase">Reste</th>
           <th class="text-center p-3 font-bold text-xs uppercase">%</th>
           <th class="text-center p-3 font-bold text-xs uppercase">Rythme</th>
+          <th class="text-center p-3 font-bold text-xs uppercase">Checklist</th>
           <th class="text-center p-3 font-bold text-xs uppercase">État</th>
           <th class="text-center p-3 font-bold text-xs uppercase no-print">Actions</th>
         </tr></thead>
         <tbody id="proj-table-body"></tbody>
       </table></div>
+      <div id="jalon-panel" class="hidden mt-4 p-4 bg-white rounded-xl border border-slate-200">
+        <div class="flex justify-between items-center mb-3">
+          <h4 class="font-black text-slate-800 text-sm" id="jalon-title">Checklist</h4>
+          <button onclick="closeJalons()" class="text-slate-400 hover:text-slate-600 font-black">✕</button>
+        </div>
+        <div id="jalon-list" class="space-y-2 mb-3"></div>
+        <div class="flex gap-2">
+          <input id="j-name" placeholder="Nouvelle case (ex : Equipes formees)" class="flex-1 p-2 rounded-lg border border-slate-200 text-sm font-semibold outline-none focus:border-blue-500">
+          <input id="j-date" type="date" class="p-2 rounded-lg border border-slate-200 text-sm font-semibold outline-none focus:border-blue-500">
+          <button onclick="addJalon()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-lg text-xs font-black">+ Ajouter</button>
+        </div>
+      </div>
     </div>
 
     <div class="p-6 bg-slate-50 border-b border-slate-200">
@@ -329,6 +342,10 @@ body { font-family: 'Inter', sans-serif; }
         <div id="dash-budget-top"></div>
       </div>
       <div class="bg-slate-50 p-6 rounded-xl mb-8">
+        <h3 class="font-black text-slate-800 mb-1">✅ Checklists projets : cases en retard</h3>
+        <div id="dash-jalons" class="mt-3"></div>
+      </div>
+      <div class="bg-slate-50 p-6 rounded-xl mb-8">
         <h3 class="font-black text-slate-800 mb-1">🔥 Top activités consommatrices (équipe)</h3>
         <div id="dash-top" class="mt-4"></div>
       </div>
@@ -374,7 +391,7 @@ let viewedUid = null, editingBlockId = null, draggedBlockId = null, editingProje
 let chartAgents = null, chartWeeks = null, chartCumul = null, bootstrapped = false, blocksListenerOn = false;
 let unsubs = [];
 let currentWeek = isoWeekKey(new Date());
-let dupDone = {}, copyDrag = false;
+let dupDone = {}, copyDrag = false, editingJalonsId = null;
 
 /* ---------- SEMAINES ISO ---------- */
 function isoWeekKey(date) {
@@ -603,6 +620,7 @@ function refreshAll() {
   if (!document.getElementById('view-manager').classList.contains('hidden')) renderManager();
   if (!document.getElementById('view-dashboard').classList.contains('hidden')) renderDashboard();
   if (!document.getElementById('view-users').classList.contains('hidden')) renderUsers();
+  if (editingJalonsId) renderJalons();
 }
 
 /* ---------- SÉLECTEURS ---------- */
@@ -928,13 +946,61 @@ window.saveProject = async () => {
   }
 };
 
+function jalonStats(p) {
+  const jal = p.jalons || [];
+  const today = new Date().toISOString().slice(0,10);
+  const done = jal.filter(j => j.done).length;
+  const next = jal.filter(j => !j.done && j.date).sort((a,b) => a.date.localeCompare(b.date))[0] || null;
+  const overdue = !!(next && next.date < today);
+  return { done, total: jal.length, next, overdue };
+}
+function renderJalons() {
+  const p = allProjects.find(x => x.id === editingJalonsId);
+  const panel = document.getElementById('jalon-panel');
+  if (!p) { panel.classList.add('hidden'); return; }
+  panel.classList.remove('hidden');
+  document.getElementById('jalon-title').textContent = '✅ Checklist - ' + (p.code || p.name);
+  const jal = p.jalons || [];
+  const today = new Date().toISOString().slice(0,10);
+  document.getElementById('jalon-list').innerHTML = jal.length ? jal.slice().sort((a,b) => (a.date||'9999').localeCompare(b.date||'9999')).map(j => {
+    const late = !j.done && j.date && j.date < today;
+    return `<div class="flex items-center gap-2 p-2 rounded-lg ${j.done ? 'bg-green-50' : late ? 'bg-red-50' : 'bg-slate-50'}">
+      <input type="checkbox" ${j.done ? 'checked' : ''} onchange="toggleJalon('${j.id}')" class="w-4 h-4">
+      <span class="flex-1 text-sm font-semibold ${j.done ? 'line-through text-slate-400' : late ? 'text-red-700' : 'text-slate-700'}">${esc(j.name)}</span>
+      <span class="text-xs font-bold ${late ? 'text-red-600' : 'text-slate-500'}">${j.date ? j.date.slice(8,10)+'/'+j.date.slice(5,7)+'/'+j.date.slice(2,4) : 'sans date'}${late ? ' - RETARD' : ''}</span>
+      <button onclick="deleteJalon('${j.id}')" class="text-red-400 hover:text-red-600 font-black text-xs">✕</button>
+    </div>`;
+  }).join('') : '<p class="text-xs text-slate-400 italic">Aucune case. Ajoutez la premiere ci-dessous.</p>';
+}
+window.openJalons = id => { editingJalonsId = id; renderJalons(); };
+window.closeJalons = () => { editingJalonsId = null; document.getElementById('jalon-panel').classList.add('hidden'); };
+window.addJalon = () => {
+  const p = allProjects.find(x => x.id === editingJalonsId); if (!p) return;
+  const name = document.getElementById('j-name').value.trim();
+  const date = document.getElementById('j-date').value;
+  if (!name) { alert('Donnez un libelle a la case.'); return; }
+  const jal = (p.jalons || []).slice();
+  jal.push({ id: 'j' + Date.now(), name, date, done: false });
+  setDoc(doc(db, PATHS.projects, p.id), { jalons: jal }, { merge: true });
+  document.getElementById('j-name').value = '';
+};
+window.toggleJalon = jid => {
+  const p = allProjects.find(x => x.id === editingJalonsId); if (!p) return;
+  const jal = (p.jalons || []).map(j => j.id === jid ? { ...j, done: !j.done } : j);
+  setDoc(doc(db, PATHS.projects, p.id), { jalons: jal }, { merge: true });
+};
+window.deleteJalon = jid => {
+  const p = allProjects.find(x => x.id === editingJalonsId); if (!p) return;
+  const jal = (p.jalons || []).filter(j => j.id !== jid);
+  setDoc(doc(db, PATHS.projects, p.id), { jalons: jal }, { merge: true });
+};
 function renderProjects() {
   const canManage = isPrivileged();
   document.getElementById('proj-add-btn').classList.toggle('hidden', !canManage);
   const tbody = document.getElementById('proj-table-body');
   if (!tbody) return;
   if (!allProjects.length) {
-    tbody.innerHTML = '<tr><td colspan="10" class="p-6 text-center text-slate-400 italic">Aucune enveloppe budgétée.' + (canManage ? ' Cliquez sur « ➕ Nouvelle enveloppe ».' : '') + '</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="11" class="p-6 text-center text-slate-400 italic">Aucune enveloppe budgétée.' + (canManage ? ' Cliquez sur « ➕ Nouvelle enveloppe ».' : '') + '</td></tr>';
     return;
   }
   tbody.innerHTML = allProjects.slice().sort((a,b) => prioOf(a)-prioOf(b) || (a.cat||'projet').localeCompare(b.cat||'projet') || (a.code||'').localeCompare(b.code||'')).map(p => {
@@ -948,6 +1014,8 @@ function renderProjects() {
     const eur = Math.round((p.budgetH||0) * config.taux);
     const cat = p.cat || 'projet';
     const badge = cat === 'projet' ? '<span class="text-[9px] px-1 py-0.5 rounded bg-blue-100 text-blue-700 font-black">PROJET</span>' : '<span class="text-[9px] px-1 py-0.5 rounded bg-violet-100 text-violet-700 font-black">AUTO ' + cat.toUpperCase() + '</span>';
+    const js = jalonStats(p);
+    const jcell = js.total ? '<span class="font-black">' + js.done + '/' + js.total + '</span>' + (js.next ? ' - <span class="' + (js.overdue ? 'text-red-600 font-black' : 'text-slate-600') + '">' + (js.overdue ? 'RETARD ' : '') + js.next.date.slice(8,10) + '/' + js.next.date.slice(5,7) + '</span>' : '') : '<span class="text-slate-400">-</span>';
     return `<tr class="border-b border-slate-100 hover:bg-slate-50 ${p.active === false ? 'opacity-50' : ''}">
       <td class="p-3 font-black text-slate-700">${esc(p.code||'')} ${badge}</td>
       <td class="p-3 text-center"><select onchange="changePrio('${p.id}', this.value)" class="p-1.5 rounded-lg border border-slate-200 text-xs font-bold outline-none">${[1,2,3].map(n => '<option value="' + n + '"' + (prioOf(p) === n ? ' selected' : '') + '>' + PRIO_LABEL[n] + '</option>').join('')}</select></td>
@@ -957,8 +1025,9 @@ function renderProjects() {
       <td class="text-center p-3 font-bold ${rest < 0 ? 'text-red-600' : 'text-slate-600'}">${fmt(rest)}h</td>
       <td class="text-center p-3 font-black">${pct}%</td>
       <td class="text-center p-3 text-xs text-slate-600">${rythme ? fmt(rythme) + 'h/sem · ' + (semRest != null && semRest >= 0 ? '≈' + fmt(semRest) + ' sem. rest.' : '—') : '—'}</td>
+      <td class="text-center p-3 text-xs">${jcell}</td>
       <td class="text-center p-3 text-xs font-black">${state}</td>
-      <td class="text-center p-3 no-print">${canManage ? `<button onclick="editProject('${p.id}')" class="text-blue-600 font-black text-xs">✏️</button> <button onclick="toggleProject('${p.id}')" title="${p.active === false ? 'Rouvrir' : 'Clôturer'}" class="text-slate-500 font-black text-xs">${p.active === false ? '♻️' : '⚪'}</button> <button onclick="deleteProject('${p.id}')" title="Supprimer définitivement" class="text-red-500 hover:text-red-700 font-black text-xs">🗑️</button>` : ''}</td>
+      <td class="text-center p-3 no-print">${canManage ? `<button onclick="editProject('${p.id}')" class="text-blue-600 font-black text-xs">✏️</button> <button onclick="toggleProject('${p.id}')" title="${p.active === false ? 'Rouvrir' : 'Clôturer'}" class="text-slate-500 font-black text-xs">${p.active === false ? '♻️' : '⚪'}</button> <button onclick="openJalons('${p.id}')" title="Checklist du projet" class="text-emerald-600 hover:text-emerald-800 font-black text-xs">✅</button> <button onclick="deleteProject('${p.id}')" title="Supprimer définitivement" class="text-red-500 hover:text-red-700 font-black text-xs">🗑️</button>` : ''}</td>
     </tr>`;
   }).join('');
 }
@@ -1204,6 +1273,13 @@ function renderDashboard() {
       ] },
     options: { responsive: true, plugins: { legend: { position: 'bottom' } }, scales: { y: { beginAtZero: true } } } });
 
+  const todayJ = new Date().toISOString().slice(0,10);
+  const lateRows = [];
+  allProjects.forEach(p => (p.jalons || []).forEach(j => { if (!j.done && j.date && j.date < todayJ) lateRows.push({ p, j }); }));
+  document.getElementById('dash-jalons').innerHTML = lateRows.length ? lateRows.sort((a,b) => a.j.date.localeCompare(b.j.date)).map(r => {
+    const days = Math.round((new Date(todayJ) - new Date(r.j.date)) / 86400000);
+    return `<div class="flex items-center gap-3 mb-2 p-2 rounded-lg bg-red-50"><span class="font-black text-sm">🔴</span><span class="text-sm font-bold text-slate-700">${esc(r.p.code || r.p.name)}</span><span class="text-sm text-slate-600 flex-1">${esc(r.j.name)}</span><span class="text-xs font-black text-red-600">retard de ${days} j (${r.j.date.slice(8,10)}/${r.j.date.slice(5,7)})</span></div>`;
+  }).join('') : '<p class="text-sm text-green-600 font-bold">✅ Aucune case en retard.</p>';
   const stats = allProjects.map(p => ({ p, cons: projectConsumed(p) }));
   const totBudget = allProjects.reduce((s,p) => s + (p.budgetH||0), 0);
   const totCons = stats.reduce((s,x) => s + x.cons, 0);
