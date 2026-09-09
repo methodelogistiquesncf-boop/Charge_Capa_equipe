@@ -38,12 +38,13 @@ body { font-family: 'Inter', sans-serif; }
   </div>
 </header>
 
+<!-- Onglets : ceux interdits au rôle sont masqués par le script de rôle en bas de page -->
 <div class="max-w-5xl mx-auto px-4 mt-6 flex gap-2 flex-wrap no-print">
   <button onclick="showTab('start')" id="tab-start" class="px-4 py-2.5 rounded-xl font-black text-sm bg-white border border-slate-200">🚀 Démarrage</button>
   <button onclick="showTab('agent')" id="tab-agent" class="px-4 py-2.5 rounded-xl font-black text-sm bg-white border border-slate-200">🟢 Agent</button>
-  <button onclick="showTab('manager')" id="tab-manager" class="px-4 py-2.5 rounded-xl font-black text-sm bg-white border border-slate-200">🔵 Manager</button>
-  <button onclick="showTab('admin')" id="tab-admin" class="px-4 py-2.5 rounded-xl font-black text-sm bg-white border border-slate-200">🔴 Admin</button>
-  <button onclick="showTab('faq')" id="tab-faq" class="px-4 py-2.5 rounded-xl font-black text-sm bg-white border border-slate-200">❓ FAQ</button>
+  <button onclick="showTab('manager')" id="tab-manager" class="hidden px-4 py-2.5 rounded-xl font-black text-sm bg-white border border-slate-200">🔵 Manager</button>
+  <button onclick="showTab('admin')" id="tab-admin" class="hidden px-4 py-2.5 rounded-xl font-black text-sm bg-white border border-slate-200">🔴 Admin</button>
+  <button onclick="showTab('faq')" id="tab-faq" class="hidden px-4 py-2.5 rounded-xl font-black text-sm bg-white border border-slate-200">❓ FAQ</button>
 </div>
 
 <main class="max-w-5xl mx-auto px-4 py-6 space-y-6">
@@ -195,7 +196,7 @@ body { font-family: 'Inter', sans-serif; }
     <ul class="text-sm text-slate-600 space-y-2 list-disc pl-5">
       <li><strong>Période</strong> : mois, mois dernier, trimestre, année, 12 mois, tout.</li>
       <li><strong>Colonnes</strong> : ETP · Rendement · Capacité/sem (calculée) · Travaillé · Semaines saisies / semaines de la période · Taux C/C.</li>
-      <li><strong>Taux C/C</strong> = heures travaillées ÷ capacité réelle de la personne sur ses semaines saisies. 🟢 ≤ 100 % · 🟡 80-100 % vigilance inversée… en pratique : 🔴 &gt; 110 % surcharge · 🟠 100-110 % tendu · 🟡 80-100 % vigilance · 🟢 OK.</li>
+      <li><strong>Taux C/C</strong> = heures travaillées ÷ capacité réelle de la personne sur ses semaines saisies. 🔴 &gt; 110 % surcharge · 🟠 100-110 % tendu · 🟡 80-100 % vigilance · 🟢 OK.</li>
       <li><strong>📈 Courbe</strong> : charge équipe vs capacité réelle (ETP × rendements × congés déduits), semaine par semaine.</li>
       <li><strong>🧮 Chiffres de période</strong> : Σ ETP, rendement moyen, jours travaillés/an, capacité hebdo & annuelle équipe, taux de saisie, activité n°1, comptes « gestion seule ».</li>
       <li><strong>« Où partent les heures ? »</strong> : agrégat par activité précise, tous agents confondus.</li>
@@ -207,8 +208,8 @@ body { font-family: 'Inter', sans-serif; }
     <ul class="text-sm text-slate-600 space-y-2 list-disc pl-5">
       <li><strong>Projet (rattachement explicite)</strong> : se débite uniquement quand un bloc 🚀 lui est rattaché.</li>
       <li><strong>Auto (MCO / support / transverse)</strong> : débite <strong>tous</strong> les blocs de la catégorie, sans action des agents — adapté aux charges récurrentes. Une seule enveloppe auto active par catégorie.</li>
-      <li><strong>Méthode MCO</strong> : période « 12 derniers mois » → « Où partent les heures » → total MCO ÷ semaines saisies = run-rate h/sem → × semaines/an = budget annuel (ex : 25 h/sem × 52 = 1 300 h ≈ 0,87 ETP à rendement 0,85… à comparer à la capacité).</li>
-      <li><strong>Suivi</strong> : consommé, reste, %, rythme (h/sem), horizon « ≈ X sem. rest. », état 🟢🟡🟠🔴.</li>
+      <li><strong>Méthode MCO</strong> : période « 12 derniers mois » → « Où partent les heures » → total MCO ÷ semaines saisies = run-rate h/sem → × semaines/an = budget annuel.</li>
+      <li><strong>Suivi</strong> : consommé, reste, %, rythme (h/sem), horizon « ≈ X sem. rest. », état 🟢🟠🔴.</li>
       <li><strong>Actions</strong> : ✏️ modifier · <strong>⚪/♻️ clôturer/rouvrir</strong> (recommandé en fin de projet : historique conservé) · <strong>🗑️ supprimer</strong> (double confirmation ; les blocs saisis restent dans leurs catégories mais perdent le rattachement budgétaire).</li>
     </ul>
   </div>
@@ -287,7 +288,7 @@ body { font-family: 'Inter', sans-serif; }
         <tr><td class="p-2 font-bold">ETP, rôles, accès, mode saisie</td><td class="p-2">🚫</td><td class="p-2">🚫</td><td class="p-2">✏️</td></tr>
         <tr><td class="p-2 font-bold">Enveloppes & budgets</td><td class="p-2">🚫 (voient les listes)</td><td class="p-2">✏️</td><td class="p-2">✏️</td></tr>
         <tr><td class="p-2 font-bold">Consolidation + Dashboard</td><td class="p-2">🚫</td><td class="p-2">✅</td><td class="p-2">✅</td></tr>
-        <tr><td class="p-2 font-bold">Paramètres, référentiels, purge</td><td class="p-2">🚫</td><td class="p-2">👁️ / 🚫 purge</td><td class="p-2">✏️</td></tr>
+        <tr><td class="p-2 font-bold">Paramètres, référentiels, purge</td><td class="p-2">🚫</td><td class="p-2">👁️ /  purge</td><td class="p-2">✏️</td></tr>
       </tbody>
     </table>
   </div>
@@ -304,7 +305,7 @@ body { font-family: 'Inter', sans-serif; }
     <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">💰 Projet vs enveloppe « auto » ?</summary><p class="text-sm text-slate-600 mt-2">Un <strong>projet</strong> se débite seulement quand un bloc 🚀 lui est rattaché. Une enveloppe <strong>auto</strong> (MCO/support/transverse) débite tous les blocs de sa catégorie, sans action des agents — adapté aux charges récurrentes.</p></details>
     <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">🗑️ Supprimer ou clôturer une enveloppe ?</summary><p class="text-sm text-slate-600 mt-2"><strong>⚪ Clôturer</strong> = conserve historique et consommation, retire l'enveloppe des suggestions (recommandé en fin de projet). <strong>🗑️ Supprimer</strong> = efface définitivement (double confirmation) ; les blocs saisis restent dans leurs catégories mais perdent le rattachement budgétaire.</p></details>
     <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">🔧 Comment budgétiser le MCO ?</summary><p class="text-sm text-slate-600 mt-2">Mesurez le run-rate : période « 12 derniers mois » → « Où partent les heures » → total MCO ÷ semaines saisies = h/sem. Multipliez par les semaines/an = budget annuel. Créez ensuite une enveloppe « 🔧 MCO (auto) ».</p></details>
-    <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer"> Mot de passe oublié ?</summary><p class="text-sm text-slate-600 mt-2">Lien « 🔑 Mot de passe oublié ? » sur l'écran de connexion → email de réinitialisation automatique.</p></details>
+    <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">🔑 Mot de passe oublié ?</summary><p class="text-sm text-slate-600 mt-2">Lien « 🔑 Mot de passe oublié ? » sur l'écran de connexion → email de réinitialisation automatique.</p></details>
     <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">⧉ Dupliquer un bloc ?</summary><p class="text-sm text-slate-600 mt-2">Clic bloc → « ⧉ Dupliquer ce bloc vers… » → boutons jours ou « ⇉ Tous les jours ». Ou Ctrl + glisser (⌘ Mac) pour copier vers un créneau précis.</p></details>
     <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">🧭 Planning en lecture seule ?</summary><p class="text-sm text-slate-600 mt-2">Deux cas : compte « 🧭 Gestion seule » (bandeau gris : aucune saisie attendue), ou consultation du planning d'un autre (bandeau orange). Pour contribuer, demandez le passage en « 📝 Saisit ».</p></details>
     <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">📲 Installer l'application ?</summary><p class="text-sm text-slate-600 mt-2">Android/Chrome : ⋮ → « Installer l'application ». iPhone/Safari : Partager → « Sur l'écran d'accueil ». PC Chrome/Edge : icône ⊕ dans la barre d'adresse.</p></details>
@@ -324,16 +325,50 @@ body { font-family: 'Inter', sans-serif; }
 
 <script>
 function showTab(key) {
+  const btn = document.getElementById('tab-' + key);
+  if (btn && btn.classList.contains('hidden')) return; // onglet interdit pour ce rôle
   ['start','agent','manager','admin','faq'].forEach(k => {
     document.getElementById('view-' + k).classList.toggle('hidden', k !== key);
-    const btn = document.getElementById('tab-' + k);
-    btn.classList.toggle('tab-active', k === key);
-    btn.classList.toggle('bg-white', k !== key);
+    const b = document.getElementById('tab-' + k);
+    b.classList.toggle('tab-active', k === key);
+    b.classList.toggle('bg-white', k !== key);
   });
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 document.getElementById('year').textContent = new Date().getFullYear();
 showTab('start');
+</script>
+
+<!-- ===== Contrôle d'accès aux onglets selon le rôle connecté ===== -->
+<script type="module">
+import { db, auth, PATHS, doc, onSnapshot, onAuthStateChanged } from './firebase.js';
+
+/* Onglets autorisés par rôle — modifiez ici si besoin
+   (ex : pour donner la FAQ à tout le monde, ajoutez 'faq' aux lignes manager et agent) */
+const TABS_BY_ROLE = {
+  admin:   ['start','agent','manager','admin','faq'],
+  manager: ['start','agent','manager'],
+  agent:   ['start','agent']
+};
+const ALL_TABS = ['start','agent','manager','admin','faq'];
+
+function applyRole(role) {
+  const allowed = TABS_BY_ROLE[role] || TABS_BY_ROLE.agent;
+  ALL_TABS.forEach(t => {
+    const btn = document.getElementById('tab-' + t);
+    if (btn) btn.classList.toggle('hidden', !allowed.includes(t));
+  });
+  // si l'onglet actuellement affiché devient interdit → retour Démarrage
+  const current = ALL_TABS.find(t => !document.getElementById('view-' + t).classList.contains('hidden'));
+  if (current && !allowed.includes(current)) showTab('start');
+}
+
+onAuthStateChanged(auth, user => {
+  if (!user) { applyRole('agent'); return; }  // visiteur non connecté (depuis l'écran de connexion) = vue agent
+  onSnapshot(doc(db, PATHS.users, user.uid), snap => {
+    applyRole(snap.exists() ? (snap.data().role || 'agent') : 'agent');
+  }, () => applyRole('agent'));
+});
 </script>
 </body>
 </html>
