@@ -475,12 +475,7 @@ window.login = async () => {
   catch (e) { err.textContent = '❌ ' + (e.code === 'auth/invalid-credential' ? 'Identifiants incorrects' : e.message); err.classList.remove('hidden'); }
 };
 window.logout = () => signOut(auth);
-window.togglePassword = () => {
-  const input = document.getElementById('login-password');
-  const icon = document.getElementById('toggle-pwd-icon');
-  if (input.type === 'password') { input.type = 'text'; icon.textContent = '🙈'; }
-  else { input.type = 'password'; icon.textContent = '👁️'; }
-};
+window.togglePassword = () => { const i = document.getElementById('login-password'); i.type = i.type === 'password' ? 'text' : 'password'; };
 window.forgotPassword = async () => {
   const email = document.getElementById('login-email').value.trim() || prompt('Email du compte :');
   if (!email) return;
