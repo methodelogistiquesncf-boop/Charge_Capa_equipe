@@ -1,42 +1,55 @@
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
+/* =====================================================
+   firebase.js — Paramétrage centralisé
+   Application "Planning Activités" (Charge / Capacité)
+   Projet : pilotage-equipe-12517  •  Base : FIRESTORE
+   ⚠️ Ce fichier ne doit JAMAIS contenir les règles Firestore
+   (elles se publient dans la console Firebase → Firestore → Règles)
+===================================================== */
 
-    function role() {
-      return get(/databases/$(database)/documents/cc_users/$(request.auth.uid)).data.role;
-    }
-    function isAdmin()   { return request.auth != null && role() == 'admin'; }
-    function isManager() { return request.auth != null && (role() == 'manager' || role() == 'admin'); }
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import {
+  getFirestore, collection, doc, setDoc, updateDoc, deleteDoc,
+  onSnapshot, query, where, getDocs
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import {
+  getAuth, signInWithEmailAndPassword, signOut,
+  onAuthStateChanged, createUserWithEmailAndPassword, sendPasswordResetEmail
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-    match /cc_users/{uid} {
-      allow read: if request.auth != null;
-      allow create: if request.auth != null && (request.auth.uid == uid || isAdmin());
-      allow update: if isAdmin() || (isManager() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['rendement']));
-      allow delete: if isAdmin();
-    }
+/* ---------- 1. CONFIGURATION ---------- */
+export const ADMIN_EMAIL = "michael.frischherz@sncf.fr";
 
-    match /cc_blocks/{id} {
-      allow read: if request.auth != null && (resource.data.owner == request.auth.uid || isManager());
-      allow create: if request.auth != null && (request.resource.data.owner == request.auth.uid || isAdmin());
-      allow update, delete: if request.auth != null && (resource.data.owner == request.auth.uid || isAdmin());
-    }
+const firebaseConfig = {
+  apiKey: "AIzaSyAoe39w3q89D2i3dzeHVE8ulz-g0Go5IqQ",
+  authDomain: "pilotage-equipe-12517.firebaseapp.com",
+  projectId: "pilotage-equipe-12517",
+  storageBucket: "pilotage-equipe-12517.firebasestorage.app",
+  messagingSenderId: "972121598212",
+  appId: "1:972121598212:web:4e4976d2a753af54120851"
+};
 
-    match /cc_projects/{id} {
-      allow read: if request.auth != null;
-      allow write: if isManager();
-    }
+/* ---------- 2. COLLECTIONS ---------- */
+export const PATHS = {
+  users:    "cc_users",
+  blocks:   "cc_blocks",
+  projects: "cc_projects",
+  config:   "cc_config",
+  refs:     "cc_refs"
+};
 
-    match /cc_config/{doc} {
-      allow read: if request.auth != null;
-      allow write: if isAdmin();
-    }
-    match /cc_refs/{doc} {
-      allow read: if request.auth != null;
-      allow write: if isAdmin();
-    }
+/* ---------- 3. INITIALISATION ---------- */
+export const app  = initializeApp(firebaseConfig);
+export const db   = getFirestore(app);
+export const auth = getAuth(app);
 
-    match /{document=**} {
-      allow read, write: if false;
-    }
-  }
-}
+/* Instance secondaire : création de comptes par l'admin sans perdre sa session */
+export const secondaryApp  = initializeApp(firebaseConfig, "secondary");
+export const secondaryAuth = getAuth(secondaryApp);
+
+/* ---------- 4. RÉ-EXPORT SDK ---------- */
+export {
+  collection, doc, setDoc, updateDoc, deleteDoc,
+  onSnapshot, query, where, getDocs,
+  signInWithEmailAndPassword, signOut,
+  onAuthStateChanged, createUserWithEmailAndPassword, sendPasswordResetEmail
+};
