@@ -382,7 +382,7 @@ const DEFAULT_REFS = { projet: [], mco: [], support: [], transverse: [], absence
 const PRIO_LABEL = { 1: '🔴 P1', 2: '🟠 P2', 3: '🟢 P3' };
 const prioOf = p => [1,2,3].includes(p?.prio) ? p.prio : 2;
 const JOURS = ['Lundi','Mardi','Mercredi','Jeudi','Vendredi'];
-const DAY_START = 8, DAY_END = 18, ROW_H = 46;
+const DAY_START = 8, DAY_END = 18, ROW_H = 60;
 const ROLE_STYLE = { agent: ['🟢','bg-green-100 text-green-700'], manager: ['🔵','bg-blue-100 text-blue-700'], admin: ['🔴','bg-red-100 text-red-700'] };
 
 let me = null, allUsers = {}, allBlocks = [], allProjects = [];
