@@ -27,6 +27,11 @@ body { font-family: 'Inter', sans-serif; }
 .blk:active { cursor: grabbing; }
 .blk:hover { transform: scale(1.03); box-shadow: 0 4px 10px rgba(0,0,0,0.25); z-index: 30 !important; }
 .blk.dragging { opacity: 0.35; }
+.rz { position: absolute; left: 0; right: 0; height: 6px; cursor: ns-resize; z-index: 6; }
+.rz-t { top: 0; }
+.rz-b { bottom: 0; }
+.rz:hover { background: rgba(255,255,255,0.4); }
+.readonly .rz { display: none; }
 .day-col.drag-over { background: #dbeafe; outline: 2px dashed #2563eb; outline-offset: -3px; }
 .day-col.drag-over .slot:hover::after { content: ''; }
 .readonly .slot:hover { background: transparent; cursor: default; }
@@ -731,7 +736,7 @@ function renderCalendar() {
         style="top:${(b.start-DAY_START)*ROW_H+1}px;height:${Math.max(18,b.duration*ROW_H-3)}px;left:calc(${pos.lane*w}% + 2px);width:calc(${w}% - 4px);background:${c.color};z-index:10"
         title="${esc(b.label)} — ${fmtHour(b.start)}→${fmtHour(b.start+b.duration)} · Ctrl+glisser = copier">
         <div class="font-black text-[10px] leading-tight truncate">⠿ ${esc(b.label) || '(sans libellé)'}</div>
-        ${b.duration >= 0.5 ? `<div class="text-[9px] opacity-80 font-bold">${fmtHour(b.start)}-${fmtHour(b.start+b.duration)} · ${fmtDur(b.duration)}</div>` : ''}</div>`;
+        ${b.duration >= 0.5 ? `<div class="text-[9px] opacity-80 font-bold">${fmtHour(b.start)}-${fmtHour(b.start+b.duration)} · ${fmtDur(b.duration)}</div>` : ''}${editable ? `<div class="rz rz-t" onmousedown="startResize(event,'${b.id}','t')"></div><div class="rz rz-b" onmousedown="startResize(event,'${b.id}','b')"></div>` : ''}</div>`;
     });
     html += '</div>';
   });
@@ -760,6 +765,51 @@ window.onDrop = (e, day) => {
     updateDoc(doc(db, PATHS.blocks, id), { day, start });
   }
   copyDrag = false;
+};
+
+/* ---------- RESIZE DES BLOCS ---------- */
+let resizing = null;
+window.startResize = (e, id, edge) => {
+  if (!canEdit()) return;
+  e.preventDefault(); e.stopPropagation();
+  window._rzSuppress = true; setTimeout(() => { window._rzSuppress = false; }, 50);
+  const b = allBlocks.find(x => x.id === id); if (!b) return;
+  const col = e.target.closest('.day-col'); if (!col) return;
+  const rect = col.getBoundingClientRect();
+  const blkEl = e.target.closest('.blk');
+  if (blkEl) blkEl.draggable = false;
+  resizing = { id, edge, rect, origStart: b.start, origDur: b.duration, blkEl, newDur: null, newStart: null };
+  const move = ev => {
+    if (!resizing) return;
+    const y = ev.clientY - resizing.rect.top;
+    let t = DAY_START + Math.round((y / ROW_H) * 4) / 4;
+    t = Math.max(DAY_START, Math.min(DAY_END, t));
+    const b2 = allBlocks.find(x => x.id === resizing.id); if (!b2) return;
+    if (resizing.edge === 'b') {
+      const dur = Math.max(0.25, Math.min(DAY_END - b2.start, t - b2.start));
+      if (resizing.blkEl) resizing.blkEl.style.height = Math.max(12, dur * ROW_H - 3) + 'px';
+      resizing.newDur = dur;
+    } else {
+      const end = resizing.origStart + resizing.origDur;
+      const st = Math.max(DAY_START, Math.min(t, end - 0.25));
+      const dur = end - st;
+      if (resizing.blkEl) { resizing.blkEl.style.top = ((st - DAY_START) * ROW_H + 1) + 'px'; resizing.blkEl.style.height = Math.max(12, dur * ROW_H - 3) + 'px'; }
+      resizing.newStart = st; resizing.newDur = dur;
+    }
+  };
+  const up = () => {
+    document.removeEventListener('mousemove', move);
+    document.removeEventListener('mouseup', up);
+    if (resizing && resizing.blkEl) resizing.blkEl.draggable = true;
+    if (resizing && resizing.newDur) {
+      const data = { duration: resizing.newDur };
+      if (resizing.newStart != null) data.start = resizing.newStart;
+      updateDoc(doc(db, PATHS.blocks, resizing.id), data);
+    }
+    resizing = null;
+  };
+  document.addEventListener('mousemove', move);
+  document.addEventListener('mouseup', up);
 };
 
 /* ---------- MODAL BLOC ---------- */
@@ -801,7 +851,7 @@ window.onProjChange = () => {
   } else warn.classList.add('hidden');
 };
 window.openModal = (day, start, blockId) => {
-  if (!canEdit()) return;
+  if (!canEdit() || window._rzSuppress) return;
   editingBlockId = blockId || null; fillModalSelects();
   const b = blockId ? allBlocks.find(x => x.id === blockId) : null;
   document.getElementById('modal-title').textContent = b ? "Modifier l'activité" : 'Nouvelle activité';
