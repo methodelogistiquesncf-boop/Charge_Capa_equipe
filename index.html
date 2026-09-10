@@ -767,12 +767,19 @@ window.onDrop = (e, day) => {
   copyDrag = false;
 };
 
+/* ---------- PIEGE A CLIC POST-RESIZE ---------- */
+document.addEventListener('click', (e) => {
+  if (window._rzClickTrap) {
+    e.stopPropagation(); e.preventDefault();
+    window._rzClickTrap = false;
+  }
+}, true);
 /* ---------- RESIZE DES BLOCS ---------- */
 let resizing = null;
 window.startResize = (e, id, edge) => {
   if (!canEdit()) return;
   e.preventDefault(); e.stopPropagation();
-  window._rzSuppress = true; setTimeout(() => { window._rzSuppress = false; }, 50);
+  window._rzClickTrap = true;
   const b = allBlocks.find(x => x.id === id); if (!b) return;
   const col = e.target.closest('.day-col'); if (!col) return;
   const rect = col.getBoundingClientRect();
@@ -851,7 +858,7 @@ window.onProjChange = () => {
   } else warn.classList.add('hidden');
 };
 window.openModal = (day, start, blockId) => {
-  if (!canEdit() || window._rzSuppress) return;
+  if (!canEdit() || window._rzClickTrap) return;
   editingBlockId = blockId || null; fillModalSelects();
   const b = blockId ? allBlocks.find(x => x.id === blockId) : null;
   document.getElementById('modal-title').textContent = b ? "Modifier l'activité" : 'Nouvelle activité';
