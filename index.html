@@ -38,6 +38,8 @@ body { font-family: 'Inter', sans-serif; }
 .readonly .slot:hover::after { content: ''; }
 .readonly .blk { cursor: default; }
 @media print { .no-print { display: none !important; } body { background: white; } }
+tr.gs td:nth-child(3) input, tr.gs td:nth-child(4) input { display: none; }
+tr.gs td:nth-child(3)::after, tr.gs td:nth-child(4)::after { content: '—'; color: #cbd5e1; font-weight: 900; }
 </style>
 </head>
 <body class="bg-slate-50 min-h-screen">
