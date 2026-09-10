@@ -832,6 +832,8 @@ window.saveBlock = () => {
   const projSel = document.getElementById('m-proj').value || null;
   let label = document.getElementById('m-label').value.trim();
   if (projSel && !label) { const p = allProjects.find(x => x.id === projSel); if (p) label = p.name; }
+  const canon = (refs[document.getElementById('m-cat').value] || []).find(r => normLabel(r) === normLabel(label));
+  if (canon) label = canon;
   const data = { cat: document.getElementById('m-cat').value, label, day: document.getElementById('m-day').value, start, duration: dur, week: currentWeek, projectId: projSel };
   if (editingBlockId) updateDoc(doc(db, PATHS.blocks, editingBlockId), data);
   else { const id = 'b' + Date.now(); setDoc(doc(db, PATHS.blocks, id), { id, owner: viewedUid, ...data }); }
@@ -1119,12 +1121,13 @@ function renderUsers() {
 }
 
 /* ---------- MANAGER ---------- */
+const normLabel = s => (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
 function aggregateBlocks(list) {
   const agg = {};
   list.forEach(b => {
     if (b.cat === 'absences') return;
     const label = (b.label||'').trim(); if (!label) return;
-    const k = b.cat + '|' + label;
+    const k = b.cat + '|' + normLabel(label);
     if (!agg[k]) agg[k] = { cat: b.cat, label, hours: 0, agents: new Set() };
     agg[k].hours += b.duration; agg[k].agents.add(b.owner);
   });
@@ -1198,14 +1201,16 @@ function renderManager() {
     options: { responsive: true, plugins: { legend: { position: 'bottom' } }, scales: { y: { beginAtZero: true } } } });
 
   const agg = aggregateBlocks(blocksP), maxH = agg[0]?.hours || 1;
-  document.getElementById('agg-table-body').innerHTML = agg.length === 0 ? '<tr><td class="p-6 text-center text-slate-400 italic">Aucun bloc sur la période.</td></tr>' : agg.map(a => {
+  const top20 = agg.slice(0, 20), restAgg = agg.slice(20);
+  const restH = restAgg.reduce((sm, a) => sm + a.hours, 0);
+  document.getElementById('agg-table-body').innerHTML = agg.length === 0 ? '<tr><td class="p-6 text-center text-slate-400 italic">Aucun bloc sur la période.</td></tr>' : top20.map(a => {
     const c = CATS.find(x => x.key === a.cat);
     return `<tr class="border-b border-slate-100"><td class="p-2 w-8"><div class="w-3 h-3 rounded-full" style="background:${c.color}"></div></td>
       <td class="p-2 font-bold text-slate-800">${esc(a.label)}<span class="ml-2 text-[10px] text-slate-400 font-semibold">${a.nbAgents} pers.</span></td>
       <td class="p-2 w-64"><div class="h-4 bg-slate-100 rounded overflow-hidden"><div class="h-full rounded" style="background:${c.color};width:${Math.round(a.hours/maxH*100)}%"></div></div></td>
       <td class="p-2 text-center font-black w-24">${fmt(a.hours)}h</td>
       <td class="p-2 text-center text-slate-600 w-28">${Math.round(a.hours*config.weeks/(sumWeeksN||1)*users.length).toLocaleString('fr-FR')}h/an proj.</td></tr>`;
-  }).join('');
+  }).join('') + (restAgg.length ? `<tr class="border-t-2 border-slate-200"><td class="p-2"></td><td class="p-2 font-bold text-slate-500 italic">… et ${restAgg.length} autres activités (libellés divers)</td><td class="p-2"></td><td class="p-2 text-center font-black text-slate-500">${fmt(restH)}h</td><td class="p-2"></td></tr>` : '');
 }
 
 /* ---------- DASHBOARD ---------- */
