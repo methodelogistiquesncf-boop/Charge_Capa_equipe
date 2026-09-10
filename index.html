@@ -1056,8 +1056,9 @@ function renderJalons() {
     const late = !j.done && j.date && j.date < today;
     return `<div class="flex items-center gap-2 p-2 rounded-lg ${j.done ? 'bg-green-50' : late ? 'bg-red-50' : 'bg-slate-50'}">
       <input type="checkbox" ${j.done ? 'checked' : ''} onchange="toggleJalon('${j.id}')" class="w-4 h-4">
-      <span class="flex-1 text-sm font-semibold ${j.done ? 'line-through text-slate-400' : late ? 'text-red-700' : 'text-slate-700'}">${esc(j.name)}</span>
-      <span class="text-xs font-bold ${late ? 'text-red-600' : 'text-slate-500'}">${j.date ? j.date.slice(8,10)+'/'+j.date.slice(5,7)+'/'+j.date.slice(2,4) : 'sans date'}${late ? ' - RETARD' : ''}</span>
+      <input type="text" value="${esc(j.name)}" onchange="renameJalon('${j.id}', this.value)" title="Cliquer pour modifier le texte" class="flex-1 text-sm font-semibold bg-transparent border-b border-transparent hover:border-slate-300 focus:border-blue-500 focus:bg-white rounded px-1 outline-none ${j.done ? 'line-through text-slate-400' : late ? 'text-red-700' : 'text-slate-700'}">
+      <input type="date" value="${j.date || ''}" onchange="setJalonDate('${j.id}', this.value)" title="Modifier la date" class="text-xs font-bold bg-transparent outline-none ${late ? 'text-red-600' : 'text-slate-500'}">
+      ${late ? '<span class="text-[10px] font-black text-red-600">RETARD</span>' : ''}
       <button onclick="deleteJalon('${j.id}')" class="text-red-400 hover:text-red-600 font-black text-xs">✕</button>
     </div>`;
   }).join('') : '<p class="text-xs text-slate-400 italic">Aucune case. Ajoutez la premiere ci-dessous.</p>';
@@ -1073,6 +1074,17 @@ window.addJalon = () => {
   jal.push({ id: 'j' + Date.now(), name, date, done: false });
   setDoc(doc(db, PATHS.projects, p.id), { jalons: jal }, { merge: true });
   document.getElementById('j-name').value = '';
+};
+window.renameJalon = (jid, val) => {
+  const p = allProjects.find(x => x.id === editingJalonsId); if (!p) return;
+  const v = (val || '').trim(); if (!v) return;
+  const jal = (p.jalons || []).map(j => j.id === jid ? { ...j, name: v } : j);
+  setDoc(doc(db, PATHS.projects, p.id), { jalons: jal }, { merge: true });
+};
+window.setJalonDate = (jid, val) => {
+  const p = allProjects.find(x => x.id === editingJalonsId); if (!p) return;
+  const jal = (p.jalons || []).map(j => j.id === jid ? { ...j, date: val } : j);
+  setDoc(doc(db, PATHS.projects, p.id), { jalons: jal }, { merge: true });
 };
 window.toggleJalon = jid => {
   const p = allProjects.find(x => x.id === editingJalonsId); if (!p) return;
