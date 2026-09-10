@@ -22,7 +22,7 @@ body { font-family: 'Inter', sans-serif; }
 .fade-in { animation: fadeIn 0.4s ease-out; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 .slot:hover { background: #eff6ff; cursor: pointer; }
-.slot:hover::after { content: '+'; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #93c5fd; font-weight: 900; font-size: 16px; }
+.slot:hover::after { content: '+'; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #93c5fd; font-weight: 900; font-size: 11px; line-height: 1; }
 .blk { transition: transform 0.15s, box-shadow 0.15s; cursor: grab; }
 .blk:active { cursor: grabbing; }
 .blk:hover { transform: scale(1.03); box-shadow: 0 4px 10px rgba(0,0,0,0.25); z-index: 30 !important; }
@@ -719,7 +719,7 @@ function renderCalendar() {
     html += `<div class="day-col relative border-l border-slate-200" style="height:${colH}px" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${j}')">`;
     for (let q = 0; q < (DAY_END - DAY_START) * 4; q++) {
       const st = DAY_START + q * 0.25;
-      html += `<div class="slot absolute left-0 right-0 relative ${(q + 1) % 4 === 0 ? 'border-b border-slate-200' : 'border-b border-slate-100/70'}" style="top:${q * (ROW_H / 4)}px;height:${ROW_H / 4}px" onclick="openModal('${j}',${st})"></div>`;
+      html += `<div class="slot absolute left-0 right-0 ${(q + 1) % 4 === 0 ? 'border-b border-slate-200' : 'border-b border-slate-100/70'}" style="top:${q * (ROW_H / 4)}px;height:${ROW_H / 4}px" onclick="openModal('${j}',${st})"></div>`;
     }
     dayBlocks.forEach(b => {
       const c = CATS.find(x => x.key === b.cat) || CATS[0];
@@ -807,7 +807,7 @@ window.openModal = (day, start, blockId) => {
   document.getElementById('m-cat').value = b ? b.cat : 'projet';
   document.getElementById('m-label').value = b ? (b.label || '') : '';
   document.getElementById('m-day').value = b ? b.day : day;
-  document.getElementById('m-start').value = b ? b.start : start;
+  document.getElementById('m-start').value = String(Math.round((b ? b.start : start) * 4) / 4);
   document.getElementById('m-dur').value = b ? b.duration : 1;
   document.getElementById('m-delete').classList.toggle('hidden', !b);
   updateProjWrap();
