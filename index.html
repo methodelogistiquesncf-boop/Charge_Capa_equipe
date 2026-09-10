@@ -170,6 +170,17 @@ tr.gs td:nth-child(3)::after, tr.gs td:nth-child(4)::after { content: '—'; col
   </div>
 </div>
 
+<div id="info-modal" class="hidden fixed inset-0 z-[110] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
+  <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 fade-in">
+    <div class="flex justify-between items-center mb-3">
+      <h3 class="text-base font-black text-slate-800" id="info-title"></h3>
+      <button onclick="closeInfo()" class="text-slate-400 hover:text-slate-600 text-xl font-black">✕</button>
+    </div>
+    <p id="info-body" class="text-sm text-slate-600 leading-relaxed"></p>
+    <button onclick="closeInfo()" class="mt-5 w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-xl font-bold text-sm">Compris</button>
+  </div>
+</div>
+
 <!-- ============ VUE MANAGER ============ -->
 <section id="view-manager" class="max-w-[1920px] mx-auto px-6 py-8 hidden">
   <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
@@ -191,11 +202,11 @@ tr.gs td:nth-child(3)::after, tr.gs td:nth-child(4)::after { content: '—'; col
     <div id="cfg-section" class="p-6 bg-slate-50 border-b border-slate-200">
       <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">⚙️ Paramètres de projection annuelle</h3>
       <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
-        <div><label class="block text-xs font-semibold text-slate-600 mb-1.5">Heures contrat / sem. (1 ETP)</label><input type="number" id="cfg-hours-week" oninput="saveConfigFromInputs()" class="w-full p-2 rounded-lg border border-slate-200 text-sm font-bold text-center"></div>
-        <div><label class="block text-xs font-semibold text-slate-600 mb-1.5">Semaines / an</label><input type="number" id="cfg-weeks" oninput="saveConfigFromInputs()" class="w-full p-2 rounded-lg border border-slate-200 text-sm font-bold text-center"></div>
-        <div><label class="block text-xs font-semibold text-slate-600 mb-1.5">Jours congés+RTT / an</label><input type="number" id="cfg-conge" oninput="saveConfigFromInputs()" class="w-full p-2 rounded-lg border border-slate-200 text-sm font-bold text-center"></div>
-        <div><label class="block text-xs font-semibold text-slate-600 mb-1.5">Effectif cible ETP (référence)</label><input type="number" id="cfg-etp" oninput="saveConfigFromInputs()" class="w-full p-2 rounded-lg border border-slate-200 text-sm font-bold text-center"></div>
-        <div><label class="block text-xs font-semibold text-slate-600 mb-1.5">Taux horaire (€)</label><input type="number" id="cfg-taux" oninput="saveConfigFromInputs()" class="w-full p-2 rounded-lg border border-slate-200 text-sm font-bold text-center"></div>
+        <div><label class="block text-xs font-semibold text-slate-600 mb-1.5">Heures contrat / sem. (1 ETP) <button type="button" onclick="explainParam('hoursWeek')" class="text-blue-500 hover:text-blue-700 font-black" title="A quoi sert ce champ ?">ⓘ</button></label><input type="number" id="cfg-hours-week" oninput="saveConfigFromInputs()" class="w-full p-2 rounded-lg border border-slate-200 text-sm font-bold text-center"></div>
+        <div><label class="block text-xs font-semibold text-slate-600 mb-1.5">Semaines / an <button type="button" onclick="explainParam('weeks')" class="text-blue-500 hover:text-blue-700 font-black" title="A quoi sert ce champ ?">ⓘ</button></label><input type="number" id="cfg-weeks" oninput="saveConfigFromInputs()" class="w-full p-2 rounded-lg border border-slate-200 text-sm font-bold text-center"></div>
+        <div><label class="block text-xs font-semibold text-slate-600 mb-1.5">Jours congés+RTT / an <button type="button" onclick="explainParam('congeDays')" class="text-blue-500 hover:text-blue-700 font-black" title="A quoi sert ce champ ?">ⓘ</button></label><input type="number" id="cfg-conge" oninput="saveConfigFromInputs()" class="w-full p-2 rounded-lg border border-slate-200 text-sm font-bold text-center"></div>
+        <div><label class="block text-xs font-semibold text-slate-600 mb-1.5">Effectif cible ETP (référence) <button type="button" onclick="explainParam('etpCible')" class="text-blue-500 hover:text-blue-700 font-black" title="A quoi sert ce champ ?">ⓘ</button></label><input type="number" id="cfg-etp" oninput="saveConfigFromInputs()" class="w-full p-2 rounded-lg border border-slate-200 text-sm font-bold text-center"></div>
+        <div><label class="block text-xs font-semibold text-slate-600 mb-1.5">Taux horaire (€) <button type="button" onclick="explainParam('taux')" class="text-blue-500 hover:text-blue-700 font-black" title="A quoi sert ce champ ?">ⓘ</button></label><input type="number" id="cfg-taux" oninput="saveConfigFromInputs()" class="w-full p-2 rounded-lg border border-slate-200 text-sm font-bold text-center"></div>
       </div>
       <p class="text-[11px] text-slate-500 mt-2" id="cfg-formule"></p>
     </div>
@@ -266,8 +277,8 @@ tr.gs td:nth-child(3)::after, tr.gs td:nth-child(4)::after { content: '—'; col
       <table class="w-full text-sm">
         <thead><tr class="bg-slate-800 text-white">
           <th class="text-left p-3 font-bold text-xs uppercase">Collaborateur</th>
-          <th class="text-center p-3 font-bold text-xs uppercase">ETP</th>
-          <th class="text-center p-3 font-bold text-xs uppercase">Rendement</th>
+          <th class="text-center p-3 font-bold text-xs uppercase">ETP <button type="button" onclick="explainParam('etpUser')" class="text-blue-500 hover:text-blue-700 font-black" title="A quoi sert ce champ ?">ⓘ</button></th>
+          <th class="text-center p-3 font-bold text-xs uppercase">Rendement <button type="button" onclick="explainParam('rendUser')" class="text-blue-500 hover:text-blue-700 font-black" title="A quoi sert ce champ ?">ⓘ</button></th>
           <th class="text-center p-3 font-bold text-xs uppercase">Capacité / sem</th>
           <th class="text-center p-3 font-bold text-xs uppercase">Travaillé</th>
           <th class="text-center p-3 font-bold text-xs uppercase">Semaines saisies</th>
@@ -310,8 +321,8 @@ tr.gs td:nth-child(3)::after, tr.gs td:nth-child(4)::after { content: '—'; col
         <thead><tr class="bg-slate-800 text-white">
           <th class="text-left p-3 font-bold text-xs uppercase">Nom</th>
           <th class="text-left p-3 font-bold text-xs uppercase">Email</th>
-          <th class="text-center p-3 font-bold text-xs uppercase">ETP</th>
-          <th class="text-center p-3 font-bold text-xs uppercase">Rendement</th>
+          <th class="text-center p-3 font-bold text-xs uppercase">ETP <button type="button" onclick="explainParam('etpUser')" class="text-blue-500 hover:text-blue-700 font-black" title="A quoi sert ce champ ?">ⓘ</button></th>
+          <th class="text-center p-3 font-bold text-xs uppercase">Rendement <button type="button" onclick="explainParam('rendUser')" class="text-blue-500 hover:text-blue-700 font-black" title="A quoi sert ce champ ?">ⓘ</button></th>
           <th class="text-center p-3 font-bold text-xs uppercase">Rôle</th>
           <th class="text-center p-3 font-bold text-xs uppercase">Accès</th>
           <th class="text-center p-3 font-bold text-xs uppercase">📝 Saisie</th>
@@ -500,6 +511,18 @@ const meSaisit = () => saisit(allUsers[me?.uid]);
 const canEdit = () => (viewedUid === me?.uid && meSaisit()) || (viewedUid !== me?.uid && me?.role === 'admin');
 const isAdmin = () => me?.role === 'admin';
 const isPrivileged = () => me?.role === 'admin' || me?.role === 'manager';
+
+const INFOS = {
+  hoursWeek: ['Heures contrat / semaine (1 ETP)', "Où mettre la valeur : les heures contractuelles hebdomadaires d'un temps plein (souvent 35). À quoi elle sert : base de TOUTES les capacités. La capacité de chaque personne = cette valeur × son ETP × son rendement, congés déduits."],
+  weeks: ['Semaines / an', "Où mettre la valeur : le nombre de semaines payées dans l'année (52, congés inclus). À quoi elle sert : convertit la capacité hebdomadaire en capacité annuelle (capacité hebdo × cette valeur), utilisée par les budgets et le dashboard."],
+  congeDays: ['Jours congés + RTT / an', "Où mettre la valeur : la moyenne de jours de congés + RTT pris par personne et par an (ex : 46). À quoi elle sert : déduit automatiquement ces jours de la capacité — personne n'a à les saisir dans le planning. 260 jours ouvrés − 46 = 214 jours travaillés."],
+  etpCible: ['Effectif cible ETP (référence)', "Où mettre la valeur : l'effectif de référence fixé par la direction (pas l'effectif réel). À quoi elle sert : comparé à l'effectif réel dans le dashboard pour montrer la sur- ou sous-charge structurelle."],
+  taux: ['Taux horaire (€)', "Où mettre la valeur : le coût chargé d'une heure de travail (ex : 66 €). À quoi elle sert : convertit les enveloppes d'heures en euros et calcule le coût annuel de la surcharge affiché à la direction."],
+  etpUser: ['ETP (Équivalent Temps Plein)', "Où mettre la valeur : depuis le contrat de la personne (1 = temps plein, 0,8 = 80 %…). À quoi elle sert : proportionne la capacité de la personne. Masqué pour les comptes « gestion seule » (hors charge)."],
+  rendUser: ['Taux de rendement', "Où mettre la valeur : par le manager, selon le temps productif observé (défaut 0,85). À quoi elle sert : ajuste la capacité réelle (35 h × 0,85 = 29,5 h productives avant déduction des congés). Réglable par personne dans ce tableau."]
+};
+window.explainParam = k => { const i = INFOS[k]; if (!i) return; document.getElementById('info-title').textContent = i[0]; document.getElementById('info-body').textContent = i[1]; document.getElementById('info-modal').classList.remove('hidden'); };
+window.closeInfo = () => document.getElementById('info-modal').classList.add('hidden');
 
 /* ---------- AUTH ---------- */
 window.login = async () => {
