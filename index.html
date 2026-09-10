@@ -379,6 +379,7 @@ const CATS = [
 ];
 const WORK_CATS = CATS.filter(c => c.key !== 'absences');
 const DEFAULT_REFS = { projet: [], mco: [], support: [], transverse: [], absences: [] };
+const RECURRENT_CATS = ['mco'];
 const PRIO_LABEL = { 1: '🔴 P1', 2: '🟠 P2', 3: '🟢 P3' };
 const prioOf = p => [1,2,3].includes(p?.prio) ? p.prio : 2;
 const JOURS = ['Lundi','Mardi','Mercredi','Jeudi','Vendredi'];
@@ -1208,6 +1209,7 @@ function renderManager() {
       const p = allProjects.find(x => (x.name || '').trim() === a.label || (x.code || '').trim() === a.label);
       return p && p.budgetH ? fmt(a.hours) + 'h / ' + fmt(p.budgetH) + 'h budget' : 'ponctuel (non projete)';
     }
+    if (!RECURRENT_CATS.includes(a.cat)) return 'occasionnel (non projete)';
     return Math.round(a.hours * config.weeks / (sumWeeksN || 1) * users.length).toLocaleString('fr-FR') + 'h/an proj.';
   };
   document.getElementById('agg-table-body').innerHTML = agg.length === 0 ? '<tr><td class="p-6 text-center text-slate-400 italic">Aucun bloc sur la période.</td></tr>' : top20.map(a => {
