@@ -1203,13 +1203,20 @@ function renderManager() {
   const agg = aggregateBlocks(blocksP), maxH = agg[0]?.hours || 1;
   const top20 = agg.slice(0, 20), restAgg = agg.slice(20);
   const restH = restAgg.reduce((sm, a) => sm + a.hours, 0);
+  const projCell = a => {
+    if (a.cat === 'projet') {
+      const p = allProjects.find(x => (x.name || '').trim() === a.label || (x.code || '').trim() === a.label);
+      return p && p.budgetH ? fmt(a.hours) + 'h / ' + fmt(p.budgetH) + 'h budget' : 'ponctuel (non projete)';
+    }
+    return Math.round(a.hours * config.weeks / (sumWeeksN || 1) * users.length).toLocaleString('fr-FR') + 'h/an proj.';
+  };
   document.getElementById('agg-table-body').innerHTML = agg.length === 0 ? '<tr><td class="p-6 text-center text-slate-400 italic">Aucun bloc sur la période.</td></tr>' : top20.map(a => {
     const c = CATS.find(x => x.key === a.cat);
     return `<tr class="border-b border-slate-100"><td class="p-2 w-8"><div class="w-3 h-3 rounded-full" style="background:${c.color}"></div></td>
       <td class="p-2 font-bold text-slate-800">${esc(a.label)}<span class="ml-2 text-[10px] text-slate-400 font-semibold">${a.nbAgents} pers.</span></td>
       <td class="p-2 w-64"><div class="h-4 bg-slate-100 rounded overflow-hidden"><div class="h-full rounded" style="background:${c.color};width:${Math.round(a.hours/maxH*100)}%"></div></div></td>
       <td class="p-2 text-center font-black w-24">${fmt(a.hours)}h</td>
-      <td class="p-2 text-center text-slate-600 w-28">${Math.round(a.hours*config.weeks/(sumWeeksN||1)*users.length).toLocaleString('fr-FR')}h/an proj.</td></tr>`;
+      <td class="p-2 text-center w-28 ${a.cat === 'projet' ? 'text-slate-500' : 'text-slate-600'}">${projCell(a)}</td></tr>`;
   }).join('') + (restAgg.length ? `<tr class="border-t-2 border-slate-200"><td class="p-2"></td><td class="p-2 font-bold text-slate-500 italic">… et ${restAgg.length} autres activités (libellés divers)</td><td class="p-2"></td><td class="p-2 text-center font-black text-slate-500">${fmt(restH)}h</td><td class="p-2"></td></tr>` : '');
 }
 
