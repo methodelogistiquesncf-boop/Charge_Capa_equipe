@@ -1355,7 +1355,12 @@ function renderDashboard() {
     options:{ responsive:true, plugins:{legend:{position:'bottom'}}, scales:{ y:{beginAtZero:true}, x:{grid:{display:false}} } } });
 
   const nowKey = isoWeekKey(new Date());
-  const weeksY = weeksListInRange(periodRange('year')).filter(w => w <= nowKey);
+  const _firstW = work.map(b => weekOf(b)).filter(w => w !== 'TYPE').sort()[0];
+  const _minW = shiftWeek(nowKey, -52);
+  const ORIGIN_W = _firstW ? (_firstW > _minW ? _firstW : _minW) : _minW;
+  const weeksY = weeksListInRange(periodRange('year')).filter(w => w <= nowKey && w >= ORIGIN_W);
+  const cs = document.getElementById('cumul-start');
+  if (cs) cs.textContent = _firstW ? ' — départ S' + ORIGIN_W.slice(6) + ' (' + (_firstW > _minW ? 'première semaine avec saisies' : '12 derniers mois') + ')' : ' — aucune saisie enregistrée';
   let cumC = 0, cumCap = 0;
   const dataC = [], dataCap = [];
   weeksY.forEach(w => {
