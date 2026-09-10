@@ -739,7 +739,7 @@ function renderCalendar() {
   let html = '<div class="min-w-[860px]"><div class="grid" style="grid-template-columns: 60px repeat(5, 1fr);"><div></div>';
   JOURS.forEach(j => {
     const t = blocks.filter(b => b.day === j && b.cat !== 'absences').reduce((s,b) => s + b.duration, 0);
-    html += `<div class="text-center pb-2 border-b-2 border-slate-200"><div class="font-black text-slate-800 text-sm uppercase">${j}</div><div class="text-xs font-bold ${t > config.hoursWeek/5 ? 'text-orange-600' : 'text-slate-400'}">${fmt(t)}h</div></div>`;
+    html += `<div class="text-center pb-2 border-b-2 border-slate-200"><div class="font-black text-slate-800 text-sm uppercase">${j} <span class="cdate text-[11px] font-bold text-slate-400">${currentWeek === 'TYPE' ? '' : new Date(mondayOf(currentWeek).getTime() + JOURS.indexOf(j) * 86400000).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })}</span></div><div class="text-xs font-bold ${t > config.hoursWeek/5 ? 'text-orange-600' : 'text-slate-400'}">${fmt(t)}h</div></div>`;
   });
   html += `<div class="relative" style="height:${colH}px">`;
   for (let h = DAY_START; h < DAY_END; h++) html += `<div class="absolute right-2 text-[10px] font-bold text-slate-400" style="top:${(h-DAY_START)*ROW_H-6}px">${fmtHour(h)}</div>`;
