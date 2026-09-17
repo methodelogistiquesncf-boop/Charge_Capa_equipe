@@ -996,7 +996,6 @@ function renderSummary() {
   const st = document.getElementById('agent-status');
   if (viewedUid === me.uid && !meSaisit()) st.innerHTML = `🧭 <span class="text-slate-600">Compte gestion uniquement — aucune saisie attendue</span>`;
   else if (currentWeek === 'TYPE') st.innerHTML = `📐 <span class="text-indigo-600">Semaine type de référence (non comptée dans les statistiques réelles)</span>`;
-  else if (t.total > capW + 2) st.innerHTML = `⚠️ <span class="text-red-600">${fmt(t.total)}h travaillées pour ${fmt(capW)}h de capacité réelle (ETP ${etpOf(viewedUid)} × rend. ${rendementOf(viewedUid).toFixed(2)} × congés déduits) → Débordement</span>`;
   else if (t.total >= capW - 1) st.innerHTML = `✅ <span class="text-green-600">Semaine cohérente : ${fmt(t.total)}h travaillées / ${fmt(capW)}h de capacité réelle</span>`;
   else st.innerHTML = `ℹ️ <span class="text-slate-600">${fmt(t.total)}h travaillées / ${fmt(capW)}h de capacité réelle (ETP ${etpOf(viewedUid)} × rend. ${rendementOf(viewedUid).toFixed(2)})</span>`;
 }
