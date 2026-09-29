@@ -1599,5 +1599,199 @@ if ('serviceWorker' in navigator) {
 })();
 </script>
 
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     MODAL CARNET DE NOTES (injecté automatiquement)
+     ═══════════════════════════════════════════════════════════════════════ -->
+<div id="notes-modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col">
+    <div class="p-5 border-b border-slate-200 flex justify-between items-center">
+      <h3 id="notes-modal-title" class="text-lg font-black text-slate-800">📝 Carnet de notes</h3>
+      <button onclick="closeNotesModal()" class="text-slate-400 hover:text-red-500 hover:bg-red-50 p-2 rounded-full transition">✕</button>
+    </div>
+    <div id="notes-list" class="p-5 space-y-3 overflow-y-auto flex-1 bg-slate-100/50"></div>
+    <div class="p-4 border-t border-slate-200 bg-white rounded-b-2xl">
+      <textarea id="notes-input" rows="3" placeholder="Ajouter une note (point d'avancement, blocage, décision...)" class="w-full border border-slate-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none resize-none"></textarea>
+      <div class="flex items-center justify-between mt-2 gap-3">
+        <span class="text-[11px] text-slate-400">Ctrl + Entrée pour envoyer · note signée avec ton compte</span>
+        <button id="notes-add-btn" onclick="addNote()" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-2 px-4 rounded-xl transition shrink-0">➕ Ajouter la note</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     JS CARNET DE NOTES (injecté automatiquement)
+     ═══════════════════════════════════════════════════════════════════════ -->
+<script type="module">
+import { getApps, getApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, collection, addDoc, deleteDoc, doc, getDocs, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+(function init() {
+  const app = getApps().length ? getApp() : null;
+  if (!app) { console.warn("[Notes] App Firebase introuvable."); return; }
+  const db = getFirestore(app);
+  const auth = getAuth(app);
+
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const fmtDate = (ts) => { try { return ts?.toDate?.().toLocaleString('fr-FR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' }); } catch(e) { return ''; } };
+  const initials = (email) => (email || '?').replace(/@.*$/, '').slice(0, 2).toUpperCase();
+
+  let currentEnv = null, unsubNotes = null;
+  const modal = () => document.getElementById('notes-modal');
+  const listEl = () => document.getElementById('notes-list');
+  const inputEl = () => document.getElementById('notes-input');
+
+  function openNotesModal(id, code, nom) {
+    currentEnv = { id, code, nom };
+    document.getElementById('notes-modal-title').innerHTML =
+      '📝 Carnet de notes — <span class="text-blue-600">' + esc(code) + '</span> <span class="text-slate-400 font-semibold">· ' + esc(nom) + '</span>';
+    modal().classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    inputEl().value = '';
+    if (unsubNotes) unsubNotes();
+    unsubNotes = onSnapshot(
+      query(collection(db, 'enveloppes', id, 'notes'), orderBy('at', 'desc')),
+      (snap) => { renderNotes(snap); updateBadgeCount(id, snap.size); },
+      (err) => { listEl().innerHTML = '<p class="text-sm text-red-500 p-4">Erreur : ' + esc(err.message) + '</p>'; }
+    );
+    setTimeout(() => inputEl().focus(), 100);
+  }
+
+  function closeNotesModal() {
+    if (unsubNotes) { unsubNotes(); unsubNotes = null; }
+    modal().classList.add('hidden');
+    document.body.style.overflow = '';
+    currentEnv = null;
+  }
+
+  function renderNotes(snap) {
+    const el = listEl();
+    if (snap.empty) {
+      el.innerHTML = '<div class="text-center text-slate-400 text-sm py-8">Aucune note pour l\'instant.<br>Écris la première ci-dessous 👇</div>';
+      return;
+    }
+    el.innerHTML = snap.docs.map(d => {
+      const n = d.data();
+      return '<div class="flex gap-3 bg-white rounded-xl p-3 border border-slate-200 group shadow-sm">' +
+        '<div class="w-9 h-9 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-black shrink-0">' + esc(initials(n.by)) + '</div>' +
+        '<div class="flex-1 min-w-0">' +
+          '<div class="flex items-center gap-2 flex-wrap">' +
+            '<span class="text-xs font-bold text-slate-700">' + esc(n.by || '—') + '</span>' +
+            '<span class="text-[11px] text-slate-400">' + (fmtDate(n.at) || 'à l\'instant') + '</span>' +
+            '<button data-del="' + d.id + '" class="ml-auto text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition text-xs" title="Supprimer">🗑️</button>' +
+          '</div>' +
+          '<p class="text-sm text-slate-700 whitespace-pre-wrap mt-1">' + esc(n.text) + '</p>' +
+        '</div></div>';
+    }).join('');
+  }
+
+  async function addNote() {
+    const txt = inputEl().value.trim();
+    if (!txt || !currentEnv) return;
+    const btn = document.getElementById('notes-add-btn');
+    btn.disabled = true; btn.textContent = 'Envoi...';
+    try {
+      await addDoc(collection(db, 'enveloppes', currentEnv.id, 'notes'), {
+        text: txt,
+        by: (auth.currentUser && auth.currentUser.email) || 'utilisateur',
+        at: serverTimestamp(),
+        envId: currentEnv.id,
+        envCode: currentEnv.code
+      });
+      inputEl().value = '';
+    } catch (e) { alert('Erreur enregistrement : ' + e.message); }
+    finally { btn.disabled = false; btn.textContent = '➕ Ajouter la note'; }
+  }
+
+  async function deleteNote(noteId) {
+    if (!currentEnv || !confirm('Supprimer définitivement cette note ?')) return;
+    try { await deleteDoc(doc(db, 'enveloppes', currentEnv.id, 'notes', noteId)); }
+    catch (e) { alert('Erreur suppression : ' + e.message); }
+  }
+
+  function updateBadgeCount(envId, count) {
+    document.querySelectorAll('.notes-inject-btn[data-env-id="' + envId + '"]').forEach(btn => {
+      const badge = btn.querySelector('.notes-count');
+      if (badge) { badge.textContent = count > 0 ? count : ''; badge.style.display = count > 0 ? 'flex' : 'none'; }
+      btn.classList.toggle('ring-2', count > 0);
+      btn.title = count > 0 ? count + ' note(s) — cliquer pour ouvrir' : 'Ajouter une note';
+    });
+  }
+
+  async function refreshBadge(envId) {
+    try {
+      const snap = await getDocs(collection(db, 'enveloppes', envId, 'notes'));
+      updateBadgeCount(envId, snap.size);
+    } catch (e) {}
+  }
+
+  /* ── Injection auto du bouton 📝 dans la colonne ACTIONS ── */
+  function findEnvelopesTable() {
+    return [...document.querySelectorAll('table')].find(t => {
+      const head = (t.tHead ? t.tHead.textContent : t.textContent.slice(0, 500)).toUpperCase();
+      return head.includes('ENVELOPPE') && head.includes('BUDGET');
+    });
+  }
+
+  function envIdFromRow(tr) {
+    if (tr.dataset.envId) return tr.dataset.envId;
+    const last = tr.querySelector('td:last-child');
+    if (!last) return null;
+    const m = last.innerHTML.match(/onclick="[\w$.]+\(\s*'([^']+)'[\s,)]/);
+    if (m) return m[1];
+    const m2 = last.innerHTML.match(/data-id="([^"]+)"/);
+    return m2 ? m2[1] : null;
+  }
+
+  function scanAndInject() {
+    const table = findEnvelopesTable();
+    if (!table) return;
+    table.querySelectorAll('tbody tr').forEach(tr => {
+      if (tr.querySelector('.notes-inject-btn')) return;
+      const id = envIdFromRow(tr);
+      if (!id) return;
+      const cells = tr.querySelectorAll('td');
+      const code = (cells[0] && cells[0].textContent.trim().split(/\s+/)[0]) || '';
+      const nom = (cells[2] && cells[2].textContent.trim()) || '';
+      const actionsCell = tr.querySelector('td:last-child');
+      const btn = document.createElement('button');
+      btn.className = 'notes-inject-btn relative px-2 py-1 rounded-lg hover:bg-blue-50 transition ring-blue-400';
+      btn.dataset.envId = id;
+      btn.title = 'Carnet de notes';
+      btn.innerHTML = '📝<span class="notes-count absolute -top-1 -right-1 bg-blue-600 text-white text-[10px] font-bold rounded-full min-w-[16px] h-4 px-0.5 items-center justify-center" style="display:none"></span>';
+      btn.addEventListener('click', (e) => { e.stopPropagation(); openNotesModal(id, code, nom); });
+      actionsCell.prepend(btn);
+      refreshBadge(id);
+    });
+  }
+
+  let scanTimer = null;
+  new MutationObserver(() => { clearTimeout(scanTimer); scanTimer = setTimeout(scanAndInject, 300); })
+    .observe(document.body, { childList: true, subtree: true });
+  scanAndInject();
+
+  /* ── Événements globaux ── */
+  document.addEventListener('click', (e) => {
+    const del = e.target.closest('[data-del]');
+    if (del) { deleteNote(del.dataset.del); return; }
+    const m = modal();
+    if (m && !m.classList.contains('hidden') && e.target === m) closeNotesModal();
+  });
+  document.addEventListener('keydown', (e) => {
+    const m = modal();
+    if (!m || m.classList.contains('hidden')) return;
+    if (e.key === 'Escape') closeNotesModal();
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') addNote();
+  });
+
+  window.openNotesModal = openNotesModal;
+  window.closeNotesModal = closeNotesModal;
+  window.addNote = addNote;
+})();
+</script>
+
 </body>
 </html>
