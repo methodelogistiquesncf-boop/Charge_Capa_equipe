@@ -1653,7 +1653,7 @@ import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth
     inputEl().value = '';
     if (unsubNotes) unsubNotes();
     unsubNotes = onSnapshot(
-      query(collection(db, 'enveloppes', id, 'notes'), orderBy('at', 'desc')),
+      query(collection(db, 'cc_projects', id, 'notes'), orderBy('at', 'desc')),
       (snap) => { renderNotes(snap); updateBadgeCount(id, snap.size); },
       (err) => { listEl().innerHTML = '<p class="text-sm text-red-500 p-4">Erreur : ' + esc(err.message) + '</p>'; }
     );
@@ -1694,7 +1694,7 @@ import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth
     const btn = document.getElementById('notes-add-btn');
     btn.disabled = true; btn.textContent = 'Envoi...';
     try {
-      await addDoc(collection(db, 'enveloppes', currentEnv.id, 'notes'), {
+      await addDoc(collection(db, 'cc_projects', currentEnv.id, 'notes'), {
         text: txt,
         by: (auth.currentUser && auth.currentUser.email) || 'utilisateur',
         at: serverTimestamp(),
@@ -1708,7 +1708,7 @@ import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth
 
   async function deleteNote(noteId) {
     if (!currentEnv || !confirm('Supprimer définitivement cette note ?')) return;
-    try { await deleteDoc(doc(db, 'enveloppes', currentEnv.id, 'notes', noteId)); }
+    try { await deleteDoc(doc(db, 'cc_projects', currentEnv.id, 'notes', noteId)); }
     catch (e) { alert('Erreur suppression : ' + e.message); }
   }
 
@@ -1723,7 +1723,7 @@ import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth
 
   async function refreshBadge(envId) {
     try {
-      const snap = await getDocs(collection(db, 'enveloppes', envId, 'notes'));
+      const snap = await getDocs(collection(db, 'cc_projects', envId, 'notes'));
       updateBadgeCount(envId, snap.size);
     } catch (e) {}
   }
