@@ -1668,6 +1668,8 @@ import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth
   }
 
   function renderNotes(snap) {
+    window.__lastSnap = snap;
+    window.__notesCache = snap.docs.map(d => Object.assign({ id: d.id }, d.data()));
     const el = listEl();
     if (snap.empty) {
       el.innerHTML = '<div class="text-center text-slate-400 text-sm py-8">Aucune note pour l\'instant.<br>Écris la première ci-dessous 👇</div>';
@@ -1680,8 +1682,8 @@ import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth
         '<div class="flex-1 min-w-0">' +
           '<div class="flex items-center gap-2 flex-wrap">' +
             '<span class="text-xs font-bold text-slate-700">' + esc(n.by || '—') + '</span>' +
-            '<span class="text-[11px] text-slate-400">' + (fmtDate(n.at) || 'à l\'instant') + '</span>' +
-            '<button data-del="' + d.id + '" class="ml-auto text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition text-xs" title="Supprimer">🗑️</button>' +
+            '<span class="text-[11px] text-slate-400">' + (fmtDate(n.at) || 'à l\'instant') + '</span>' + (n.editedAt ? '<span class="text-[10px] text-slate-400 italic">(modifiée)</span>' : '') +
+            '<span class="ml-auto flex items-center gap-1">' + ((n.by === myEmail()) ? '<button data-edit="' + d.id + '" class="text-slate-300 hover:text-blue-500 opacity-0 group-hover:opacity-100 transition text-xs" title="Modifier ma note">✏️</button>' : '') + '<button data-del="' + d.id + '" class="text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition text-xs" title="Supprimer">🗑️</button></span>' +
           '</div>' +
           '<p class="text-sm text-slate-700 whitespace-pre-wrap mt-1">' + esc(n.text) + '</p>' +
         '</div></div>';
@@ -1710,6 +1712,33 @@ import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth
     if (!currentEnv || !confirm('Supprimer définitivement cette note ?')) return;
     try { await deleteDoc(doc(db, 'cc_projects', currentEnv.id, 'notes', noteId)); }
     catch (e) { alert('Erreur suppression : ' + e.message); }
+  }
+
+  function myEmail() { return (auth.currentUser && auth.currentUser.email) || ''; }
+
+  function startEditNote(noteId) {
+    const note = (window.__notesCache || []).find(n => n.id === noteId);
+    if (!note || !currentEnv) return;
+    const btn = document.querySelector('[data-edit="' + noteId + '"]');
+    if (!btn) return;
+    const card = btn.closest('.group');
+    const p = card && card.querySelector('p.whitespace-pre-wrap');
+    if (!p) return;
+    p.outerHTML = '<textarea id="note-edit-area" rows="3" class="w-full border border-blue-300 rounded-xl p-2 text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none resize-none mt-1">' + esc(note.text) + '</textarea>' +
+      '<div class="flex gap-2 mt-2 justify-end">' +
+      '<button id="note-edit-cancel" class="text-xs font-bold text-slate-500 hover:text-slate-700 px-3 py-1 rounded-lg hover:bg-slate-100 transition">Annuler</button>' +
+      '<button id="note-edit-save" class="text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded-lg transition">💾 Enregistrer</button>' +
+      '</div>';
+    const area = document.getElementById('note-edit-area');
+    area.focus();
+    document.getElementById('note-edit-cancel').onclick = () => { if (window.__lastSnap) renderNotes(window.__lastSnap); };
+    document.getElementById('note-edit-save').onclick = async () => {
+      const val = area.value.trim();
+      if (!val || val === note.text) { if (window.__lastSnap) renderNotes(window.__lastSnap); return; }
+      try {
+        await updateDoc(doc(db, 'cc_projects', currentEnv.id, 'notes', noteId), { text: val, editedAt: serverTimestamp(), editedBy: myEmail() });
+      } catch (e) { alert('Erreur modification : ' + e.message); }
+    };
   }
 
   function updateBadgeCount(envId, count) {
@@ -1775,6 +1804,8 @@ import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth
 
   /* ── Événements globaux ── */
   document.addEventListener('click', (e) => {
+    const ed = e.target.closest('[data-edit]');
+    if (ed) { startEditNote(ed.dataset.edit); return; }
     const del = e.target.closest('[data-del]');
     if (del) { deleteNote(del.dataset.del); return; }
     const m = modal();
