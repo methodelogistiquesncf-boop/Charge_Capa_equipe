@@ -297,7 +297,7 @@ tr.gs td:nth-child(3)::after, tr.gs td:nth-child(4)::after { content: '—'; col
       <div class="grid grid-cols-2 md:grid-cols-3 gap-3" id="ref-panel"></div>
     </div>
     <div class="p-6 border-b border-slate-200 grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <div class="bg-slate-50 p-4 rounded-xl"><h3 class="font-black text-slate-800 text-sm mb-3">📈 Charge hebdo équipe (h) vs capacité réelle (ETP × rendement × congés déduits)</h3><canvas id="chart-weeks" height="180"></canvas></div>
+      <div class="bg-slate-50 p-4 rounded-xl"><h3 class="font-black text-slate-800 text-sm mb-3">📈 Charge hebdo équipe (h) vs capacité réelle (ETP × rendement × congés déduits) <button type="button" onclick="toggleChartHelpModal()" title="Comment lire ce graphique ?" class="ml-2 inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 hover:text-blue-800 text-[11px] font-black transition no-print align-middle">i</button></h3><canvas id="chart-weeks" height="180"></canvas></div>
       <div class="bg-slate-50 p-4 rounded-xl"><h3 class="font-black text-slate-800 text-sm mb-3">🧮 Chiffres de la période</h3><div id="period-stats" class="text-sm space-y-2"></div></div>
     </div>
     <div class="overflow-x-auto">
@@ -1826,5 +1826,62 @@ import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth
 })();
 </script>
 
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     MODAL AIDE GRAPHIQUE (injecté automatiquement)
+     ═══════════════════════════════════════════════════════════════════════ -->
+<div id="chart-help-modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl shadow-2xl max-w-xl w-full max-h-[90vh] overflow-y-auto">
+    <div class="p-5 border-b border-slate-200 flex justify-between items-center sticky top-0 bg-white z-10">
+      <h3 class="text-lg font-black text-slate-800">📈 Comment lire ce graphique ?</h3>
+      <button onclick="toggleChartHelpModal()" class="text-slate-400 hover:text-red-500 hover:bg-red-50 p-2 rounded-full transition">✕</button>
+    </div>
+    <div class="p-6 space-y-4 text-sm text-slate-700">
+      <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
+        <h4 class="font-bold text-slate-800 mb-1">🔵 Courbe bleue — Charge équipe (h)</h4>
+        <p>Total des heures d'activités saisies au planning pour chaque semaine (S37 → S52). Un point = une semaine. Pic = semaine chargée ; creux = période creuse (congés, fêtes…).</p>
+      </div>
+      <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded-r-lg">
+        <h4 class="font-bold text-slate-800 mb-1">🟢 Ligne verte pointillée — Capacité réelle</h4>
+        <p>Heures maximales que l'équipe peut produire en une semaine : <strong>ETP × h/semaine × rendement, congés déduits</strong>. C'est le plafond à ne pas dépasser.</p>
+      </div>
+      <div class="bg-slate-50 border border-slate-200 p-4 rounded-xl">
+        <h4 class="font-bold text-slate-800 mb-2">✅ Interpréter en un coup d'œil</h4>
+        <ul class="space-y-2">
+          <li><span class="font-bold text-green-600">Courbe sous la ligne :</span> OK — charge soutenable, l'équipe a de la marge.</li>
+          <li><span class="font-bold text-orange-500">Courbe proche de la ligne (90-100 %) :</span> tension — marge faible, le moindre imprévu déborde.</li>
+          <li><span class="font-bold text-red-600">Courbe au-dessus de la ligne :</span> surcharge — plus de travail planifié que de capacité. Arbitrer : déplacer des blocs (glisser-déposer), reporter, déléguer ou renforcer.</li>
+        </ul>
+      </div>
+      <div class="bg-yellow-50 border border-yellow-300 p-4 rounded-xl">
+        <p class="font-bold text-yellow-800 mb-1">💡 Le bon réflexe</p>
+        <p class="text-yellow-700">Anticipe : un pic qui dépasse la ligne verte dans 2-3 semaines se lisse <strong>maintenant</strong> (report de projet, semaine type), pas dans l'urgence.</p>
+      </div>
+    </div>
+    <div class="p-4 border-t border-slate-200 bg-slate-50 rounded-b-2xl">
+      <button onclick="toggleChartHelpModal()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-xl transition">✅ Compris</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     JS AIDE GRAPHIQUE (injecté automatiquement)
+     ═══════════════════════════════════════════════════════════════════════ -->
+<script>
+function toggleChartHelpModal() {
+  var m = document.getElementById('chart-help-modal');
+  if (!m) return;
+  var hidden = m.classList.toggle('hidden');
+  document.body.style.overflow = hidden ? '' : 'hidden';
+}
+document.addEventListener('click', function(e) {
+  var m = document.getElementById('chart-help-modal');
+  if (m && !m.classList.contains('hidden') && e.target === m) toggleChartHelpModal();
+});
+document.addEventListener('keydown', function(e) {
+  var m = document.getElementById('chart-help-modal');
+  if (e.key === 'Escape' && m && !m.classList.contains('hidden')) toggleChartHelpModal();
+});
+</script>
 </body>
 </html>
