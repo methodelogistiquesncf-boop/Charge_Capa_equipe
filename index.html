@@ -301,7 +301,7 @@ tr.gs td:nth-child(3)::after, tr.gs td:nth-child(4)::after { content: '—'; col
       <div class="bg-slate-50 p-4 rounded-xl"><h3 class="font-black text-slate-800 text-sm mb-3">🧮 Chiffres de la période</h3><div id="period-stats" class="text-sm space-y-2"></div></div>
     </div>
     <div class="overflow-x-auto">
-      <table class="w-full text-sm">
+      <div class="flex justify-end mb-2 no-print"><button type="button" onclick="toggleTableHelpModal()" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 text-xs font-bold transition"><span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-blue-200 text-blue-700 text-[10px] font-black">i</span> Comment lire ce tableau ?</button></div><table class="w-full text-sm">
         <thead><tr class="bg-slate-800 text-white">
           <th class="text-left p-3 font-bold text-xs uppercase">Collaborateur</th>
           <th class="text-center p-3 font-bold text-xs uppercase">ETP <button type="button" onclick="explainParam('etpUser')" class="text-blue-500 hover:text-blue-700 font-black" title="A quoi sert ce champ ?">ⓘ</button></th>
@@ -1881,6 +1881,59 @@ document.addEventListener('click', function(e) {
 document.addEventListener('keydown', function(e) {
   var m = document.getElementById('chart-help-modal');
   if (e.key === 'Escape' && m && !m.classList.contains('hidden')) toggleChartHelpModal();
+});
+</script>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     MODAL AIDE TABLEAU COLLABORATEURS (injecté automatiquement)
+     ═══════════════════════════════════════════════════════════════════════ -->
+<div id="table-help-modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl shadow-2xl max-w-xl w-full max-h-[90vh] overflow-y-auto">
+    <div class="p-5 border-b border-slate-200 flex justify-between items-center sticky top-0 bg-white z-10">
+      <h3 class="text-lg font-black text-slate-800">📋 Comment lire ce tableau ?</h3>
+      <button onclick="toggleTableHelpModal()" class="text-slate-400 hover:text-red-500 hover:bg-red-50 p-2 rounded-full transition">✕</button>
+    </div>
+    <div class="p-6 space-y-3 text-sm text-slate-700">
+      <div class="bg-slate-50 border border-slate-200 p-3 rounded-xl"><strong class="text-slate-800">👤 Collaborateur :</strong> compte utilisateur et son rôle (agent = planning personnel ; admin/manager = vue consolidée).</div>
+      <div class="bg-blue-50 border-l-4 border-blue-500 p-3 rounded-r-lg"><strong>ETP :</strong> équivalent temps plein. 1.0 = temps complet, 0.5 = mi-temps. C'est la base de calcul de la capacité.</div>
+      <div class="bg-blue-50 border-l-4 border-blue-500 p-3 rounded-r-lg"><strong>Rendement :</strong> coefficient d'efficacité (0.85 par défaut) : part du temps réellement productive (réunions, interruptions… déduites).</div>
+      <div class="bg-blue-50 border-l-4 border-blue-500 p-3 rounded-r-lg"><strong>Capacité / sem :</strong> heures théoriques produites en une semaine = ETP × h/semaine × rendement.</div>
+      <div class="bg-orange-50 border-l-4 border-orange-500 p-3 rounded-r-lg"><strong>Travaillé :</strong> total des heures saisies au planning sur la période affichée.</div>
+      <div class="bg-orange-50 border-l-4 border-orange-500 p-3 rounded-r-lg"><strong>Semaines saisies :</strong> nombre de semaines avec au moins une saisie / total de semaines. C'est la <em>fiabilité</em> de la lecture : 1/53 = photo ponctuelle, 16/53 = tendance fiable.</div>
+      <div class="bg-red-50 border-l-4 border-red-500 p-3 rounded-r-lg"><strong>Taux C/C (charge/capacité) :</strong> heures travaillées ÷ capacité des semaines saisies. <span class="font-bold text-green-600">&lt; 100 % = OK</span> · <span class="font-bold text-orange-500">100-110 % = tendu</span> · <span class="font-bold text-red-600">&gt; 110 % = surcharge</span>.</div>
+      <div class="bg-slate-100 border border-slate-300 p-3 rounded-xl"><strong>Ligne TOTAL :</strong> consolidation équipe — somme des ETP, capacité totale, heures totales et taux global.</div>
+      <div class="bg-yellow-50 border border-yellow-300 p-4 rounded-xl">
+        <p class="font-bold text-yellow-800 mb-1">💡 Bien interpréter</p>
+        <ul class="list-disc ml-4 space-y-1 text-yellow-700">
+          <li>Un taux rouge sur <strong>peu de semaines saisies</strong> = pic ponctuel (ex. 119 % sur 3 sem.), pas forcément structurel.</li>
+          <li>Compare toujours <strong>Travaillé</strong> avec <strong>Capacité × semaines saisies</strong>, jamais avec la capacité annuelle.</li>
+          <li>Un collaborateur à 0 h saisies n'a pas une charge nulle : il n'a juste <strong>pas encore saisi</strong> son planning.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="p-4 border-t border-slate-200 bg-slate-50 rounded-b-2xl">
+      <button onclick="toggleTableHelpModal()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-xl transition">✅ Compris</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     JS AIDE TABLEAU COLLABORATEURS (injecté automatiquement)
+     ═══════════════════════════════════════════════════════════════════════ -->
+<script>
+function toggleTableHelpModal() {
+  var m = document.getElementById('table-help-modal');
+  if (!m) return;
+  var hidden = m.classList.toggle('hidden');
+  document.body.style.overflow = hidden ? '' : 'hidden';
+}
+document.addEventListener('click', function(e) {
+  var m = document.getElementById('table-help-modal');
+  if (m && !m.classList.contains('hidden') && e.target === m) toggleTableHelpModal();
+});
+document.addEventListener('keydown', function(e) {
+  var m = document.getElementById('table-help-modal');
+  if (e.key === 'Escape' && m && !m.classList.contains('hidden')) toggleTableHelpModal();
 });
 </script>
 </body>
