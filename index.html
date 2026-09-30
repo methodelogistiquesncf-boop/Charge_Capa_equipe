@@ -1936,5 +1936,95 @@ document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape' && m && !m.classList.contains('hidden')) toggleTableHelpModal();
 });
 </script>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     TABLE-UX-JS : lisibilité du tableau collaborateurs (injecté auto)
+     ═══════════════════════════════════════════════════════════════════════ -->
+<style id="chef-mode-css">
+.chef-mode th:nth-child(2),.chef-mode td:nth-child(2),
+.chef-mode th:nth-child(3),.chef-mode td:nth-child(3),
+.chef-mode th:nth-child(6),.chef-mode td:nth-child(6){display:none!important}
+</style>
+<script>
+(function(){
+  var chefMode = false;
+  function parseH(t){ var m = String(t).replace(/\s/g,'').replace(',','.').match(/([\d.]+)/); return m ? parseFloat(m[1]) : 0; }
+  function statusOf(txt){
+    if (/surcharge/i.test(txt)) return 'red';
+    if (/tendu/i.test(txt)) return 'orange';
+    return 'green';
+  }
+  var COLORS = { red:'#dc2626', orange:'#ea580c', green:'#16a34a' };
+  var TINTS  = { red:'#fef2f2', orange:'#fff7ed', green:'#f0fdf4' };
+
+  function findTable(){
+    return Array.prototype.slice.call(document.querySelectorAll('table')).find(function(t){
+      return (t.tHead ? t.tHead.textContent : '').toUpperCase().indexOf('COLLABORATEUR') !== -1;
+    });
+  }
+
+  function enhance(){
+    var table = findTable();
+    if (!table) return;
+    if (chefMode) table.classList.add('chef-mode');
+
+    if (!document.getElementById('chef-toggle-btn')) {
+      var helpBtn = document.querySelector('[onclick="toggleTableHelpModal()"]');
+      var wrap = helpBtn ? helpBtn.parentElement : null;
+      if (!wrap) { wrap = document.createElement('div'); wrap.className = 'flex justify-end mb-2 no-print'; table.parentNode.insertBefore(wrap, table); }
+      var b = document.createElement('button');
+      b.id = 'chef-toggle-btn';
+      b.type = 'button';
+      b.className = 'ml-2 px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 text-xs font-bold transition no-print';
+      b.textContent = '👨‍ Vue simplifiée';
+      b.onclick = function(){
+        chefMode = !chefMode;
+        var tb = findTable();
+        if (tb) tb.classList.toggle('chef-mode', chefMode);
+        b.textContent = chefMode ? '🔬 Vue complète' : '👨💼 Vue simplifiée';
+      };
+      wrap.appendChild(b);
+    }
+
+    var rows = table.querySelectorAll('tbody tr');
+    rows.forEach(function(tr){
+      var first = tr.cells[0] ? tr.cells[0].textContent : '';
+      if (/TOTAL/i.test(first)) return;
+      if (tr.cells.length < 7) return;
+      var worked = parseH(tr.cells[4].textContent);
+      var weeks  = parseInt(tr.cells[5].textContent, 10) || 0;
+      var tauxCell = tr.cells[6];
+      var taux = parseInt(tauxCell.textContent, 10) || 0;
+      var st = statusOf(tauxCell.textContent);
+
+      tr.style.backgroundColor = TINTS[st];
+
+      var wCell = tr.cells[4];
+      if (weeks > 0 && !wCell.querySelector('.enh-avg')) {
+        var avg = worked / weeks;
+        var d = document.createElement('div');
+        d.className = 'enh-avg text-[10px] text-slate-400 font-semibold mt-0.5';
+        d.textContent = '≈ ' + avg.toLocaleString('fr-FR', {maximumFractionDigits:1}) + ' h/sem saisies';
+        wCell.appendChild(d);
+      }
+
+      if (!tauxCell.querySelector('.enh-gauge')) {
+        var g = document.createElement('div');
+        g.className = 'enh-gauge w-24 h-1.5 bg-slate-200 rounded-full mt-1 mx-auto overflow-hidden';
+        var f = document.createElement('div');
+        f.className = 'h-full rounded-full';
+        f.style.width = (Math.min(taux,120)/1.2) + '%';
+        f.style.background = COLORS[st];
+        g.appendChild(f);
+        tauxCell.appendChild(g);
+      }
+    });
+  }
+
+  var t = null;
+  new MutationObserver(function(){ clearTimeout(t); t = setTimeout(enhance, 300); }).observe(document.body, {childList:true, subtree:true});
+  enhance();
+})();
+</script>
 </body>
 </html>
