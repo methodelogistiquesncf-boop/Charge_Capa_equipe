@@ -1298,9 +1298,9 @@ function renderManager() {
   loadConfigInputs(); renderRefPanel(); renderProjects();
   const kind = document.getElementById('period-select').value;
   const range = periodRange(kind);
-  const weekList = weeksListInRange(range);
+  const weekList = weeksListInRange(range);.filter(w => (window.scopeWeek ? window.scopeWeek(w) : true))
   const weeksP = weekList.length;
-  const blocksP = allBlocks.filter(b => inPeriod(weekOf(b), range));
+  const blocksP = allBlocks.filter(b => inPeriod(weekOf(b), range));.filter(b => (window.scopeFilter ? window.scopeFilter(b) : true))
   const users = Object.entries(allUsers).filter(([uid, u]) => saisit(u));
   const gestion = Object.entries(allUsers).filter(([uid, u]) => !saisit(u));
 
@@ -2024,6 +2024,68 @@ document.addEventListener('keydown', function(e) {
   var t = null;
   new MutationObserver(function(){ clearTimeout(t); t = setTimeout(enhance, 300); }).observe(document.body, {childList:true, subtree:true});
   enhance();
+})();
+</script>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     SCOPE-JS-V1 : périmètre Réalisé / Planifié / Mixte (injecté auto)
+     ═══════════════════════════════════════════════════════════════════════ -->
+<script>
+(function(){
+  function isoWeekNow(){
+    var d = new Date();
+    var t = new Date(d.valueOf());
+    var dayNum = (d.getDay() + 6) % 7;
+    t.setDate(t.getDate() - dayNum + 3);
+    var ft = new Date(t.getFullYear(), 0, 4);
+    var fNum = (ft.getDay() + 6) % 7;
+    ft.setDate(ft.getDate() - fNum + 3);
+    var week = 1 + Math.round((t - ft) / 604800000);
+    return t.getFullYear() + '-W' + String(week).padStart(2, '0');
+  }
+  var scope = 'mixte';
+  var ON  = 'px-2 py-1 rounded-lg text-[11px] font-black bg-blue-600 text-white';
+  var OFF = 'px-2 py-1 rounded-lg text-[11px] font-bold bg-slate-100 text-slate-500 hover:bg-slate-200';
+
+  window.scopeWeek = function(w){
+    if (w === 'TYPE') return scope === 'mixte';
+    if (scope === 'mixte') return true;
+    var cur = isoWeekNow();
+    return scope === 'realise' ? (w <= cur) : (w > cur);
+  };
+  window.scopeFilter = function(b){ return window.scopeWeek(weekOf(b)); };
+
+  window.setMgrScope = function(s, rerender){
+    scope = s;
+    document.querySelectorAll('[data-scope-btn]').forEach(function(btn){
+      btn.className = (btn.getAttribute('data-scope-btn') === s) ? ON : OFF;
+    });
+    var lbl = document.getElementById('scope-label');
+    if (lbl) {
+      var cur = isoWeekNow();
+      lbl.textContent = s === 'mixte' ? 'tout (réel + planifié)' : (s === 'realise' ? 'semaines ≤ S' + cur.slice(6) : 'semaines > S' + cur.slice(6));
+    }
+    if (rerender !== false) { try { renderManager(); } catch(e) { console.warn(e); } }
+  };
+
+  function build(){
+    if (document.getElementById('scope-group')) return;
+    var helpBtn = document.querySelector('[onclick="toggleTableHelpModal()"]');
+    var wrap = helpBtn ? helpBtn.parentElement : null;
+    if (!wrap) return;
+    var group = document.createElement('div');
+    group.id = 'scope-group';
+    group.className = 'flex items-center gap-1 mr-3 no-print';
+    group.innerHTML = '<span class="text-[10px] font-bold text-slate-400 mr-1">Périmètre :</span>' +
+      '<button type="button" data-scope-btn="mixte" onclick="setMgrScope(\'mixte\')">🔄 Mixte</button>' +
+      '<button type="button" data-scope-btn="realise" onclick="setMgrScope(\'realise\')">✅ Réalisé</button>' +
+      '<button type="button" data-scope-btn="planifie" onclick="setMgrScope(\'planifie\')">📅 Planifié</button>' +
+      '<span id="scope-label" class="text-[10px] text-slate-400 ml-2"></span>';
+    wrap.prepend(group);
+    window.setMgrScope('mixte', false);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', build);
+  else build();
 })();
 </script>
 </body>
