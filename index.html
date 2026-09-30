@@ -1298,9 +1298,9 @@ function renderManager() {
   loadConfigInputs(); renderRefPanel(); renderProjects();
   const kind = document.getElementById('period-select').value;
   const range = periodRange(kind);
-  const weekList = weeksListInRange(range);.filter(w => (window.scopeWeek ? window.scopeWeek(w) : true))
+  const weekList = weeksListInRange(range).filter(w => (window.scopeWeek ? window.scopeWeek(w) : true))
   const weeksP = weekList.length;
-  const blocksP = allBlocks.filter(b => inPeriod(weekOf(b), range));.filter(b => (window.scopeFilter ? window.scopeFilter(b) : true))
+  const blocksP = allBlocks.filter(b => inPeriod(weekOf(b), range)).filter(b => (window.scopeFilter ? window.scopeFilter(b) : true))
   const users = Object.entries(allUsers).filter(([uid, u]) => saisit(u));
   const gestion = Object.entries(allUsers).filter(([uid, u]) => !saisit(u));
 
