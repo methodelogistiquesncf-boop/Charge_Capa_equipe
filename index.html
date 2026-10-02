@@ -1349,13 +1349,14 @@ window.renderManager = function renderManager() {
     <div class="flex justify-between"><span class="text-slate-500">Activité n°1</span><strong>${top ? esc(top.label) + ' (' + fmt(top.hours) + 'h)' : '—'}</strong></div>
     <div class="flex justify-between"><span class="text-slate-500">Comptes « gestion seule »</span><strong>${gestion.length ? gestion.map(([uid,u]) => esc(u.name)).join(', ') : '—'}</strong></div>`;
 
+  const __curW = (function(){var d=new Date(),t=new Date(d.valueOf());var dn=(d.getDay()+6)%7;t.setDate(t.getDate()-dn+3);var ft=new Date(t.getFullYear(),0,4);var fn=(ft.getDay()+6)%7;ft.setDate(ft.getDate()-fn+3);var wk=1+Math.round((t-ft)/604800000);return t.getFullYear()+'-W'+String(wk).padStart(2,'0');})();
   const weeksSorted = [...new Set(blocksP.map(b => weekOf(b)))].sort();
   const ctxW = document.getElementById('chart-weeks').getContext('2d');
   if (chartWeeks) chartWeeks.destroy();
   chartWeeks = new Chart(ctxW, { type: 'line', data: {
       labels: weeksSorted.map(w => 'S' + w.slice(6)),
       datasets: [
-        { label: 'Charge équipe (h)', data: weeksSorted.map(w => blocksP.filter(b => weekOf(b) === w && b.cat !== 'absences').reduce((s,b) => s + b.duration, 0)), borderColor: '#2563eb', backgroundColor: 'rgba(37,99,235,0.15)', fill: true, tension: 0.3 },
+        { label: 'Charge équipe (h) · bleu = réel, orange = projeté', data: weeksSorted.map(w => blocksP.filter(b => weekOf(b) === w && b.cat !== 'absences').reduce((s,b) => s + b.duration, 0)), borderColor: '#2563eb', backgroundColor: 'rgba(37,99,235,0.15)', fill: true, tension: 0.3, segment: { borderColor: c => (weeksSorted[c.p1DataIndex] <= __curW ? '#2563eb' : '#f97316'), borderDash: c => (weeksSorted[c.p1DataIndex] <= __curW ? undefined : [6,4]) }, pointBackgroundColor: weeksSorted.map(w => w <= __curW ? '#2563eb' : '#ffffff'), pointBorderColor: weeksSorted.map(w => w <= __curW ? '#2563eb' : '#f97316'), pointBorderWidth: 2, pointRadius: weeksSorted.map(w => w === __curW ? 5 : 3) },
         { label: 'Capacité réelle (ETP×rendement×congés)', data: weeksSorted.map(() => users.reduce((s,[uid]) => s + capWeekOf(uid), 0)), borderColor: '#16a34a', borderDash: [6,4], pointRadius: 0 }
       ] },
     options: { responsive: true, plugins: { legend: { position: 'bottom' } }, scales: { y: { beginAtZero: true } } } });
@@ -1839,7 +1840,7 @@ import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth
     <div class="p-6 space-y-4 text-sm text-slate-700">
       <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
         <h4 class="font-bold text-slate-800 mb-1">🔵 Courbe bleue — Charge équipe (h)</h4>
-        <p>Total des heures d'activités saisies au planning pour chaque semaine (S37 → S52). Un point = une semaine. Pic = semaine chargée ; creux = période creuse (congés, fêtes…).</p>
+        <p>Total des heures d'activités saisies au planning pour chaque semaine (S37 → S52). Un point = une semaine. Pic = semaine chargée ; creux = période creuse (congés, fêtes…). <strong>Couleurs :</strong> trait bleu plein + points pleins = semaines passées (réel) ; trait orange pointillé + points creux = semaines futures (projeté) ; le point plus gros marque la semaine courante.</p>
       </div>
       <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded-r-lg">
         <h4 class="font-bold text-slate-800 mb-1">🟢 Ligne verte pointillée — Capacité réelle</h4>
