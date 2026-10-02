@@ -2349,5 +2349,26 @@ document.addEventListener('keydown', function(e) {
   ensureBtn();
 })();
 </script>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     HIDE-DASHDETAIL-JS : masque le tableau "Activité / % charge / Statut"
+     (redondant avec le panneau 🎯 Équilibre des catégories, et seuils
+     de statut contradictoires)
+     ═══════════════════════════════════════════════════════════════════════ -->
+<script>
+(function(){
+  function hide(){
+    var tb = document.getElementById('dash-detail');
+    if (!tb) return;
+    var table = tb.closest('table');
+    if (table) table.style.display = 'none';
+  }
+  var t = null;
+  new MutationObserver(function(){ clearTimeout(t); t = setTimeout(hide, 300); })
+    .observe(document.body, {childList:true, subtree:true});
+  setInterval(hide, 1500);
+  hide();
+})();
+</script>
 </body>
 </html>
