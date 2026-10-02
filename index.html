@@ -2150,18 +2150,28 @@ document.addEventListener('keydown', function(e) {
 })();
 </script>
 
+
+
 <!-- ═══════════════════════════════════════════════════════════════════════
-     CAT-RULE-JS : panneau "% du temps vs cibles de gestion" (dashboard)
+     CAT-RULE-JS-V2 : panneau % vs cibles RÉGLABLES, vue heures masquée
      ═══════════════════════════════════════════════════════════════════════ -->
 <script>
 (function(){
-  var TARGETS = [
-    { match:/projet/i,      lo:50, hi:60, label:'règle : 50-60%' },
-    { match:/mco/i,         lo:20, hi:25, label:'règle : 20-25%' },
-    { match:/support/i,     lo:0,  hi:15, label:'règle : < 15%' },
-    { match:/transverse/i,  lo:10, hi:15, label:'règle : 10-15%' }
-  ];
-  var sig = '';
+  var DEFAULT_TARGETS = { projet:{lo:50,hi:60}, mco:{lo:20,hi:25}, support:{lo:0,hi:15}, transverse:{lo:10,hi:15} };
+  var KEYRE = { projet:/projet/i, mco:/mco/i, support:/support/i, transverse:/transverse/i };
+  var editMode = false, sig = '', lastRows = null;
+
+  function loadTargets(){
+    var t = JSON.parse(JSON.stringify(DEFAULT_TARGETS));
+    try {
+      var saved = JSON.parse(localStorage.getItem('catRuleTargets') || 'null');
+      if (saved) for (var k in t) if (saved[k]) { t[k].lo = +saved[k].lo || 0; t[k].hi = +saved[k].hi || 0; }
+    } catch(e){}
+    return t;
+  }
+  var TARGETS = loadTargets();
+  function saveTargets(){ try { localStorage.setItem('catRuleTargets', JSON.stringify(TARGETS)); } catch(e){} }
+
   function parseH(t){ var m = String(t).replace(/\s/g,'').replace(',','.').match(/([\d.]+)/); return m ? parseFloat(m[1]) : 0; }
   function readRows(){
     var box = document.getElementById('dash-bars');
@@ -2170,15 +2180,13 @@ document.addEventListener('keydown', function(e) {
     Array.prototype.forEach.call(box.children, function(row){
       var divs = row.querySelectorAll('div');
       if (!divs.length) return;
-      var label = divs[0].textContent.trim();
-      var val = parseH(divs[divs.length-1].textContent);
       var st = (divs[divs.length-1].getAttribute('style')||'').match(/color:\s*([^;]+)/);
-      rows.push({ label: label, hours: val, color: st ? st[1].trim() : '#2563eb' });
+      rows.push({ label: divs[0].textContent.trim(), hours: parseH(divs[divs.length-1].textContent), color: st ? st[1].trim() : '#2563eb' });
     });
     return rows.length ? rows : null;
   }
   function targetOf(label){
-    for (var i=0;i<TARGETS.length;i++) if (TARGETS[i].match.test(label)) return TARGETS[i];
+    for (var k in KEYRE) if (KEYRE[k].test(label)) return { key:k, lo:TARGETS[k].lo, hi:TARGETS[k].hi };
     return null;
   }
   function verdict(p, t){
@@ -2189,7 +2197,10 @@ document.addEventListener('keydown', function(e) {
     return d <= 5 ? { icon:'🟠', txt:dir+' ('+sign+d.toFixed(1)+' pts)', cls:'text-orange-500' }
                   : { icon:'🔴', txt:dir+' ('+sign+d.toFixed(1)+' pts)', cls:'text-red-600' };
   }
+  function ruleLabel(t){ return t.lo === 0 ? ('cible : < ' + t.hi + '%') : ('cible : ' + t.lo + '-' + t.hi + '%'); }
+
   function render(rows){
+    lastRows = rows;
     var box = document.getElementById('dash-bars');
     var card = box.parentElement;
     var total = rows.reduce(function(s,r){ return s + r.hours; }, 0);
@@ -2197,13 +2208,15 @@ document.addEventListener('keydown', function(e) {
     if (!panel) {
       panel = document.createElement('div');
       panel.id = 'cat-rule-panel';
-      panel.className = 'mt-5 pt-4 border-t border-slate-200';
+      panel.className = 'mt-2';
       card.appendChild(panel);
     }
-    var html = '<div class="flex items-center justify-between mb-3">' +
+    var html = '<div class="flex items-center justify-between mb-3 flex-wrap gap-2">' +
       '<h4 class="text-sm font-black text-slate-800">🎯 Équilibre des catégories (% du temps total)</h4>' +
-      '<button id="cat-rule-toggle" type="button" class="no-print text-[11px] font-bold px-2 py-1 rounded-lg bg-slate-100 text-slate-500 hover:bg-slate-200"></button></div>' +
-      '<div class="space-y-3">';
+      '<div class="flex gap-2 no-print">' +
+        '<button id="cat-rule-edit" type="button" class="text-[11px] font-bold px-2 py-1 rounded-lg bg-slate-100 text-slate-500 hover:bg-slate-200">⚙️ Régler mes cibles</button>' +
+        '<button id="cat-rule-toggle" type="button" class="text-[11px] font-bold px-2 py-1 rounded-lg bg-slate-100 text-slate-500 hover:bg-slate-200"></button>' +
+      '</div></div><div class="space-y-3">';
     rows.forEach(function(r){
       var t = targetOf(r.label);
       var p = total ? (r.hours / total * 100) : 0;
@@ -2218,30 +2231,49 @@ document.addEventListener('keydown', function(e) {
         '<div class="relative h-5 bg-slate-200 rounded-lg overflow-hidden">' +
           (t ? '<div class="absolute top-0 h-full bg-green-300/50 border-x-2 border-green-500" style="left:' + t.lo + '%;width:' + (t.hi - t.lo) + '%"></div>' : '') +
           '<div class="absolute top-0 h-full rounded-lg" style="left:0;width:' + Math.min(p,100) + '%;background:' + r.color + ';opacity:.85"></div>' +
-        '</div>' +
-        (t ? '<div class="text-[10px] text-slate-400 mt-0.5">' + t.label + '</div>' : '') +
-      '</div>';
+        '</div>';
+      if (t) {
+        if (editMode) {
+          html += '<div class="flex items-center gap-1 mt-1 text-[10px] text-slate-500 no-print">cible :' +
+            '<input data-tg="' + t.key + '-lo" type="number" min="0" max="100" step="1" value="' + t.lo + '" class="w-14 p-1 rounded border border-slate-300 text-center text-[10px] font-bold outline-none focus:border-blue-500"> à' +
+            '<input data-tg="' + t.key + '-hi" type="number" min="0" max="100" step="1" value="' + t.hi + '" class="w-14 p-1 rounded border border-slate-300 text-center text-[10px] font-bold outline-none focus:border-blue-500"> %</div>';
+        } else {
+          html += '<div class="text-[10px] text-slate-400 mt-0.5">' + ruleLabel(t) + '</div>';
+        }
+      }
+      html += '</div>';
     });
-    html += '</div><p class="text-[10px] text-slate-400 mt-3">Zone verte = cible de la règle de gestion · barre colorée = part réelle du temps · ✅ dans cible · 🟠 écart ≤ 5 pts · 🔴 écart > 5 pts</p>';
+    html += '</div><p class="text-[10px] text-slate-400 mt-3">Zone verte = cible · barre colorée = part réelle · ✅ dans cible · 🟠 écart ≤ 5 pts · 🔴 écart > 5 pts</p>';
     panel.innerHTML = html;
+
     var tg = document.getElementById('cat-rule-toggle');
-    function setToggle(){
-      tg.textContent = (box.style.display === 'none') ? '👁️ Afficher vue heures' : '🙈 Masquer vue heures';
-    }
+    function setToggle(){ tg.textContent = (box.style.display === 'none') ? '👁️ Afficher vue heures' : '🙈 Masquer vue heures'; }
+    var pref; try { pref = localStorage.getItem('catRuleHideHours'); } catch(e){ pref = null; }
+    if (pref === null) { pref = '1'; try { localStorage.setItem('catRuleHideHours','1'); } catch(e){} }
+    box.style.display = (pref === '1') ? 'none' : '';
+    setToggle();
     tg.onclick = function(){
       box.style.display = (box.style.display === 'none') ? '' : 'none';
       try { localStorage.setItem('catRuleHideHours', box.style.display === 'none' ? '1' : '0'); } catch(e){}
       setToggle();
     };
-    try { if (localStorage.getItem('catRuleHideHours') === '1') box.style.display = 'none'; } catch(e){}
-    setToggle();
+    document.getElementById('cat-rule-edit').onclick = function(){ editMode = !editMode; render(lastRows); };
+    panel.querySelectorAll('input[data-tg]').forEach(function(inp){
+      inp.addEventListener('change', function(){
+        var parts = this.getAttribute('data-tg').split('-');
+        var v = Math.max(0, Math.min(100, parseFloat(this.value) || 0));
+        TARGETS[parts[0]][parts[1]] = v;
+        saveTargets();
+        sig = ''; tick();
+      });
+    });
   }
   function tick(){
     var rows = readRows();
     if (!rows) return;
-    var s = rows.map(function(r){ return r.label + ':' + r.hours; }).join('|');
-    if (s === sig && document.getElementById('cat-rule-panel')) return;
-    sig = s;
+    var s2 = rows.map(function(r){ return r.label + ':' + r.hours; }).join('|');
+    if (s2 === sig && document.getElementById('cat-rule-panel')) return;
+    sig = s2;
     render(rows);
   }
   var t = null;
