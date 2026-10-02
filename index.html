@@ -2274,5 +2274,80 @@ document.addEventListener('keydown', function(e) {
   tick();
 })();
 </script>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     CAT-RULE-INFO-JS : modal "comment c'est calculé ? réel ou projeté ?"
+     ═══════════════════════════════════════════════════════════════════════ -->
+<div id="cat-rule-modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl shadow-2xl max-w-xl w-full max-h-[90vh] overflow-y-auto">
+    <div class="p-5 border-b border-slate-200 flex justify-between items-center sticky top-0 bg-white z-10">
+      <h3 class="text-lg font-black text-slate-800">🎯 Comment ce panneau est calculé ?</h3>
+      <button onclick="toggleCatRuleModal()" class="text-slate-400 hover:text-red-500 hover:bg-red-50 p-2 rounded-full transition">✕</button>
+    </div>
+    <div class="p-6 space-y-4 text-sm text-slate-700">
+      <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
+        <h4 class="font-bold text-slate-800 mb-1">🧮 La part (%)</h4>
+        <p>% d'une catégorie = <strong>heures de la catégorie ÷ total des heures des 4 catégories</strong> (Projets + MCO + Support + Transverse), sur la période analysée.</p>
+        <p class="mt-1 text-slate-500">Exemple : 1603 h Projets ÷ 2820 h total = <strong>56,8 %</strong>.</p>
+      </div>
+      <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded-r-lg">
+        <h4 class="font-bold text-slate-800 mb-1">🎯 Cibles & verdicts</h4>
+        <p>La <strong>zone verte</strong> = ta cible (réglable via ⚙️, mémorisée dans ce navigateur). Verdict : ✅ dans la cible · 🟠 écart ≤ 5 pts · 🔴 écart > 5 pts.</p>
+      </div>
+      <div class="bg-orange-50 border-l-4 border-orange-500 p-4 rounded-r-lg">
+        <h4 class="font-bold text-slate-800 mb-1">📌 Réel ou projeté ?</h4>
+        <p>Le calcul porte sur <strong>tous les blocs saisis</strong> de la période :</p>
+        <ul class="list-disc ml-5 mt-1 space-y-1">
+          <li>semaines <strong>passées</strong> = <strong>réel</strong> constaté ;</li>
+          <li>semaines <strong>futures</strong> = <strong>projeté</strong> (prévisionnel saisi).</li>
+        </ul>
+        <p class="mt-2">Le % affiché est donc un <strong>mixte réel + projeté</strong> (vision anticipative). Pour une lecture <strong>100 % réel</strong> (passé uniquement), utilise la vue <strong>Manager → périmètre ✅ Réalisé</strong>.</p>
+        <p class="mt-1 text-slate-500">Repère : en cours de période le % est une <em>tendance</em> ; en fin de période il devient du <em>réel</em>.</p>
+      </div>
+    </div>
+    <div class="p-4 border-t border-slate-200 bg-slate-50 rounded-b-2xl">
+      <button onclick="toggleCatRuleModal()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-xl transition">✅ Compris</button>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  window.toggleCatRuleModal = function(){
+    var m = document.getElementById('cat-rule-modal');
+    if (!m) return;
+    var hidden = m.classList.toggle('hidden');
+    document.body.style.overflow = hidden ? '' : 'hidden';
+  };
+  document.addEventListener('click', function(e){
+    var m = document.getElementById('cat-rule-modal');
+    if (m && !m.classList.contains('hidden') && e.target === m) toggleCatRuleModal();
+  });
+  document.addEventListener('keydown', function(e){
+    var m = document.getElementById('cat-rule-modal');
+    if (e.key === 'Escape' && m && !m.classList.contains('hidden')) toggleCatRuleModal();
+  });
+  function ensureBtn(){
+    var edit = document.getElementById('cat-rule-edit');
+    if (!edit || document.getElementById('cat-rule-info-btn')) return;
+    var grp = document.createElement('div');
+    grp.className = 'flex gap-2 no-print';
+    edit.parentNode.insertBefore(grp, edit);
+    grp.appendChild(edit);
+    var b = document.createElement('button');
+    b.id = 'cat-rule-info-btn';
+    b.type = 'button';
+    b.onclick = function(){ toggleCatRuleModal(); };
+    b.title = 'Comment c\'est calculé ? réel ou projeté ?';
+    b.className = 'inline-flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 text-[11px] font-black';
+    b.textContent = 'i';
+    grp.appendChild(b);
+  }
+  var t = null;
+  new MutationObserver(function(){ clearTimeout(t); t = setTimeout(ensureBtn, 450); })
+    .observe(document.body, {childList:true, subtree:true});
+  setInterval(ensureBtn, 1500);
+  ensureBtn();
+})();
+</script>
 </body>
 </html>
