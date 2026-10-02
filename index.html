@@ -2152,9 +2152,12 @@ document.addEventListener('keydown', function(e) {
 
 
 
+
+
 <!-- ═══════════════════════════════════════════════════════════════════════
-     CAT-RULE-JS-V2 : panneau % vs cibles RÉGLABLES, vue heures masquée
+     CAT-RULE-JS-V3 : panneau % vs cibles réglables, vue heures SUPPRIMÉE
      ═══════════════════════════════════════════════════════════════════════ -->
+<style id="cat-rule-hide-hours">#dash-bars{display:none!important}</style>
 <script>
 (function(){
   var DEFAULT_TARGETS = { projet:{lo:50,hi:60}, mco:{lo:20,hi:25}, support:{lo:0,hi:15}, transverse:{lo:10,hi:15} };
@@ -2202,6 +2205,7 @@ document.addEventListener('keydown', function(e) {
   function render(rows){
     lastRows = rows;
     var box = document.getElementById('dash-bars');
+    if (!box) return;
     var card = box.parentElement;
     var total = rows.reduce(function(s,r){ return s + r.hours; }, 0);
     var panel = document.getElementById('cat-rule-panel');
@@ -2213,10 +2217,8 @@ document.addEventListener('keydown', function(e) {
     }
     var html = '<div class="flex items-center justify-between mb-3 flex-wrap gap-2">' +
       '<h4 class="text-sm font-black text-slate-800">🎯 Équilibre des catégories (% du temps total)</h4>' +
-      '<div class="flex gap-2 no-print">' +
-        '<button id="cat-rule-edit" type="button" class="text-[11px] font-bold px-2 py-1 rounded-lg bg-slate-100 text-slate-500 hover:bg-slate-200">⚙️ Régler mes cibles</button>' +
-        '<button id="cat-rule-toggle" type="button" class="text-[11px] font-bold px-2 py-1 rounded-lg bg-slate-100 text-slate-500 hover:bg-slate-200"></button>' +
-      '</div></div><div class="space-y-3">';
+      '<button id="cat-rule-edit" type="button" class="no-print text-[11px] font-bold px-2 py-1 rounded-lg bg-slate-100 text-slate-500 hover:bg-slate-200">⚙️ Régler mes cibles</button>' +
+      '</div><div class="space-y-3">';
     rows.forEach(function(r){
       var t = targetOf(r.label);
       var p = total ? (r.hours / total * 100) : 0;
@@ -2246,17 +2248,6 @@ document.addEventListener('keydown', function(e) {
     html += '</div><p class="text-[10px] text-slate-400 mt-3">Zone verte = cible · barre colorée = part réelle · ✅ dans cible · 🟠 écart ≤ 5 pts · 🔴 écart > 5 pts</p>';
     panel.innerHTML = html;
 
-    var tg = document.getElementById('cat-rule-toggle');
-    function setToggle(){ tg.textContent = (box.style.display === 'none') ? '👁️ Afficher vue heures' : '🙈 Masquer vue heures'; }
-    var pref; try { pref = localStorage.getItem('catRuleHideHours'); } catch(e){ pref = null; }
-    if (pref === null) { pref = '1'; try { localStorage.setItem('catRuleHideHours','1'); } catch(e){} }
-    box.style.display = (pref === '1') ? 'none' : '';
-    setToggle();
-    tg.onclick = function(){
-      box.style.display = (box.style.display === 'none') ? '' : 'none';
-      try { localStorage.setItem('catRuleHideHours', box.style.display === 'none' ? '1' : '0'); } catch(e){}
-      setToggle();
-    };
     document.getElementById('cat-rule-edit').onclick = function(){ editMode = !editMode; render(lastRows); };
     panel.querySelectorAll('input[data-tg]').forEach(function(inp){
       inp.addEventListener('change', function(){
