@@ -1947,7 +1947,7 @@ document.addEventListener('keydown', function(e) {
 </style>
 <script>
 (function(){
-  var chefMode = false;
+  var chefMode = true;
   function parseH(t){ var m = String(t).replace(/\s/g,'').replace(',','.').match(/([\d.]+)/); return m ? parseFloat(m[1]) : 0; }
   function statusOf(txt){
     if (/surcharge/i.test(txt)) return 'red';
@@ -1976,7 +1976,7 @@ document.addEventListener('keydown', function(e) {
       b.id = 'chef-toggle-btn';
       b.type = 'button';
       b.className = 'ml-2 px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 text-xs font-bold transition no-print';
-      b.textContent = '👨‍ Vue simplifiée';
+      b.textContent = chefMode ? '🔬 Vue complète' : '👨‍ Vue simplifiée';
       b.onclick = function(){
         chefMode = !chefMode;
         var tb = findTable();
