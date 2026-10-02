@@ -2125,5 +2125,29 @@ document.addEventListener('keydown', function(e) {
   patch();
 })();
 </script>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     HIDE-USERCHART-JS : masque le graphique "Charge vs capacité réelle
+     par collaborateur" (redondant avec le tableau collaborateurs)
+     ═══════════════════════════════════════════════════════════════════════ -->
+<script>
+(function(){
+  var TITLE = 'Charge vs capacité réelle par collaborateur';
+  function hide(){
+    var heads = document.querySelectorAll('h1,h2,h3,h4,h5,h6');
+    heads.forEach(function(el){
+      if (el.childElementCount === 0 && el.textContent.trim() === TITLE) {
+        var card = el.closest('.bg-slate-50') || el.parentElement;
+        if (card) card.style.display = 'none';
+      }
+    });
+  }
+  var t = null;
+  new MutationObserver(function(){ clearTimeout(t); t = setTimeout(hide, 300); })
+    .observe(document.body, {childList:true, subtree:true});
+  setInterval(hide, 1500);
+  hide();
+})();
+</script>
 </body>
 </html>
