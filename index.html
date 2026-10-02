@@ -2149,5 +2149,107 @@ document.addEventListener('keydown', function(e) {
   hide();
 })();
 </script>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     CAT-RULE-JS : panneau "% du temps vs cibles de gestion" (dashboard)
+     ═══════════════════════════════════════════════════════════════════════ -->
+<script>
+(function(){
+  var TARGETS = [
+    { match:/projet/i,      lo:50, hi:60, label:'règle : 50-60%' },
+    { match:/mco/i,         lo:20, hi:25, label:'règle : 20-25%' },
+    { match:/support/i,     lo:0,  hi:15, label:'règle : < 15%' },
+    { match:/transverse/i,  lo:10, hi:15, label:'règle : 10-15%' }
+  ];
+  var sig = '';
+  function parseH(t){ var m = String(t).replace(/\s/g,'').replace(',','.').match(/([\d.]+)/); return m ? parseFloat(m[1]) : 0; }
+  function readRows(){
+    var box = document.getElementById('dash-bars');
+    if (!box) return null;
+    var rows = [];
+    Array.prototype.forEach.call(box.children, function(row){
+      var divs = row.querySelectorAll('div');
+      if (!divs.length) return;
+      var label = divs[0].textContent.trim();
+      var val = parseH(divs[divs.length-1].textContent);
+      var st = (divs[divs.length-1].getAttribute('style')||'').match(/color:\s*([^;]+)/);
+      rows.push({ label: label, hours: val, color: st ? st[1].trim() : '#2563eb' });
+    });
+    return rows.length ? rows : null;
+  }
+  function targetOf(label){
+    for (var i=0;i<TARGETS.length;i++) if (TARGETS[i].match.test(label)) return TARGETS[i];
+    return null;
+  }
+  function verdict(p, t){
+    if (p >= t.lo && p <= t.hi) return { icon:'✅', txt:'dans la cible', cls:'text-green-600' };
+    var d = p < t.lo ? (t.lo - p) : (p - t.hi);
+    var dir = p < t.lo ? 'sous cible' : 'over cible';
+    var sign = p < t.lo ? '−' : '+';
+    return d <= 5 ? { icon:'🟠', txt:dir+' ('+sign+d.toFixed(1)+' pts)', cls:'text-orange-500' }
+                  : { icon:'🔴', txt:dir+' ('+sign+d.toFixed(1)+' pts)', cls:'text-red-600' };
+  }
+  function render(rows){
+    var box = document.getElementById('dash-bars');
+    var card = box.parentElement;
+    var total = rows.reduce(function(s,r){ return s + r.hours; }, 0);
+    var panel = document.getElementById('cat-rule-panel');
+    if (!panel) {
+      panel = document.createElement('div');
+      panel.id = 'cat-rule-panel';
+      panel.className = 'mt-5 pt-4 border-t border-slate-200';
+      card.appendChild(panel);
+    }
+    var html = '<div class="flex items-center justify-between mb-3">' +
+      '<h4 class="text-sm font-black text-slate-800">🎯 Équilibre des catégories (% du temps total)</h4>' +
+      '<button id="cat-rule-toggle" type="button" class="no-print text-[11px] font-bold px-2 py-1 rounded-lg bg-slate-100 text-slate-500 hover:bg-slate-200"></button></div>' +
+      '<div class="space-y-3">';
+    rows.forEach(function(r){
+      var t = targetOf(r.label);
+      var p = total ? (r.hours / total * 100) : 0;
+      var v = t ? verdict(p, t) : null;
+      html += '<div>' +
+        '<div class="flex justify-between text-xs font-bold text-slate-600 mb-1">' +
+          '<span>' + r.label + '</span>' +
+          '<span>' + (v ? '<span class="' + v.cls + '">' + v.icon + ' ' + v.txt + '</span> ' : '') +
+          '<span class="text-slate-800 font-black">' + p.toLocaleString('fr-FR',{maximumFractionDigits:1}) + '%</span> ' +
+          '<span class="text-slate-400 font-semibold">(' + r.hours.toLocaleString('fr-FR') + ' h)</span></span>' +
+        '</div>' +
+        '<div class="relative h-5 bg-slate-200 rounded-lg overflow-hidden">' +
+          (t ? '<div class="absolute top-0 h-full bg-green-300/50 border-x-2 border-green-500" style="left:' + t.lo + '%;width:' + (t.hi - t.lo) + '%"></div>' : '') +
+          '<div class="absolute top-0 h-full rounded-lg" style="left:0;width:' + Math.min(p,100) + '%;background:' + r.color + ';opacity:.85"></div>' +
+        '</div>' +
+        (t ? '<div class="text-[10px] text-slate-400 mt-0.5">' + t.label + '</div>' : '') +
+      '</div>';
+    });
+    html += '</div><p class="text-[10px] text-slate-400 mt-3">Zone verte = cible de la règle de gestion · barre colorée = part réelle du temps · ✅ dans cible · 🟠 écart ≤ 5 pts · 🔴 écart > 5 pts</p>';
+    panel.innerHTML = html;
+    var tg = document.getElementById('cat-rule-toggle');
+    function setToggle(){
+      tg.textContent = (box.style.display === 'none') ? '👁️ Afficher vue heures' : '🙈 Masquer vue heures';
+    }
+    tg.onclick = function(){
+      box.style.display = (box.style.display === 'none') ? '' : 'none';
+      try { localStorage.setItem('catRuleHideHours', box.style.display === 'none' ? '1' : '0'); } catch(e){}
+      setToggle();
+    };
+    try { if (localStorage.getItem('catRuleHideHours') === '1') box.style.display = 'none'; } catch(e){}
+    setToggle();
+  }
+  function tick(){
+    var rows = readRows();
+    if (!rows) return;
+    var s = rows.map(function(r){ return r.label + ':' + r.hours; }).join('|');
+    if (s === sig && document.getElementById('cat-rule-panel')) return;
+    sig = s;
+    render(rows);
+  }
+  var t = null;
+  new MutationObserver(function(){ clearTimeout(t); t = setTimeout(tick, 400); })
+    .observe(document.body, {childList:true, subtree:true});
+  setInterval(tick, 1500);
+  tick();
+})();
+</script>
 </body>
 </html>
