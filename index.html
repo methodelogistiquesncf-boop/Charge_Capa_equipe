@@ -250,7 +250,7 @@ tr.gs td:nth-child(3)::after, tr.gs td:nth-child(4)::after { content: '—'; col
         </select>
         <input id="pj-code" placeholder="Code (MAG9 / MCO-26)" class="p-2 rounded-lg border border-slate-200 text-sm font-bold outline-none focus:border-blue-500">
         <input id="pj-name" placeholder="Nom de l'enveloppe" class="md:col-span-2 p-2 rounded-lg border border-slate-200 text-sm font-bold outline-none focus:border-blue-500">
-        <input id="pj-budget" type="number" placeholder="Budget (h)" class="p-2 rounded-lg border border-slate-200 text-sm font-bold outline-none focus:border-blue-500">
+        <input id="pj-budget" type="number" placeholder="Budget (h)" class="p-2 rounded-lg border border-slate-200 text-sm font-bold outline-none focus:border-blue-500"><div><label class="block text-[10px] font-bold text-slate-500 mb-1">📅 Début</label><input id="pj-start" type="date" class="p-2 rounded-lg border border-slate-200 text-sm font-bold outline-none focus:border-blue-500"></div><div><label class="block text-[10px] font-bold text-slate-500 mb-1">🏁 Fin visée</label><input id="pj-end" type="date" class="p-2 rounded-lg border border-slate-200 text-sm font-bold outline-none focus:border-blue-500"></div>
         <select id="pj-prio" class="p-2 rounded-lg border border-slate-200 text-sm font-bold outline-none focus:border-blue-500" title="Priorite">
           <option value="1">🔴 P1</option>
           <option value="2" selected>🟠 P2</option>
@@ -268,6 +268,7 @@ tr.gs td:nth-child(3)::after, tr.gs td:nth-child(4)::after { content: '—'; col
           <th class="text-left p-3 font-bold text-xs uppercase">Code</th>
           <th class="text-center p-3 font-bold text-xs uppercase">Priorité</th>
           <th class="text-left p-3 font-bold text-xs uppercase">Enveloppe</th>
+          <th class="text-center p-3 font-bold text-xs uppercase">Début → Fin</th>
           <th class="text-center p-3 font-bold text-xs uppercase">Budget</th>
           <th class="text-center p-3 font-bold text-xs uppercase">Consommé</th>
           <th class="text-center p-3 font-bold text-xs uppercase">Reste</th>
@@ -1050,7 +1051,7 @@ function renderRefPanel() {
 }
 
 /* ---------- ENVELOPPES : CRUD ---------- */
-window.newProject = () => { editingProjectId = null; ['pj-code','pj-name','pj-budget'].forEach(id => document.getElementById(id).value = ''); document.getElementById('pj-cat').value = 'projet'; document.getElementById('pj-active').checked = true; document.getElementById('pj-prio').value = '2'; document.getElementById('proj-form').classList.remove('hidden'); };
+window.newProject = () => { editingProjectId = null; ['pj-code','pj-name','pj-budget','pj-start','pj-end'].forEach(id => document.getElementById(id).value = ''); document.getElementById('pj-cat').value = 'projet'; document.getElementById('pj-active').checked = true; document.getElementById('pj-prio').value = '2'; document.getElementById('proj-form').classList.remove('hidden'); };
 window.cancelProject = () => { document.getElementById('proj-form').classList.add('hidden'); editingProjectId = null; };
 window.editProject = id => {
   const p = allProjects.find(x => x.id === id); if (!p) return;
@@ -1061,6 +1062,8 @@ window.editProject = id => {
   document.getElementById('pj-budget').value = p.budgetH || 0;
   document.getElementById('pj-active').checked = p.active !== false;
   document.getElementById('pj-prio').value = String(prioOf(p));
+  document.getElementById('pj-start').value = p.start || '';
+  document.getElementById('pj-end').value = p.end || '';
   document.getElementById('proj-form').classList.remove('hidden');
 };
 window.toggleProject = id => { const p = allProjects.find(x => x.id === id); if (!p) return; setDoc(doc(db, PATHS.projects, id), { active: p.active === false }, { merge: true }); };
@@ -1094,7 +1097,7 @@ window.saveProject = async () => {
   if (!PATHS.projects) { alert('❌ firebase.js : PATHS ne contient pas "projects".'); return; }
   const id = editingProjectId || ('p' + Date.now());
   try {
-    await setDoc(doc(db, PATHS.projects, id), { code, name, budgetH, active, cat, prio });
+    await setDoc(doc(db, PATHS.projects, id), { code, name, budgetH, active, cat, prio, start: document.getElementById('pj-start').value || null, end: document.getElementById('pj-end').value || null }, { merge: true });
     cancelProject();
   } catch (e) {
     console.error('Erreur sauvegarde enveloppe :', e);
@@ -1162,13 +1165,25 @@ window.deleteJalon = jid => {
   const jal = (p.jalons || []).filter(j => j.id !== jid);
   setDoc(doc(db, PATHS.projects, p.id), { jalons: jal }, { merge: true });
 };
+function projDateCell(p) {
+  const s = p.start || null, e = p.end || null;
+  if (!s && !e) return '<span class="text-slate-300">—</span>';
+  const today = new Date().toISOString().slice(0,10);
+  const fmtD = d => d ? d.slice(8,10) + '/' + d.slice(5,7) + '/' + d.slice(2,4) : '?';
+  if (e && p.active !== false) {
+    if (e < today) return '<span class="text-red-600 font-black">🚨 ' + fmtD(s) + ' → ' + fmtD(e) + '</span>';
+    const days = Math.round((new Date(e) - new Date(today)) / 86400000);
+    if (days <= 30) return '<span class="text-orange-500 font-bold">' + fmtD(s) + ' → ' + fmtD(e) + '</span>';
+  }
+  return '<span class="text-slate-600 font-bold">' + fmtD(s) + ' → ' + fmtD(e) + '</span>';
+}
 function renderProjects() {
   const canManage = isPrivileged();
   document.getElementById('proj-add-btn').classList.toggle('hidden', !canManage);
   const tbody = document.getElementById('proj-table-body');
   if (!tbody) return;
   if (!allProjects.length) {
-    tbody.innerHTML = '<tr><td colspan="11" class="p-6 text-center text-slate-400 italic">Aucune enveloppe budgétée.' + (canManage ? ' Cliquez sur « ➕ Nouvelle enveloppe ».' : '') + '</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="12" class="p-6 text-center text-slate-400 italic">Aucune enveloppe budgétée.' + (canManage ? ' Cliquez sur « ➕ Nouvelle enveloppe ».' : '') + '</td></tr>';
     return;
   }
   tbody.innerHTML = allProjects.slice().sort((a,b) => prioOf(a)-prioOf(b) || (a.cat||'projet').localeCompare(b.cat||'projet') || (a.code||'').localeCompare(b.code||'')).map(p => {
@@ -1188,6 +1203,7 @@ function renderProjects() {
       <td class="p-3 font-black text-slate-700">${esc(p.code||'')} ${badge}</td>
       <td class="p-3 text-center"><select onchange="changePrio('${p.id}', this.value)" class="p-1.5 rounded-lg border border-slate-200 text-xs font-bold outline-none">${[1,2,3].map(n => '<option value="' + n + '"' + (prioOf(p) === n ? ' selected' : '') + '>' + PRIO_LABEL[n] + '</option>').join('')}</select></td>
       <td class="p-3 font-bold text-slate-800">${esc(p.name||'')}</td>
+      <td class="text-center p-3 text-xs">${projDateCell(p)}</td>
       <td class="text-center p-3 font-black">${fmt(p.budgetH||0)}h <span class="text-[10px] text-slate-400">(${eur.toLocaleString('fr-FR')} €)</span></td>
       <td class="text-center p-3 font-black">${fmt(cons)}h</td>
       <td class="text-center p-3 font-bold ${rest < 0 ? 'text-red-600' : 'text-slate-600'}">${fmt(rest)}h</td>
