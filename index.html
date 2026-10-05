@@ -377,7 +377,7 @@ tr.gs td:nth-child(3)::after, tr.gs td:nth-child(4)::after { content: '—'; col
       <div class="grid grid-cols-2 md:grid-cols-4 gap-5 mb-8" id="dash-kpis"></div>
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         <div class="bg-slate-50 p-6 rounded-xl"><h3 class="font-black text-slate-800 mb-4">Répartition par catégorie</h3><div id="dash-bars"></div></div>
-        <div class="bg-slate-50 p-6 rounded-xl"><h3 class="font-black text-slate-800 mb-4">📦 Tenue des échéances & besoin ETP</h3><div id="proj-etp-panel" class="text-sm space-y-2"></div></div>
+        <div class="bg-slate-50 p-6 rounded-xl"><h3 class="font-black text-slate-800 mb-4">📦 Peut-on tenir les échéances projets ?</h3><div id="proj-etp-panel" class="text-sm space-y-2"></div></div>
         <div class="bg-slate-50 p-6 rounded-xl"><h3 class="font-black text-slate-800 mb-4">Charge vs capacité réelle par collaborateur</h3><canvas id="chart-agents" height="250"></canvas></div>
       </div>
       <div class="bg-slate-50 p-6 rounded-xl mb-8">
@@ -1220,8 +1220,7 @@ function renderProjects() {
   const __t2 = new Date(); const __dn2 = (__t2.getDay()+6)%7; __t2.setDate(__t2.getDate()-__dn2+3);
   const __ft2 = new Date(__t2.getFullYear(),0,4); const __fn2 = (__ft2.getDay()+6)%7; __ft2.setDate(__ft2.getDate()-__fn2+3);
   const __curW = __t2.getFullYear()+'-W'+String(1+Math.round((__t2-__ft2)/604800000)).padStart(2,'0');
-  const __wkDate = w => { const y=+w.slice(0,4), ww=+w.slice(6); const d=new Date(y,0,4); const dn=(d.getDay()+6)%7; d.setDate(d.getDate()-dn+3); d.setDate(d.getDate()+(ww-1)*7); return d; };
-  const __cut = new Date(Date.now()-28*86400000);
+  const __cd = new Date(Date.now()-28*86400000); const __cdn = (__cd.getDay()+6)%7; __cd.setDate(__cd.getDate()-__cdn+3); const __cft = new Date(__cd.getFullYear(),0,4); const __cfn = (__cft.getDay()+6)%7; __cft.setDate(__cft.getDate()-__cfn+3); const __cutW = __cd.getFullYear()+'-W'+String(1+Math.round((__cd-__cft)/604800000)).padStart(2,'0');
   let remDated=0, reqRate=0, actualH=0; const overdue=[];
   allProjects.forEach(p => {
     if ((p.cat||'projet') !== 'projet' || p.active === false) return;
@@ -1233,7 +1232,7 @@ function renderProjects() {
       else { remDated += rest; reqRate += rest / wl; }
     }
   });
-  allBlocks.forEach(b => { if (b.cat === 'projet') { const w = weekOf(b); if (w && w !== 'TYPE') { const d = __wkDate(w); if (d >= __cut && d <= new Date()) actualH += b.duration; } } });
+  allBlocks.forEach(b => { if (b.cat === 'projet') { const w = weekOf(b); if (w && w !== 'TYPE' && w <= __curW && w > __cutW) actualH += b.duration; } });
   const __saisit = Object.entries(allUsers).filter(([uid,u]) => saisit(u));
   const teamCapW = __saisit.reduce((s2,[uid]) => s2 + capWeekOf(uid), 0);
   const sumEtp = __saisit.reduce((s2,[uid]) => s2 + (etpOf(uid)||1), 0);
@@ -2406,19 +2405,19 @@ document.addEventListener('keydown', function(e) {
   }
   var t = null;
   new MutationObserver(function(){ clearTimeout(t); t = setTimeout(hide, 300); })
-    .observe(document.body, {childList:true, subtree:true});
-  setInterval(hide, 1500);
-  hide();
-})();
-</script>
-
+    .observe(document.body, {childList
 <!-- ═══════════════════════════════════════════════════════════════════════
-     PROJ-ETP-JS : panneau "Tenue des échéances & besoin ETP" (dashboard)
+     PROJ-ETP-JS-V2 : rendu "directeur" (verdict + phrase + 3 barres)
      ═══════════════════════════════════════════════════════════════════════ -->
 <script>
 (function(){
   function fH(x){ return x.toLocaleString('fr-FR', {maximumFractionDigits:1}); }
-  function line(l, v, cls){ return '<div class="flex justify-between"><span class="text-slate-500">' + l + '</span><strong class="' + (cls||'text-slate-800') + '">' + v + '</strong></div>'; }
+  function bar(label, val, color, max){
+    return '<div class="mb-2"><div class="flex justify-between text-xs font-bold mb-1">' +
+      '<span class="text-slate-600">' + label + '</span>' +
+      '<span style="color:' + color + '">' + fH(val) + ' h/sem</span></div>' +
+      '<div class="h-4 bg-slate-200 rounded-lg overflow-hidden"><div class="h-full rounded-lg" style="width:' + Math.min(100, val/max*100) + '%;background:' + color + '"></div></div></div>';
+  }
   function renderPanel(){
     var st = window.__projStats;
     var el = document.getElementById('proj-etp-panel');
@@ -2428,26 +2427,38 @@ document.addEventListener('keydown', function(e) {
     var hi = (tgt && tgt.projet) ? +tgt.projet.hi : 60;
     var capProj = st.teamCapW * (lo + hi) / 200;
     var gap = st.reqRate - capProj;
-    var etp = gap > 0 && st.perEtpW ? gap / st.perEtpW : 0;
+    var etp = (gap > 0 && st.perEtpW) ? gap / st.perEtpW : 0;
+    var max = Math.max(st.actualRate, st.reqRate, capProj, 1);
     var h = '';
-    h += line('Reste à faire (projets datés actifs)', fH(st.remDated) + ' h');
-    h += line('Rythme requis pour tenir les 🏁', fH(st.reqRate) + ' h/sem', 'text-red-600');
-    h += line('Rythme réel projets (4 dern. sem.)', fH(st.actualRate) + ' h/sem', 'text-blue-600');
-    h += line('Capacité projets à ETP constant (cible ' + lo + '-' + hi + '%)', fH(capProj) + ' h/sem');
     if (gap > 0) {
-      h += '<div class="p-3 rounded-lg bg-red-50 border-l-4 border-red-500 text-red-700 font-bold text-xs">🔴 Pour tenir les échéances : ' + fH(st.reqRate) + ' h/sem requises vs ' + fH(capProj) + ' h/sem à ETP constant → manque ' + fH(gap) + ' h/sem ≈ <strong>+' + fH(etp) + ' ETP</strong> (alors que tu consacres déjà ' + fH(st.actualRate) + ' h/sem aux projets)</div>';
+      h += '<div class="p-4 rounded-xl bg-red-50 border-2 border-red-300 text-center mb-3">' +
+           '<div class="text-2xl font-black text-red-600">🔴 +' + fH(etp) + ' ETP manquant</div>' +
+           '<div class="text-xs font-bold text-red-700 mt-1">pour respecter toutes les échéances projets</div></div>';
     } else {
-      h += '<div class="p-3 rounded-lg bg-green-50 border-l-4 border-green-500 text-green-700 font-bold text-xs">✅ Capacité suffisante à ETP constant pour tenir les échéances (marge ' + fH(-gap) + ' h/sem)</div>';
+      h += '<div class="p-4 rounded-xl bg-green-50 border-2 border-green-300 text-center mb-3">' +
+           '<div class="text-2xl font-black text-green-600">✅ Échéances tenables</div>' +
+           '<div class="text-xs font-bold text-green-700 mt-1">à effectif constant (marge ' + fH(-gap) + ' h/sem)</div></div>';
     }
+    h += '<p class="text-xs text-slate-600 mb-3">On passe déjà <strong>' + fH(st.actualRate) + ' h/sem</strong> sur les projets. ' +
+         'Pour tenir toutes les échéances, il en faudrait <strong>' + fH(st.reqRate) + ' h/sem</strong> ; ' +
+         'l\'effectif actuel permet d\'y consacrer <strong>' + fH(capProj) + ' h/sem</strong>.</p>';
+    h += bar('Déjà passé sur les projets', st.actualRate, '#2563eb', max);
+    h += bar('Requis pour les échéances', st.reqRate, '#dc2626', max);
+    h += bar('Disponible à ETP constant', capProj, '#16a34a', max);
     if (st.overdue && st.overdue.length) {
-      h += '<div class="p-3 rounded-lg bg-orange-50 border-l-4 border-orange-500 text-orange-700 font-bold text-xs">🚨 Échéance dépassée avec reste à faire : ' + st.overdue.map(function(o){ return o.code + ' (' + fH(o.rest) + 'h)'; }).join(', ') + '</div>';
+      h += '<div class="mt-2 p-2 rounded-lg bg-orange-50 border-l-4 border-orange-500 text-orange-700 font-bold text-[11px]">🚨 Échéance dépassée : ' + st.overdue.map(function(o){ return o.code; }).join(', ') + '</div>';
     }
-    h += '<p class="text-[10px] text-slate-400">Base : estimations courantes des enveloppes (reste = budget − consommé). Rythme requis = reste ÷ semaines restantes jusqu\'au 🏁.</p>';
+    h += '<p class="text-[10px] text-slate-400 mt-2">Lecture : si la barre rouge dépasse la barre verte, l\'effectif ne suffit pas. Base : estimations courantes des enveloppes.</p>';
     el.innerHTML = h;
   }
   var t = null;
   new MutationObserver(function(){ clearTimeout(t); t = setTimeout(renderPanel, 400); })
     .observe(document.body, {childList:true, subtree:true});
+  setInterval(renderPanel, 1500);
+  renderPanel();
+})();
+</script>
+ee:true});
   setInterval(renderPanel, 1500);
   renderPanel();
 })();
