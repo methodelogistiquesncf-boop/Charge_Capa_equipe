@@ -377,6 +377,7 @@ tr.gs td:nth-child(3)::after, tr.gs td:nth-child(4)::after { content: '—'; col
       <div class="grid grid-cols-2 md:grid-cols-4 gap-5 mb-8" id="dash-kpis"></div>
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         <div class="bg-slate-50 p-6 rounded-xl"><h3 class="font-black text-slate-800 mb-4">Répartition par catégorie</h3><div id="dash-bars"></div></div>
+        <div class="bg-slate-50 p-6 rounded-xl"><h3 class="font-black text-slate-800 mb-4">📦 Tenue des échéances & besoin ETP</h3><div id="proj-etp-panel" class="text-sm space-y-2"></div></div>
         <div class="bg-slate-50 p-6 rounded-xl"><h3 class="font-black text-slate-800 mb-4">Charge vs capacité réelle par collaborateur</h3><canvas id="chart-agents" height="250"></canvas></div>
       </div>
       <div class="bg-slate-50 p-6 rounded-xl mb-8">
@@ -1214,6 +1215,29 @@ function renderProjects() {
       <td class="text-center p-3 no-print">${canManage ? `<button onclick="editProject('${p.id}')" class="text-blue-600 font-black text-xs">✏️</button> <button onclick="toggleProject('${p.id}')" title="${p.active === false ? 'Rouvrir' : 'Clôturer'}" class="text-slate-500 font-black text-xs">${p.active === false ? '♻️' : '⚪'}</button> <button onclick="openJalons('${p.id}')" title="Checklist du projet" class="text-emerald-600 hover:text-emerald-800 font-black text-xs">✅</button> <button onclick="deleteProject('${p.id}')" title="Supprimer définitivement" class="text-red-500 hover:text-red-700 font-black text-xs">🗑️</button>` : ''}</td>
     </tr>`;
   }).join('');
+  const __today = new Date().toISOString().slice(0,10);
+  const __ms = d => new Date(d).getTime();
+  const __t2 = new Date(); const __dn2 = (__t2.getDay()+6)%7; __t2.setDate(__t2.getDate()-__dn2+3);
+  const __ft2 = new Date(__t2.getFullYear(),0,4); const __fn2 = (__ft2.getDay()+6)%7; __ft2.setDate(__ft2.getDate()-__fn2+3);
+  const __curW = __t2.getFullYear()+'-W'+String(1+Math.round((__t2-__ft2)/604800000)).padStart(2,'0');
+  const __wkDate = w => { const y=+w.slice(0,4), ww=+w.slice(6); const d=new Date(y,0,4); const dn=(d.getDay()+6)%7; d.setDate(d.getDate()-dn+3); d.setDate(d.getDate()+(ww-1)*7); return d; };
+  const __cut = new Date(Date.now()-28*86400000);
+  let remDated=0, reqRate=0, actualH=0; const overdue=[];
+  allProjects.forEach(p => {
+    if ((p.cat||'projet') !== 'projet' || p.active === false) return;
+    const cons = projectConsumed(p);
+    const rest = Math.max(0, (p.budgetH||0) - cons);
+    if (p.end) {
+      const wl = (__ms(p.end) - __ms(__today)) / (7*86400000);
+      if (wl <= 0) { if (rest > 0) overdue.push({ code: p.code || p.name, rest }); }
+      else { remDated += rest; reqRate += rest / wl; }
+    }
+  });
+  allBlocks.forEach(b => { if (b.cat === 'projet') { const w = weekOf(b); if (w && w !== 'TYPE') { const d = __wkDate(w); if (d >= __cut && d <= new Date()) actualH += b.duration; } } });
+  const __saisit = Object.entries(allUsers).filter(([uid,u]) => saisit(u));
+  const teamCapW = __saisit.reduce((s2,[uid]) => s2 + capWeekOf(uid), 0);
+  const sumEtp = __saisit.reduce((s2,[uid]) => s2 + (etpOf(uid)||1), 0);
+  window.__projStats = { remDated, reqRate, overdue, teamCapW, perEtpW: sumEtp ? teamCapW/sumEtp : 0, actualRate: actualH/4 };
 }
 
 /* ---------- CONFIG ---------- */
@@ -2385,6 +2409,47 @@ document.addEventListener('keydown', function(e) {
     .observe(document.body, {childList:true, subtree:true});
   setInterval(hide, 1500);
   hide();
+})();
+</script>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     PROJ-ETP-JS : panneau "Tenue des échéances & besoin ETP" (dashboard)
+     ═══════════════════════════════════════════════════════════════════════ -->
+<script>
+(function(){
+  function fH(x){ return x.toLocaleString('fr-FR', {maximumFractionDigits:1}); }
+  function line(l, v, cls){ return '<div class="flex justify-between"><span class="text-slate-500">' + l + '</span><strong class="' + (cls||'text-slate-800') + '">' + v + '</strong></div>'; }
+  function renderPanel(){
+    var st = window.__projStats;
+    var el = document.getElementById('proj-etp-panel');
+    if (!st || !el) return;
+    var tgt = null; try { tgt = JSON.parse(localStorage.getItem('catRuleTargets') || 'null'); } catch(e){}
+    var lo = (tgt && tgt.projet) ? +tgt.projet.lo : 50;
+    var hi = (tgt && tgt.projet) ? +tgt.projet.hi : 60;
+    var capProj = st.teamCapW * (lo + hi) / 200;
+    var gap = st.reqRate - capProj;
+    var etp = gap > 0 && st.perEtpW ? gap / st.perEtpW : 0;
+    var h = '';
+    h += line('Reste à faire (projets datés actifs)', fH(st.remDated) + ' h');
+    h += line('Rythme requis pour tenir les 🏁', fH(st.reqRate) + ' h/sem', 'text-red-600');
+    h += line('Rythme réel projets (4 dern. sem.)', fH(st.actualRate) + ' h/sem', 'text-blue-600');
+    h += line('Capacité projets à ETP constant (cible ' + lo + '-' + hi + '%)', fH(capProj) + ' h/sem');
+    if (gap > 0) {
+      h += '<div class="p-3 rounded-lg bg-red-50 border-l-4 border-red-500 text-red-700 font-bold text-xs">🔴 Pour tenir les échéances : ' + fH(st.reqRate) + ' h/sem requises vs ' + fH(capProj) + ' h/sem à ETP constant → manque ' + fH(gap) + ' h/sem ≈ <strong>+' + fH(etp) + ' ETP</strong> (alors que tu consacres déjà ' + fH(st.actualRate) + ' h/sem aux projets)</div>';
+    } else {
+      h += '<div class="p-3 rounded-lg bg-green-50 border-l-4 border-green-500 text-green-700 font-bold text-xs">✅ Capacité suffisante à ETP constant pour tenir les échéances (marge ' + fH(-gap) + ' h/sem)</div>';
+    }
+    if (st.overdue && st.overdue.length) {
+      h += '<div class="p-3 rounded-lg bg-orange-50 border-l-4 border-orange-500 text-orange-700 font-bold text-xs">🚨 Échéance dépassée avec reste à faire : ' + st.overdue.map(function(o){ return o.code + ' (' + fH(o.rest) + 'h)'; }).join(', ') + '</div>';
+    }
+    h += '<p class="text-[10px] text-slate-400">Base : estimations courantes des enveloppes (reste = budget − consommé). Rythme requis = reste ÷ semaines restantes jusqu\'au 🏁.</p>';
+    el.innerHTML = h;
+  }
+  var t = null;
+  new MutationObserver(function(){ clearTimeout(t); t = setTimeout(renderPanel, 400); })
+    .observe(document.body, {childList:true, subtree:true});
+  setInterval(renderPanel, 1500);
+  renderPanel();
 })();
 </script>
 </body>
