@@ -1215,6 +1215,7 @@ function renderProjects() {
       <td class="text-center p-3 no-print">${canManage ? `<button onclick="editProject('${p.id}')" class="text-blue-600 font-black text-xs">✏️</button> <button onclick="toggleProject('${p.id}')" title="${p.active === false ? 'Rouvrir' : 'Clôturer'}" class="text-slate-500 font-black text-xs">${p.active === false ? '♻️' : '⚪'}</button> <button onclick="openJalons('${p.id}')" title="Checklist du projet" class="text-emerald-600 hover:text-emerald-800 font-black text-xs">✅</button> <button onclick="deleteProject('${p.id}')" title="Supprimer définitivement" class="text-red-500 hover:text-red-700 font-black text-xs">🗑️</button>` : ''}</td>
     </tr>`;
   }).join('');
+  try {
   const __today = new Date().toISOString().slice(0,10);
   const __ms = d => new Date(d).getTime();
   const __t2 = new Date(); const __dn2 = (__t2.getDay()+6)%7; __t2.setDate(__t2.getDate()-__dn2+3);
@@ -1237,6 +1238,7 @@ function renderProjects() {
   const teamCapW = __saisit.reduce((s2,[uid]) => s2 + capWeekOf(uid), 0);
   const sumEtp = __saisit.reduce((s2,[uid]) => s2 + (etpOf(uid)||1), 0);
   window.__projStats = { remDated, reqRate, overdue, teamCapW, perEtpW: sumEtp ? teamCapW/sumEtp : 0, actualRate: actualH/4 };
+  } catch (e) { console.error('❌ Stats échéances/ETP :', e); }
 }
 
 /* ---------- CONFIG ---------- */
@@ -2421,7 +2423,8 @@ document.addEventListener('keydown', function(e) {
   function renderPanel(){
     var st = window.__projStats;
     var el = document.getElementById('proj-etp-panel');
-    if (!st || !el) return;
+    if (!el) return;
+    if (!st) { el.innerHTML = '<p class="text-xs text-orange-600 font-bold">⚠️ Pas encore de données : ouvre la vue Manager une fois, ou regarde la console (F12) pour l\'erreur exacte.</p>'; return; }
     var tgt = null; try { tgt = JSON.parse(localStorage.getItem('catRuleTargets') || 'null'); } catch(e){}
     var lo = (tgt && tgt.projet) ? +tgt.projet.lo : 50;
     var hi = (tgt && tgt.projet) ? +tgt.projet.hi : 60;
