@@ -377,7 +377,7 @@ tr.gs td:nth-child(3)::after, tr.gs td:nth-child(4)::after { content: '—'; col
       <div class="grid grid-cols-2 md:grid-cols-4 gap-5 mb-8" id="dash-kpis"></div>
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         <div class="bg-slate-50 p-6 rounded-xl"><h3 class="font-black text-slate-800 mb-4">Répartition par catégorie</h3><div id="dash-bars"></div></div>
-        <div class="bg-slate-50 p-6 rounded-xl"><h3 class="font-black text-slate-800 mb-4">📦 Peut-on tenir les échéances projets ?</h3><div id="proj-etp-panel" class="text-sm space-y-2"></div></div>
+        <div class="bg-slate-50 p-6 rounded-xl"><h3 class="font-black text-slate-800 mb-4">📦 Peut-on tenir les échéances projets ? <button type="button" onclick="toggleProjEtpModal()" title="Comment cet indicateur est-il construit ?" class="ml-1 inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 hover:text-blue-800 text-[11px] font-black transition no-print align-middle">i</button></h3><div id="proj-etp-panel" class="text-sm space-y-2"></div></div>
         <div class="bg-slate-50 p-6 rounded-xl"><h3 class="font-black text-slate-800 mb-4">Charge vs capacité réelle par collaborateur</h3><canvas id="chart-agents" height="250"></canvas></div>
       </div>
       <div class="bg-slate-50 p-6 rounded-xl mb-8">
@@ -2516,5 +2516,68 @@ document.addEventListener('keydown', function(e) {
 })();
 </script>
 
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     PROJ-ETP-INFO-JS : modal explicatif simple de l'indicateur échéances/ETP
+     ═══════════════════════════════════════════════════════════════════════ -->
+<div id="proj-etp-modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl shadow-2xl max-w-xl w-full max-h-[90vh] overflow-y-auto">
+    <div class="p-5 border-b border-slate-200 flex justify-between items-center sticky top-0 bg-white z-10">
+      <h3 class="text-lg font-black text-slate-800">📦 Comment cet indicateur est construit ?</h3>
+      <button onclick="toggleProjEtpModal()" class="text-slate-400 hover:text-red-500 hover:bg-red-50 p-2 rounded-full transition">✕</button>
+    </div>
+    <div class="p-6 space-y-4 text-sm text-slate-700">
+      <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
+        <h4 class="font-bold text-slate-800 mb-1">1️⃣ Ce qui reste à faire</h4>
+        <p>Pour chaque projet <strong>actif avec une date de fin</strong> : heures restantes = budget de l'enveloppe − heures déjà saisies.</p>
+      </div>
+      <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg">
+        <h4 class="font-bold text-slate-800 mb-1">2️⃣ Le rythme nécessaire pour tenir</h4>
+        <p>Heures restantes ÷ semaines restantes jusqu'à la date de fin = <strong>h/semaine nécessaires</strong> pour ce projet. Additionné sur tous les projets = la <strong>barre rouge</strong>.</p>
+      </div>
+      <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded-r-lg">
+        <h4 class="font-bold text-slate-800 mb-1">3️⃣ Ce que permet l'effectif</h4>
+        <p>Capacité hebdo de l'équipe (ex. 4 ETP × ~24,5 h) × part du temps dédiée aux projets (ta cible 🎯, par défaut 50-60 %) = la <strong>barre verte</strong>.</p>
+      </div>
+      <div class="bg-slate-50 border border-slate-200 p-4 rounded-xl">
+        <h4 class="font-bold text-slate-800 mb-2">✅ Comment lire</h4>
+        <ul class="space-y-2">
+          <li><strong>Barre rouge &lt; barre verte</strong> → ✅ on peut tenir les échéances avec l'effectif actuel (la marge s'affiche).</li>
+          <li><strong>Barre rouge &gt; barre verte</strong> → 🔴 il manque des heures : l'écart est converti en ETP (1 ETP ≈ 24,5 h/sem).</li>
+          <li><strong>Barre bleue</strong> = ce que l'équipe passe <em>réellement</em> sur les projets (4 dernières semaines) : la réalité du terrain.</li>
+        </ul>
+      </div>
+      <div class="bg-yellow-50 border border-yellow-300 p-4 rounded-xl">
+        <p class="font-bold text-yellow-800 mb-1">⚠️ À savoir</p>
+        <ul class="list-disc ml-5 space-y-1 text-yellow-700">
+          <li>Le calcul s'appuie sur les <strong>budgets des enveloppes</strong> : si un budget est faux, l'indicateur est faussé → révise les budgets régulièrement.</li>
+          <li>Les projets <strong>sans date de fin</strong> ne sont pas comptés ici.</li>
+          <li>Cet indicateur ne juge pas le passé : il répond à « <em>de quoi a-t-on besoin dès maintenant pour tenir les dates ?</em> ».</li>
+        </ul>
+      </div>
+    </div>
+    <div class="p-4 border-t border-slate-200 bg-slate-50 rounded-b-2xl">
+      <button onclick="toggleProjEtpModal()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-xl transition">✅ Compris</button>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  window.toggleProjEtpModal = function(){
+    var m = document.getElementById('proj-etp-modal');
+    if (!m) return;
+    var hidden = m.classList.toggle('hidden');
+    document.body.style.overflow = hidden ? '' : 'hidden';
+  };
+  document.addEventListener('click', function(e){
+    var m = document.getElementById('proj-etp-modal');
+    if (m && !m.classList.contains('hidden') && e.target === m) toggleProjEtpModal();
+  });
+  document.addEventListener('keydown', function(e){
+    var m = document.getElementById('proj-etp-modal');
+    if (e.key === 'Escape' && m && !m.classList.contains('hidden')) toggleProjEtpModal();
+  });
+})();
+</script>
 </body>
 </html>
