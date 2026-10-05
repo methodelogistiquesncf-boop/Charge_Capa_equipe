@@ -1233,11 +1233,12 @@ function renderProjects() {
       else { remDated += rest; reqRate += rest / wl; }
     }
   });
-  allBlocks.forEach(b => { if (b.cat === 'projet') { const w = weekOf(b); if (w && w !== 'TYPE' && w <= __curW && w > __cutW) actualH += b.duration; } });
+  const actualByCat = { projet:0, mco:0, support:0, transverse:0 };
+  allBlocks.forEach(b => { const w = weekOf(b); if (w && w !== 'TYPE' && w <= __curW && w > __cutW) { if (b.cat === 'projet') actualH += b.duration; if (actualByCat[b.cat] !== undefined) actualByCat[b.cat] += b.duration; } });
   const __saisit = Object.entries(allUsers).filter(([uid,u]) => saisit(u));
   const teamCapW = __saisit.reduce((s2,[uid]) => s2 + capWeekOf(uid), 0);
   const sumEtp = __saisit.reduce((s2,[uid]) => s2 + (etpOf(uid)||1), 0);
-  window.__projStats = { remDated, reqRate, overdue, teamCapW, perEtpW: sumEtp ? teamCapW/sumEtp : 0, actualRate: actualH/4 };
+  window.__projStats = { remDated, reqRate, overdue, teamCapW, perEtpW: sumEtp ? teamCapW/sumEtp : 0, actualRate: actualH/4, actualByCat: { projet: actualByCat.projet/4, mco: actualByCat.mco/4, support: actualByCat.support/4, transverse: actualByCat.transverse/4 } };
   } catch (e) { console.error('❌ Stats échéances/ETP :', e); }
 }
 
@@ -2408,59 +2409,7 @@ document.addEventListener('keydown', function(e) {
   var t = null;
   new MutationObserver(function(){ clearTimeout(t); t = setTimeout(hide, 300); })
     .observe(document.body, {childList
-<!-- ═══════════════════════════════════════════════════════════════════════
-     PROJ-ETP-JS-V2 : rendu "directeur" (verdict + phrase + 3 barres)
-     ═══════════════════════════════════════════════════════════════════════ -->
-<script>
-(function(){
-  function fH(x){ return x.toLocaleString('fr-FR', {maximumFractionDigits:1}); }
-  function bar(label, val, color, max){
-    return '<div class="mb-2"><div class="flex justify-between text-xs font-bold mb-1">' +
-      '<span class="text-slate-600">' + label + '</span>' +
-      '<span style="color:' + color + '">' + fH(val) + ' h/sem</span></div>' +
-      '<div class="h-4 bg-slate-200 rounded-lg overflow-hidden"><div class="h-full rounded-lg" style="width:' + Math.min(100, val/max*100) + '%;background:' + color + '"></div></div></div>';
-  }
-  function renderPanel(){
-    var st = window.__projStats;
-    var el = document.getElementById('proj-etp-panel');
-    if (!el) return;
-    if (!st) { el.innerHTML = '<p class="text-xs text-orange-600 font-bold">⚠️ Pas encore de données : ouvre la vue Manager une fois, ou regarde la console (F12) pour l\'erreur exacte.</p>'; return; }
-    var tgt = null; try { tgt = JSON.parse(localStorage.getItem('catRuleTargets') || 'null'); } catch(e){}
-    var lo = (tgt && tgt.projet) ? +tgt.projet.lo : 50;
-    var hi = (tgt && tgt.projet) ? +tgt.projet.hi : 60;
-    var capProj = st.teamCapW * (lo + hi) / 200;
-    var gap = st.reqRate - capProj;
-    var etp = (gap > 0 && st.perEtpW) ? gap / st.perEtpW : 0;
-    var max = Math.max(st.actualRate, st.reqRate, capProj, 1);
-    var h = '';
-    if (gap > 0) {
-      h += '<div class="p-4 rounded-xl bg-red-50 border-2 border-red-300 text-center mb-3">' +
-           '<div class="text-2xl font-black text-red-600">🔴 +' + fH(etp) + ' ETP manquant</div>' +
-           '<div class="text-xs font-bold text-red-700 mt-1">pour respecter toutes les échéances projets</div></div>';
-    } else {
-      h += '<div class="p-4 rounded-xl bg-green-50 border-2 border-green-300 text-center mb-3">' +
-           '<div class="text-2xl font-black text-green-600">✅ Échéances tenables</div>' +
-           '<div class="text-xs font-bold text-green-700 mt-1">à effectif constant (marge ' + fH(-gap) + ' h/sem)</div></div>';
-    }
-    h += '<p class="text-xs text-slate-600 mb-3">On passe déjà <strong>' + fH(st.actualRate) + ' h/sem</strong> sur les projets. ' +
-         'Pour tenir toutes les échéances, il en faudrait <strong>' + fH(st.reqRate) + ' h/sem</strong> ; ' +
-         'l\'effectif actuel permet d\'y consacrer <strong>' + fH(capProj) + ' h/sem</strong>.</p>';
-    h += bar('Déjà passé sur les projets', st.actualRate, '#2563eb', max);
-    h += bar('Requis pour les échéances', st.reqRate, '#dc2626', max);
-    h += bar('Disponible à ETP constant', capProj, '#16a34a', max);
-    if (st.overdue && st.overdue.length) {
-      h += '<div class="mt-2 p-2 rounded-lg bg-orange-50 border-l-4 border-orange-500 text-orange-700 font-bold text-[11px]">🚨 Échéance dépassée : ' + st.overdue.map(function(o){ return o.code; }).join(', ') + '</div>';
-    }
-    h += '<p class="text-[10px] text-slate-400 mt-2">Lecture : si la barre rouge dépasse la barre verte, l\'effectif ne suffit pas. Base : estimations courantes des enveloppes.</p>';
-    el.innerHTML = h;
-  }
-  var t = null;
-  new MutationObserver(function(){ clearTimeout(t); t = setTimeout(renderPanel, 400); })
-    .observe(document.body, {childList:true, subtree:true});
-  setInterval(renderPanel, 1500);
-  renderPanel();
-})();
-</script>
+
 
 <!-- ═══════════════════════════════════════════════════════════════════════
      PROJ-ETP-JS-V2 : rendu "directeur" (verdict + phrase + 3 barres)
@@ -2505,6 +2454,26 @@ document.addEventListener('keydown', function(e) {
     if (st.overdue && st.overdue.length) {
       h += '<div class="mt-2 p-2 rounded-lg bg-orange-50 border-l-4 border-orange-500 text-orange-700 font-bold text-[11px]">🚨 Échéance dépassée : ' + st.overdue.map(function(o){ return o.code; }).join(', ') + '</div>';
     }
+    var cats = [ ['mco','🔧 MCO'], ['support','🆘 Support'], ['transverse','📋 Transverse'] ];
+    var short = 0, over = 0, rows = '';
+    cats.forEach(function(c){
+      var key = c[0], lab = c[1];
+      var t2 = (tgt && tgt[key]) ? tgt[key] : null;
+      var lo2 = t2 ? +t2.lo : (key==='mco'?20:key==='support'?0:10);
+      var hi2 = t2 ? +t2.hi : (key==='mco'?25:key==='support'?15:15);
+      var zLo = st.teamCapW * lo2 / 100, zHi = st.teamCapW * hi2 / 100;
+      var A = (st.actualByCat && st.actualByCat[key] != null) ? st.actualByCat[key] : 0;
+      var stt;
+      if (A > zHi) { over += A - zHi; stt = '<span class="text-orange-500 font-bold">🟠 over ' + fH(A - zHi) + ' h/sem</span>'; }
+      else if (key !== 'support' && A < zLo) { short += zLo - A; stt = '<span class="text-red-600 font-bold">🔴 manque ' + fH(zLo - A) + ' h/sem</span>'; }
+      else { stt = '<span class="text-green-600 font-bold">✅ dans la cible</span>'; }
+      rows += '<div class="flex justify-between text-xs py-1 border-b border-slate-100"><span class="text-slate-600 font-bold">' + lab + ' <span class="text-slate-400 font-normal">(cible ' + lo2 + '-' + hi2 + '% = ' + fH(zLo) + '-' + fH(zHi) + ' h/sem)</span></span><span>' + fH(A) + ' h/sem · ' + stt + '</span></div>';
+    });
+    var verdict2;
+    if (short <= 0) verdict2 = '<div class="mt-2 p-2 rounded-lg bg-green-50 border-l-4 border-green-500 text-green-700 font-bold text-[11px]">✅ Aucun ETP manquant pour tenir les cibles catégories' + (over > 0 ? ' — et ' + fH(over) + ' h/sem récupérables sur les catégories over-cible' : '') + '</div>';
+    else if (over >= short) verdict2 = '<div class="mt-2 p-2 rounded-lg bg-green-50 border-l-4 border-green-500 text-green-700 font-bold text-[11px]">✅ Rééquilibrer suffit : les catégories over-cible libèrent ' + fH(over) + ' h/sem, assez pour couvrir les ' + fH(short) + ' h/sem manquants → 0 ETP nécessaire</div>';
+    else verdict2 = '<div class="mt-2 p-2 rounded-lg bg-red-50 border-l-4 border-red-500 text-red-700 font-bold text-[11px]">🔴 Rééquilibrer ne suffit pas : après récupération de ' + fH(over) + ' h/sem, il manque encore ' + fH(short - over) + ' h/sem ≈ +' + fH((short - over) / st.perEtpW) + ' ETP pour tenir toutes les cibles</div>';
+    h += '<div class="mt-4 pt-3 border-t border-slate-200"><h4 class="text-xs font-black text-slate-700 mb-2">🎯 Manque-t-il des ETP pour tenir les cibles catégories ?</h4>' + rows + verdict2 + '</div>';
     h += '<p class="text-[10px] text-slate-400 mt-2">Lecture : si la barre rouge dépasse la barre verte, l\'effectif ne suffit pas. Base : estimations courantes des enveloppes.</p>';
     el.innerHTML = h;
   }
@@ -2546,6 +2515,10 @@ document.addEventListener('keydown', function(e) {
           <li><strong>Barre rouge &gt; barre verte</strong> → 🔴 il manque des heures : l'écart est converti en ETP (1 ETP ≈ 24,5 h/sem).</li>
           <li><strong>Barre bleue</strong> = ce que l'équipe passe <em>réellement</em> sur les projets (4 dernières semaines) : la réalité du terrain.</li>
         </ul>
+      </div>
+      <div class="bg-slate-50 border border-slate-200 p-4 rounded-xl">
+        <h4 class="font-bold text-slate-800 mb-1">🎯 Cibles catégories & ETP</h4>
+        <p>Chaque cible (%) est convertie en h/sem selon la capacité de l'équipe, puis comparée aux heures réellement passées sur la catégorie (4 semaines). Une catégorie sous cible affiche des heures manquantes ; une catégorie over cible affiche une marge récupérable. Si les marges couvrent les manques → rééquilibrer suffit ; sinon le reste est converti en ETP.</p>
       </div>
       <div class="bg-yellow-50 border border-yellow-300 p-4 rounded-xl">
         <p class="font-bold text-yellow-800 mb-1">⚠️ À savoir</p>
