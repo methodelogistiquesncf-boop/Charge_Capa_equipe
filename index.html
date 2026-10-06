@@ -2134,41 +2134,7 @@ document.addEventListener('keydown', function(e) {
 })();
 </script>
 
-<!-- ═══════════════════════════════════════════════════════════════════════
-     CHART-UNIT-V2 : unité "h" dans le tooltip ET sur l'axe vertical
-     ═══════════════════════════════════════════════════════════════════════ -->
-<script>
-(function(){
-  function patch(){
-    if (typeof Chart === 'undefined' || !Chart.getChart) return;
-    var cv = document.getElementById('chart-weeks');
-    if (!cv) return;
-    var ch = Chart.getChart(cv);
-    if (!ch || ch.__unitV2) return;
-    ch.__unitV2 = true;
 
-    ch.options.plugins = ch.options.plugins || {};
-    ch.options.plugins.tooltip = ch.options.plugins.tooltip || {};
-    ch.options.plugins.tooltip.callbacks = ch.options.plugins.tooltip.callbacks || {};
-    ch.options.plugins.tooltip.callbacks.label = function(c){
-      var v = (c.parsed.y == null ? c.parsed : c.parsed.y);
-      return (c.dataset.label || '') + ' : ' + v + ' h';
-    };
-
-    ch.options.scales = ch.options.scales || {};
-    ch.options.scales.y = ch.options.scales.y || {};
-    ch.options.scales.y.ticks = ch.options.scales.y.ticks || {};
-    ch.options.scales.y.ticks.callback = function(value){ return value + ' h'; };
-
-    ch.update();
-  }
-  var t = null;
-  new MutationObserver(function(){ clearTimeout(t); t = setTimeout(patch, 400); })
-    .observe(document.body, {childList:true, subtree:true});
-  setInterval(patch, 1200);
-  patch();
-})();
-</script>
 
 <!-- ═══════════════════════════════════════════════════════════════════════
      HIDE-USERCHART-JS : masque le graphique "Charge vs capacité réelle
@@ -2397,92 +2363,6 @@ document.addEventListener('keydown', function(e) {
 <!-- ═══════════════════════════════════════════════════════════════════════
      HIDE-DASHDETAIL-JS : masque le tableau "Activité / % charge / Statut"
      ═══════════════════════════════════════════════════════════════════════ -->
-<script>
-(function(){
-  function hide(){
-    var tb = document.getElementById('dash-detail');
-    if (!tb) return;
-    var table = tb.closest('table');
-    if (table) table.style.display = 'none';
-  }
-  var t = null;
-  new MutationObserver(function(){ clearTimeout(t); t = setTimeout(hide, 300); })
-    .observe(document.body, {childList
-
-
-<!-- ═══════════════════════════════════════════════════════════════════════
-     PROJ-ETP-JS-V2 : rendu "directeur" (verdict + phrase + 3 barres)
-     ═══════════════════════════════════════════════════════════════════════ -->
-<script>
-(function(){
-  function fH(x){ return x.toLocaleString('fr-FR', {maximumFractionDigits:1}); }
-  function bar(label, val, color, max){
-    return '<div class="mb-2"><div class="flex justify-between text-xs font-bold mb-1">' +
-      '<span class="text-slate-600">' + label + '</span>' +
-      '<span style="color:' + color + '">' + fH(val) + ' h/sem</span></div>' +
-      '<div class="h-4 bg-slate-200 rounded-lg overflow-hidden"><div class="h-full rounded-lg" style="width:' + Math.min(100, val/max*100) + '%;background:' + color + '"></div></div></div>';
-  }
-  function renderPanel(){
-    var st = window.__projStats;
-    var el = document.getElementById('proj-etp-panel');
-    if (!el) return;
-    if (!st) { el.innerHTML = '<p class="text-xs text-orange-600 font-bold">⚠️ Pas encore de données : ouvre la vue Manager une fois, ou regarde la console (F12).</p>'; return; }
-    var tgt = null; try { tgt = JSON.parse(localStorage.getItem('catRuleTargets') || 'null'); } catch(e){}
-    var lo = (tgt && tgt.projet) ? +tgt.projet.lo : 50;
-    var hi = (tgt && tgt.projet) ? +tgt.projet.hi : 60;
-    var capProj = st.teamCapW * (lo + hi) / 200;
-    var gap = st.reqRate - capProj;
-    var etp = (gap > 0 && st.perEtpW) ? gap / st.perEtpW : 0;
-    var max = Math.max(st.actualRate, st.reqRate, capProj, 1);
-    var h = '';
-    if (gap > 0) {
-      h += '<div class="p-4 rounded-xl bg-red-50 border-2 border-red-300 text-center mb-3">' +
-           '<div class="text-2xl font-black text-red-600">🔴 +' + fH(etp) + ' ETP manquant</div>' +
-           '<div class="text-xs font-bold text-red-700 mt-1">pour respecter toutes les échéances projets</div></div>';
-    } else {
-      h += '<div class="p-4 rounded-xl bg-green-50 border-2 border-green-300 text-center mb-3">' +
-           '<div class="text-2xl font-black text-green-600">✅ Échéances tenables</div>' +
-           '<div class="text-xs font-bold text-green-700 mt-1">à effectif constant (marge ' + fH(-gap) + ' h/sem)</div></div>';
-    }
-    h += '<p class="text-xs text-slate-600 mb-3">On passe déjà <strong>' + fH(st.actualRate) + ' h/sem</strong> sur les projets. ' +
-         'Pour tenir toutes les échéances, il en faudrait <strong>' + fH(st.reqRate) + ' h/sem</strong> ; ' +
-         'l\'effectif actuel permet d\'y consacrer <strong>' + fH(capProj) + ' h/sem</strong>.</p>';
-    h += bar('Déjà passé sur les projets', st.actualRate, '#2563eb', max);
-    h += bar('Requis pour les échéances', st.reqRate, '#dc2626', max);
-    h += bar('Disponible à ETP constant', capProj, '#16a34a', max);
-    if (st.overdue && st.overdue.length) {
-      h += '<div class="mt-2 p-2 rounded-lg bg-orange-50 border-l-4 border-orange-500 text-orange-700 font-bold text-[11px]">🚨 Échéance dépassée : ' + st.overdue.map(function(o){ return o.code; }).join(', ') + '</div>';
-    }
-    var cats = [ ['mco','🔧 MCO'], ['support','🆘 Support'], ['transverse','📋 Transverse'] ];
-    var short = 0, over = 0, rows = '';
-    cats.forEach(function(c){
-      var key = c[0], lab = c[1];
-      var t2 = (tgt && tgt[key]) ? tgt[key] : null;
-      var lo2 = t2 ? +t2.lo : (key==='mco'?20:key==='support'?0:10);
-      var hi2 = t2 ? +t2.hi : (key==='mco'?25:key==='support'?15:15);
-      var zLo = st.teamCapW * lo2 / 100, zHi = st.teamCapW * hi2 / 100;
-      var A = (st.actualByCat && st.actualByCat[key] != null) ? st.actualByCat[key] : 0;
-      var stt;
-      if (A > zHi) { over += A - zHi; stt = '<span class="text-orange-500 font-bold">🟠 over ' + fH(A - zHi) + ' h/sem</span>'; }
-      else if (key !== 'support' && A < zLo) { short += zLo - A; stt = '<span class="text-red-600 font-bold">🔴 manque ' + fH(zLo - A) + ' h/sem</span>'; }
-      else { stt = '<span class="text-green-600 font-bold">✅ dans la cible</span>'; }
-      rows += '<div class="flex justify-between text-xs py-1 border-b border-slate-100"><span class="text-slate-600 font-bold">' + lab + ' <span class="text-slate-400 font-normal">(cible ' + lo2 + '-' + hi2 + '% = ' + fH(zLo) + '-' + fH(zHi) + ' h/sem)</span></span><span>' + fH(A) + ' h/sem · ' + stt + '</span></div>';
-    });
-    var verdict2;
-    if (short <= 0) verdict2 = '<div class="mt-2 p-2 rounded-lg bg-green-50 border-l-4 border-green-500 text-green-700 font-bold text-[11px]">✅ Aucun ETP manquant pour tenir les cibles catégories' + (over > 0 ? ' — et ' + fH(over) + ' h/sem récupérables sur les catégories over-cible' : '') + '</div>';
-    else if (over >= short) verdict2 = '<div class="mt-2 p-2 rounded-lg bg-green-50 border-l-4 border-green-500 text-green-700 font-bold text-[11px]">✅ Rééquilibrer suffit : les catégories over-cible libèrent ' + fH(over) + ' h/sem, assez pour couvrir les ' + fH(short) + ' h/sem manquants → 0 ETP nécessaire</div>';
-    else verdict2 = '<div class="mt-2 p-2 rounded-lg bg-red-50 border-l-4 border-red-500 text-red-700 font-bold text-[11px]">🔴 Rééquilibrer ne suffit pas : après récupération de ' + fH(over) + ' h/sem, il manque encore ' + fH(short - over) + ' h/sem ≈ +' + fH((short - over) / st.perEtpW) + ' ETP pour tenir toutes les cibles</div>';
-    h += '<div class="mt-4 pt-3 border-t border-slate-200"><h4 class="text-xs font-black text-slate-700 mb-2">🎯 Manque-t-il des ETP pour tenir les cibles catégories ?</h4>' + rows + verdict2 + '</div>';
-    h += '<p class="text-[10px] text-slate-400 mt-2">Lecture : si la barre rouge dépasse la barre verte, l\'effectif ne suffit pas. Base : estimations courantes des enveloppes.</p>';
-    el.innerHTML = h;
-  }
-  var t = null;
-  new MutationObserver(function(){ clearTimeout(t); t = setTimeout(renderPanel, 400); })
-    .observe(document.body, {childList:true, subtree:true});
-  setInterval(renderPanel, 1500);
-  renderPanel();
-})();
-</script>
 
 
 <!-- ═══════════════════════════════════════════════════════════════════════
@@ -2749,8 +2629,10 @@ window.deleteUserClean = async function(uid){
 })();
 </script>
 
+
+
 <!-- ═══════════════════════════════════════════════════════════════════════
-     CHART-AXIS-H-JS : unité "h" sur l'axe vertical + tooltip du graphique
+     CHART-UNIT-FINAL : unité h (axe vertical + tooltip) via config brute
      ═══════════════════════════════════════════════════════════════════════ -->
 <script>
 (function(){
@@ -2759,18 +2641,20 @@ window.deleteUserClean = async function(uid){
     var cv = document.getElementById('chart-weeks');
     if (!cv) return;
     var ch = Chart.getChart(cv);
-    if (!ch || ch.__axisH) return;
-    ch.__axisH = true;
-    ch.options.scales = ch.options.scales || {};
-    ch.options.scales.y = ch.options.scales.y || {};
-    ch.options.scales.y.ticks = ch.options.scales.y.ticks || {};
-    ch.options.scales.y.ticks.callback = function(value){ return value + ' h'; };
-    ch.options.plugins = ch.options.plugins || {};
-    ch.options.plugins.tooltip = ch.options.plugins.tooltip || {};
-    ch.options.plugins.tooltip.callbacks = ch.options.plugins.tooltip.callbacks || {};
-    ch.options.plugins.tooltip.callbacks.label = function(c){
-      var v = (c.parsed.y == null ? c.parsed : c.parsed.y);
-      return (c.dataset.label || '') + ' : ' + v + ' h';
+    if (!ch || ch.__unitFinal) return;
+    ch.__unitFinal = true;
+    var o = ch.config && ch.config.options;
+    if (!o) { o = {}; ch.config.options = o; }
+    o.scales = o.scales || {};
+    o.scales.y = o.scales.y || {};
+    o.scales.y.ticks = o.scales.y.ticks || {};
+    o.scales.y.ticks.callback = function(v){ return v + ' h'; };
+    o.plugins = o.plugins || {};
+    o.plugins.tooltip = o.plugins.tooltip || {};
+    o.plugins.tooltip.callbacks = o.plugins.tooltip.callbacks || {};
+    o.plugins.tooltip.callbacks.label = function(c){
+      var v = (c.parsed && c.parsed.y != null) ? c.parsed.y : c.parsed;
+      return (c.dataset && c.dataset.label ? c.dataset.label : '') + ' : ' + v + ' h';
     };
     ch.update();
   }
