@@ -2669,5 +2669,25 @@ window.deleteUserClean = async function(uid){
 
 
 
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     UX-SCOPE-DEFAULT-JS : au chargement, active le périmètre "Réalisé"
+     ═══════════════════════════════════════════════════════════════════════ -->
+<script>
+(function(){
+  var done = false;
+  function apply(){
+    if (done) return;
+    var btns = document.querySelectorAll('button');
+    for (var i = 0; i < btns.length; i++) {
+      var t = (btns[i].textContent || '').trim();
+      if (t.indexOf('Réalisé') !== -1 && t.length < 20) { done = true; btns[i].click(); return; }
+    }
+  }
+  document.addEventListener('DOMContentLoaded', function(){ setTimeout(apply, 300); });
+  setTimeout(apply, 800);
+  setTimeout(apply, 2000);
+})();
+</script>
 </body>
 </html>
