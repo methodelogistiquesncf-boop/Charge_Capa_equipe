@@ -2668,66 +2668,6 @@ window.deleteUserClean = async function(uid){
 
 
 
-<!-- ═══════════════════════════════════════════════════════════════════════
-     UX-MOVE-MANAGER-V2 : transfert SÛR (graphique + chiffres + périmètre +
-     tableau collaborateurs + agrégé) vers le bas de la vue Dashboard
-     ═══════════════════════════════════════════════════════════════════════ -->
-<script>
-(function(){
-  function move(){
-    try {
-      var dash = document.querySelector('#view-dashboard .p-8');
-      var man = document.getElementById('view-manager');
-      if (!dash || !man) return;
-      if (document.getElementById('ux-manager-export')) return;
-      function ok(c){ return c && c !== dash && !c.contains(dash) && !dash.contains(c) && man.contains(c); }
-      function cardOf(el){ if (!el) return null; var c = el.closest('.rounded-xl'); return ok(c) ? c : null; }
-      function titleCard(txt){
-        var hs = man.querySelectorAll('h3, h4');
-        for (var i = 0; i < hs.length; i++) {
-          if (hs[i].textContent.indexOf(txt) !== -1) { var c = cardOf(hs[i]); if (c) return c; }
-        }
-        return null;
-      }
-      var wrap = document.createElement('div');
-      wrap.id = 'ux-manager-export';
-      wrap.className = 'mt-8 space-y-6';
-      var grid = document.createElement('div');
-      grid.className = 'grid grid-cols-1 lg:grid-cols-2 gap-6';
-      var chartCard = cardOf(document.getElementById('chart-weeks'));
-      var statsCard = titleCard('Chiffres de la période');
-      if (chartCard) grid.appendChild(chartCard);
-      if (statsCard) grid.appendChild(statsCard);
-      if (grid.children.length) wrap.appendChild(grid);
-      var scopeRow = null;
-      var divs = man.querySelectorAll('div');
-      for (var i = 0; i < divs.length; i++) {
-        var d = divs[i];
-        if (d.textContent.indexOf('Périmètre') !== -1 && d.querySelector('button') && d.textContent.length < 300) scopeRow = d;
-      }
-      if (scopeRow && ok(scopeRow)) wrap.appendChild(scopeRow);
-      var collabCard = null;
-      var ths = man.querySelectorAll('th');
-      for (var j = 0; j < ths.length; j++) {
-        if (/capacité\s*\/\s*sem/i.test(ths[j].textContent)) { collabCard = cardOf(ths[j]); break; }
-      }
-      if (collabCard) wrap.appendChild(collabCard);
-      var aggCard = titleCard('Où partent les heures');
-      if (aggCard) wrap.appendChild(aggCard);
-      if (!wrap.children.length) return;
-      if (wrap.contains(dash)) return;
-      dash.appendChild(wrap);
-      setTimeout(function(){
-        try { var c = window.Chart && Chart.getChart ? Chart.getChart(document.getElementById('chart-weeks')) : null; if (c) c.resize(); } catch(e){}
-      }, 300);
-    } catch (e) { console.error('UX-MOVE-V2 :', e); }
-  }
-  var t = null;
-  new MutationObserver(function(){ clearTimeout(t); t = setTimeout(move, 600); })
-    .observe(document.body, {childList:true, subtree:true});
-  setInterval(move, 2500);
-  move();
-})();
-</script>
+
 </body>
 </html>
