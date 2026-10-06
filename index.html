@@ -2748,5 +2748,38 @@ window.deleteUserClean = async function(uid){
   enhance();
 })();
 </script>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     CHART-AXIS-H-JS : unité "h" sur l'axe vertical + tooltip du graphique
+     ═══════════════════════════════════════════════════════════════════════ -->
+<script>
+(function(){
+  function patch(){
+    if (typeof Chart === 'undefined' || !Chart.getChart) return;
+    var cv = document.getElementById('chart-weeks');
+    if (!cv) return;
+    var ch = Chart.getChart(cv);
+    if (!ch || ch.__axisH) return;
+    ch.__axisH = true;
+    ch.options.scales = ch.options.scales || {};
+    ch.options.scales.y = ch.options.scales.y || {};
+    ch.options.scales.y.ticks = ch.options.scales.y.ticks || {};
+    ch.options.scales.y.ticks.callback = function(value){ return value + ' h'; };
+    ch.options.plugins = ch.options.plugins || {};
+    ch.options.plugins.tooltip = ch.options.plugins.tooltip || {};
+    ch.options.plugins.tooltip.callbacks = ch.options.plugins.tooltip.callbacks || {};
+    ch.options.plugins.tooltip.callbacks.label = function(c){
+      var v = (c.parsed.y == null ? c.parsed : c.parsed.y);
+      return (c.dataset.label || '') + ' : ' + v + ' h';
+    };
+    ch.update();
+  }
+  var t = null;
+  new MutationObserver(function(){ clearTimeout(t); t = setTimeout(patch, 400); })
+    .observe(document.body, {childList:true, subtree:true});
+  setInterval(patch, 1200);
+  patch();
+})();
+</script>
 </body>
 </html>
