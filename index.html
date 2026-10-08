@@ -2735,9 +2735,10 @@ window.deleteUserClean = async function(uid){
     c=document.createElement('div');
     c.id='proj-load-card'; c.className='bg-slate-50 p-6 rounded-xl mt-8';
     c.innerHTML='<h3 class="font-black text-slate-800 mb-4">📊 Charge projets par semaine (toutes semaines, lissée par enveloppe) — scroll horizontal si besoin</h3>'+
+      '<div style="position:relative">'+
       '<div style="overflow-x:auto"><div id="proj-load-inner" style="position:relative;height:340px;min-width:100%">'+
-      '<div id="proj-load-axis" style="position:sticky;left:0;top:0;height:100%;width:52px;pointer-events:none;z-index:5"></div>'+
       '<canvas id="chart-proj-load" style="position:absolute;inset:0"></canvas></div></div>'+
+      '<div id="proj-load-axis" style="position:absolute;left:0;top:0;bottom:0;width:52px;pointer-events:none;z-index:5;background:#f8fafc;border-right:1px solid rgba(100,116,139,0.25)"></div></div>'+
       '<div id="proj-load-legend" class="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[10px] font-bold text-slate-600"></div>'+
       '<p class="text-[10px] text-slate-400 mt-2">Barres empilées = reste à faire de chaque enveloppe, lissé entre ses dates début → fin. Ligne verte pointillée = capacité hebdo de l\'équipe (ETP). Une barre qui touche ou dépasse la ligne = semaine en surcharge → lisser ce projet.</p>';
     dash.appendChild(c);
