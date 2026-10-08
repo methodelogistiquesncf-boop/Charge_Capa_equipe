@@ -2733,8 +2733,9 @@ window.deleteUserClean = async function(uid){
     c=document.createElement('div');
     c.id='proj-load-card'; c.className='bg-slate-50 p-6 rounded-xl mt-8';
     c.innerHTML='<h3 class="font-black text-slate-800 mb-4">📊 Charge projets par semaine (toutes semaines, lissée par enveloppe) — scroll horizontal si besoin</h3>'+
-      '<div style="display:flex"><div style="width:64px;flex:none;height:340px"><canvas id="chart-proj-axis"></canvas></div>'+
-      '<div style="overflow-x:auto;flex:1"><div id="proj-load-inner" style="height:340px;min-width:100%"><canvas id="chart-proj-load"></canvas></div></div></div>'+
+      '<div style="overflow-x:auto"><div id="proj-load-inner" style="position:relative;height:340px;min-width:100%">'+
+      '<div id="proj-load-axis" style="position:sticky;left:0;top:0;height:100%;width:52px;pointer-events:none;z-index:5"></div>'+
+      '<canvas id="chart-proj-load" style="position:absolute;inset:0"></canvas></div></div>'+
       '<div id="proj-load-legend" class="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[10px] font-bold text-slate-600"></div>'+
       '<p class="text-[10px] text-slate-400 mt-2">Barres empilées = reste à faire de chaque enveloppe, lissé entre ses dates début → fin. Ligne verte pointillée = capacité hebdo de l\'équipe (ETP). Une barre qui touche ou dépasse la ligne = semaine en surcharge → lisser ce projet.</p>';
     dash.appendChild(c);
@@ -2756,18 +2757,30 @@ window.deleteUserClean = async function(uid){
     var M=Math.ceil((Math.max(st.capW, Math.max.apply(null,sums.concat([10])))*1.1)/10)*10;
     var lg=document.getElementById('proj-load-legend');
     if(lg){ lg.innerHTML=st.datasets.map(function(d){ return '<span class="inline-flex items-center gap-1"><span style="width:10px;height:10px;background:'+d.color+';display:inline-block;border-radius:2px"></span>'+d.code+'</span>'; }).join(' ')+' <span class="inline-flex items-center gap-1"><span style="width:14px;height:0;border-top:2px dashed #16a34a;display:inline-block"></span>Capacité équipe (ETP)</span>'; }
-    var ax=document.getElementById('chart-proj-axis');
-    if(ax && !axisChart){ axisChart=new Chart(ax,{type:'bar',data:{labels:[''],datasets:[{data:[0]}]},options:{responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:false},tooltip:{enabled:false}},scales:{x:{display:false},y:{min:0,max:M,beginAtZero:true,title:{display:true,text:'h / semaine'},ticks:{callback:function(v){return v+' h';}}}}}}); }
     var ds=st.datasets.map(function(d){ return { type:'bar', label:d.code, data:d.values, backgroundColor:d.color, stack:'proj' }; });
     ds.push({ type:'line', label:'Capacité équipe (ETP)', data: st.weeks.map(function(){ return Math.round(st.capW*10)/10; }), borderColor:'#16a34a', borderDash:[8,6], borderWidth:2, pointRadius:0, fill:false });
-    if(chart){ chart.data.labels=st.weeks; chart.data.datasets=ds; chart.options.scales.y.max=M; if(axisChart){ axisChart.options.scales.y.max=M; axisChart.update(); } chart.update(); return; }
+    if(chart){ chart.data.labels=st.weeks; chart.data.datasets=ds; chart.options.scales.y.max=M; chart.update(); drawAxis(); return; }
     chart=new Chart(cv,{ type:'bar', data:{ labels:st.weeks, datasets:ds }, options:{
       responsive:true, maintainAspectRatio:false,
       interaction:{ mode:'index', intersect:false },
-      plugins:{ legend:{ display:false }, tooltip:{ filter:function(item){ return item.parsed.y > 0; } } },
-      scales:{ x:{ stacked:true }, y:{ stacked:true, min:0, max:M, ticks:{ display:false } } }
+      layout:{ padding:{ left:56 } }, plugins:{ legend:{ display:false }, tooltip:{ filter:function(item){ return item.parsed.y > 0; } } },
+      scales:{ x:{ stacked:true }, y:{ stacked:true, min:0, max:M, ticks:{ display:false, stepSize: (M<=60?10: M<=140?20: M<=400?50:100) }, grid:{ color:'rgba(100,116,139,0.15)' } } }
     }});
+    drawAxis();
   }
+  function drawAxis(){
+    var ax=document.getElementById('proj-load-axis');
+    if(!ax||!chart) return;
+    var ca=chart.chartArea; var M=chart.options.scales.y.max;
+    var step= M<=60?10: M<=140?20: M<=400?50:100;
+    var h='';
+    for(var v=0; v<=M; v+=step){
+      var y=ca.bottom-(v/M)*(ca.bottom-ca.top);
+      h+='<div style="position:absolute;left:2px;top:'+(y-8)+'px;width:48px;text-align:right;font-size:10px;font-weight:700;color:#475569;background:rgba(248,250,252,0.9);border-radius:4px;padding:0 3px">'+v+' h</div>';
+    }
+    ax.innerHTML=h;
+  }
+  window.addEventListener('resize', function(){ setTimeout(drawAxis, 250); });
   var t=null;
   new MutationObserver(function(){ clearTimeout(t); t=setTimeout(render,500); }).observe(document.body,{childList:true,subtree:true});
   setInterval(render,1500);
