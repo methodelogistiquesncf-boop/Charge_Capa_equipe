@@ -2728,10 +2728,8 @@ window.deleteUserClean = async function(uid){
   var chart=null, axisChart=null, sig='';
   function fmtH(v){ return (Math.round(v*10)/10).toString().replace('.',','); }
   function extTip(ctx){
-    var host=document.getElementById('proj-load-inner');
-    if(!host) return;
     var el=document.getElementById('proj-load-tip');
-    if(!el){ el=document.createElement('div'); el.id='proj-load-tip'; el.style.cssText='position:absolute;pointer-events:none;background:rgba(15,23,42,0.94);color:#f8fafc;border-radius:8px;padding:8px 10px;font-size:11px;font-weight:700;z-index:60;opacity:0;transition:opacity .1s;min-width:190px'; host.appendChild(el); }
+    if(!el){ el=document.createElement('div'); el.id='proj-load-tip'; el.style.cssText='position:fixed;pointer-events:none;background:rgba(15,23,42,0.94);color:#f8fafc;border-radius:8px;padding:8px 10px;font-size:11px;font-weight:700;z-index:9999;opacity:0;transition:opacity .1s;min-width:190px'; document.body.appendChild(el); }
     var tt=ctx.tooltip;
     if(!tt || tt.opacity===0){ el.style.opacity='0'; return; }
     var pts=(tt.dataPoints||[]).filter(function(p){ return (p.parsed.y||0)>0; });
@@ -2739,7 +2737,8 @@ window.deleteUserClean = async function(uid){
     pts.forEach(function(p){
       var isLine=(p.dataset.type==='line');
       var col=isLine?(p.dataset.borderColor||'#16a34a'):(p.dataset.backgroundColor||'#94a3b8');
-      if(isLine){ cap=p.parsed.y; } else { tot+=p.parsed.y||0; }
+      if(isLine){ cap=p.parsed.y; return; }
+      tot+=p.parsed.y||0;
       rows+='<div style="display:flex;align-items:center;gap:6px;margin:1px 0"><span style="width:9px;height:9px;border-radius:2px;background:'+col+';display:inline-block;flex:none"></span><span>'+p.dataset.label+' : '+fmtH(p.parsed.y)+' h</span></div>';
     });
     var html='<div style="margin-bottom:4px">'+((tt.title&&tt.title[0])||'')+'</div>'+rows;
@@ -2751,8 +2750,11 @@ window.deleteUserClean = async function(uid){
     }
     el.innerHTML=html;
     el.style.opacity='1';
-    var lx=tt.caretX+14; if(lx>host.clientWidth-210){ lx=tt.caretX-210; }
-    el.style.left=lx+'px'; el.style.top=Math.max(0,tt.caretY-20)+'px';
+    var cv=document.getElementById('chart-proj-load'); var rc=cv?cv.getBoundingClientRect():{left:0,top:0};
+    var lx=rc.left+tt.caretX+14; if(lx+220>window.innerWidth){ lx=rc.left+tt.caretX-230; }
+    var ty=rc.top+tt.caretY-20; var eh=el.offsetHeight||150; if(ty+eh>window.innerHeight-8){ ty=window.innerHeight-eh-8; }
+    if(ty<8){ ty=8; }
+    el.style.left=lx+'px'; el.style.top=ty+'px';
   }
   function ensureCard(){
     var ps=document.querySelectorAll('#view-dashboard .p-8');
