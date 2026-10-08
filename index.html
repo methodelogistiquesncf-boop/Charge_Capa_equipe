@@ -2479,6 +2479,8 @@ document.addEventListener('keydown', function(e) {
     var el = document.getElementById('proj-etp-panel');
     if (!el) return;
     if (!st) { el.innerHTML = '<p class="text-xs text-orange-600 font-bold">⚠️ Pas encore de données : ouvre la vue Manager une fois, ou regarde la console (F12).</p>'; return; }
+    var raw = JSON.stringify(st);
+    if (raw !== window.__petpLast) { window.__petpLast = raw; el.innerHTML = '<p class="text-xs text-slate-400 font-bold">⏳ Calcul en cours (synchronisation des données)…</p>'; return; }
     var tgt = null; try { tgt = JSON.parse(localStorage.getItem('catRuleTargets') || 'null'); } catch(e){}
     var lo = (tgt && tgt.projet) ? +tgt.projet.lo : 50;
     var hi = (tgt && tgt.projet) ? +tgt.projet.hi : 60;
