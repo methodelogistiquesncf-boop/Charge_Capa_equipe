@@ -2702,208 +2702,53 @@ window.deleteUserClean = async function(uid){
 
 
 
-<!-- ═══════════════════════════════════════════════════════════════════════
-     UX-SCOPE-DEFAULT-JS : au chargement, active le périmètre "Réalisé"
-     ═══════════════════════════════════════════════════════════════════════ -->
-<script>
-(function(){
-  var done = false;
-  function apply(){
-    if (done) return;
-    var btns = document.querySelectorAll('button');
-    for (var i = 0; i < btns.length; i++) {
-      var t = (btns[i].textContent || '').trim();
-      if (t.indexOf('Réalisé') !== -1 && t.length < 20) { done = true; btns[i].click(); return; }
-    }
-  }
-  document.addEventListener('DOMContentLoaded', function(){ setTimeout(apply, 300); });
-  setTimeout(apply, 800);
-  setTimeout(apply, 2000);
-})();
-</script>
+
 
 <script>
-/* PROJ-LOAD-JS : histogramme empilé charge projets 3 mois + capacité ETP */
+/* UX-EDIT-MODAL-V2 : formulaire d'édition fixé au centre de l'écran (sans déplacement DOM) */
 (function(){
-  var chart=null, axisChart=null, sig='';
-  function fmtH(v){ return (Math.round(v*10)/10).toString().replace('.',','); }
-  function extTip(ctx){
-    var el=document.getElementById('proj-load-tip');
-    if(!el){ el=document.createElement('div'); el.id='proj-load-tip'; el.style.cssText='position:fixed;pointer-events:none;background:rgba(15,23,42,0.94);color:#f8fafc;border-radius:8px;padding:8px 10px;font-size:11px;font-weight:700;z-index:9999;opacity:0;transition:opacity .1s;min-width:190px'; document.body.appendChild(el); }
-    var tt=ctx.tooltip;
-    if(!tt || tt.opacity===0){ el.style.opacity='0'; return; }
-    var pts=(tt.dataPoints||[]).filter(function(p){ return (p.parsed.y||0)>0; });
-    var tot=0, cap=null, rows='';
-    pts.forEach(function(p){
-      var isLine=(p.dataset.type==='line');
-      var col=isLine?(p.dataset.borderColor||'#16a34a'):(p.dataset.backgroundColor||'#94a3b8');
-      if(isLine){ cap=p.parsed.y; return; }
-      tot+=p.parsed.y||0;
-      rows+='<div style="display:flex;align-items:center;gap:6px;margin:1px 0"><span style="width:9px;height:9px;border-radius:2px;background:'+col+';display:inline-block;flex:none"></span><span>'+p.dataset.label+' : '+fmtH(p.parsed.y)+' h</span></div>';
-    });
-    var html='<div style="margin-bottom:4px">'+((tt.title&&tt.title[0])||'')+'</div>'+rows;
-    html+='<div style="border-top:1px solid rgba(248,250,252,.3);margin-top:5px;padding-top:5px">Total projets : '+fmtH(tot)+' h</div>';
-    if(cap!=null){
-      var d=tot-cap; var colD=d>0?'#f87171':'#4ade80'; var sign=d>0?'+':'';
-      html+='<div>Capacité équipe : '+fmtH(cap)+' h</div>';
-      html+='<div style="color:'+colD+'">Delta : '+sign+fmtH(d)+' h</div>';
-    }
-    el.innerHTML=html;
-    el.style.opacity='1';
-    var cv=document.getElementById('chart-proj-load'); var rc=cv?cv.getBoundingClientRect():{left:0,top:0};
-    var lx=rc.left+tt.caretX+14; if(lx+220>window.innerWidth){ lx=rc.left+tt.caretX-230; }
-    var ty=rc.top+tt.caretY-20; var eh=el.offsetHeight||150; if(ty+eh>window.innerHeight-8){ ty=window.innerHeight-eh-8; }
-    if(ty<8){ ty=8; }
-    el.style.left=lx+'px'; el.style.top=ty+'px';
+  function backdrop(){
+    var b=document.getElementById('ux-edit-backdrop');
+    if(b) return b;
+    b=document.createElement('div'); b.id='ux-edit-backdrop';
+    b.style.cssText='position:fixed;inset:0;z-index:9990;display:none;background:rgba(15,23,42,0.55)';
+    document.body.appendChild(b);
+    return b;
   }
-  function ensureCard(){
-    var ps=document.querySelectorAll('#view-dashboard .p-8');
-    var dash=ps.length?ps[ps.length-1]:null;
-    var c=document.getElementById('proj-load-card');
-    if(c){ if(dash&&c.parentElement!==dash){ dash.appendChild(c); } return c; }
-    if(!dash) return null;
-    c=document.createElement('div');
-    c.id='proj-load-card'; c.className='bg-slate-50 p-6 rounded-xl mt-8';
-    c.innerHTML='<h3 class="font-black text-slate-800 mb-4">📊 Charge projets par semaine (toutes semaines, lissée par enveloppe)</h3>'+
-      '<div style="position:relative">'+
-      '<div style="overflow-x:auto"><div id="proj-load-inner" style="position:relative;height:340px;min-width:100%">'+
-      '<canvas id="chart-proj-load" style="position:absolute;inset:0"></canvas></div></div>'+
-      '<div id="proj-load-axis" style="position:absolute;left:0;top:0;bottom:0;width:52px;pointer-events:none;z-index:5;background:#f8fafc;border-right:1px solid rgba(100,116,139,0.25)"></div></div>'+
-      '<div id="proj-load-legend" class="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[10px] font-bold text-slate-600"></div>'+
-      '<p class="text-[10px] text-slate-400 mt-2">Barres empilées = reste à faire de chaque enveloppe, lissé entre ses dates début → fin. Ligne verte pointillée = capacité hebdo de l\'équipe (ETP). Une barre qui touche ou dépasse la ligne = semaine en surcharge → lisser ce projet.</p>';
-    dash.appendChild(c);
-    return c;
-  }
-  function render(){
-    var st=window.__projLoad;
-    if(!st) return;
-    if(!ensureCard()) return;
-    var s2=JSON.stringify(st)+'|'+(window.__projSolo||'');
-    if(s2===sig && chart) return;
-    sig=s2;
-    if(typeof Chart==='undefined') return;
-    var inner=document.getElementById('proj-load-inner');
-    if(inner){ var wp=Math.max((inner.parentElement?inner.parentElement.clientWidth:600)-2, st.weeks.length*42); inner.style.width=wp+'px'; }
-    var cv=document.getElementById('chart-proj-load');
-    if(!cv) return;
-    var sums=st.weeks.map(function(_,i){ return st.datasets.reduce(function(a,d){ return a+(d.values[i]||0); },0); });
-    var M=Math.ceil((Math.max(st.capW, Math.max.apply(null,sums.concat([10])))*1.1)/10)*10;
-    var lg=document.getElementById('proj-load-legend');
-    if(lg){
-      var soloL=window.__projSolo||null;
-      lg.innerHTML=st.datasets.map(function(d){
-        var off=soloL&&d.code!==soloL;
-        return '<span data-code="'+d.code+'" class="inline-flex items-center gap-1" title="'+(d.name||d.code)+' — cliquer pour isoler" style="cursor:pointer;'+(off?'opacity:0.35;filter:grayscale(1);':'')+(soloL===d.code?'font-weight:800;':'')+'"><span style="width:10px;height:10px;background:'+d.color+';display:inline-block;border-radius:2px"></span>'+d.code+'</span>';
-      }).join(' ')+' <span class="inline-flex items-center gap-1"><span style="width:14px;height:0;border-top:2px dashed #16a34a;display:inline-block"></span>Capacité équipe (ETP)</span>';
-      Array.prototype.forEach.call(lg.querySelectorAll('span[data-code]'),function(sp){
-        sp.onclick=function(){ var c=sp.getAttribute('data-code'); window.__projSolo=(window.__projSolo===c)?null:c; render(); };
-      });
-    }
-    var solo=window.__projSolo||null;
-    var ds=st.datasets.map(function(d){ return { type:'bar', label:d.code, data:d.values, backgroundColor:(solo&&d.code!==solo)?'#cbd5e1':d.color, stack:'proj' }; });
-    ds.push({ type:'line', label:'Capacité équipe (ETP)', data: st.weeks.map(function(){ return Math.round(st.capW*10)/10; }), borderColor:'#16a34a', borderDash:[8,6], borderWidth:2, pointRadius:0, fill:false });
-    if(chart){ chart.data.labels=st.weeks; chart.data.datasets=ds; chart.options.scales.y.max=M; chart.update(); drawAxis(); return; }
-    chart=new Chart(cv,{ type:'bar', data:{ labels:st.weeks, datasets:ds }, options:{
-      responsive:true, maintainAspectRatio:false,
-      interaction:{ mode:'index', intersect:false },
-      layout:{ padding:{ left:56 } }, plugins:{ legend:{ display:false }, tooltip:{ filter:function(item){ return item.parsed.y > 0; }, enabled:false, external:extTip } },
-      scales:{ x:{ stacked:true }, y:{ stacked:true, min:0, max:M, ticks:{ display:false, stepSize: (M<=60?10: M<=140?20: M<=400?50:100) }, grid:{ color:'rgba(100,116,139,0.15)' } } }
-    }});
-    drawAxis();
-  }
-  function drawAxis(){
-    var ax=document.getElementById('proj-load-axis');
-    if(!ax||!chart) return;
-    var ca=chart.chartArea; var M=chart.options.scales.y.max;
-    var step= M<=60?10: M<=140?20: M<=400?50:100;
-    var h='';
-    for(var v=0; v<=M; v+=step){
-      var y=ca.bottom-(v/M)*(ca.bottom-ca.top);
-      h+='<div style="position:absolute;left:2px;top:'+(y-8)+'px;width:48px;text-align:right;font-size:10px;font-weight:700;color:#475569;background:rgba(248,250,252,0.9);border-radius:4px;padding:0 3px">'+v+' h</div>';
-    }
-    ax.innerHTML=h;
-  }
-  window.addEventListener('resize', function(){ setTimeout(drawAxis, 250); });
-  var t=null;
-  new MutationObserver(function(){ clearTimeout(t); t=setTimeout(render,500); }).observe(document.body,{childList:true,subtree:true});
-  setInterval(render,1500);
-  render();
-})();
-</script>
-
-<script>
-/* HIDE-TEAMSUB-JS : masque la ligne effectif/base du bandeau pilotage */
-(function(){
-  function hide(){
-    var els=document.querySelectorAll('p,div,span');
-    var target=null;
-    for(var i=0;i<els.length;i++){
-      var t=els[i].textContent||'';
-      if(t.indexOf('Équipe Performance')!==-1 && t.length<220) target=els[i];
-    }
-    if(target) target.style.display='none';
-  }
-  var t=null;
-  new MutationObserver(function(){ clearTimeout(t); t=setTimeout(hide,300); }).observe(document.body,{childList:true,subtree:true});
-  setInterval(hide,1500); hide();
-})();
-</script>
-
-<script>
-/* HIDE-DASH-CARDS-JS : masque Enveloppes&budgets / Checklists / Top activités du Dashboard */
-(function(){
-  var TITLES=['Enveloppes & budgets','Checklists projets','Top activités consommatrices','Trajectoire charge vs capacité'];
-  function hide(){
-    var root=document.getElementById('view-dashboard');
-    if(!root) return;
-    var hs=root.querySelectorAll('h3,h4');
-    for(var i=0;i<hs.length;i++){
-      var t=hs[i].textContent||'';
-      for(var k=0;k<TITLES.length;k++){
-        if(t.indexOf(TITLES[k])!==-1){
-          var c=hs[i].closest('.rounded-xl')||hs[i].parentElement;
-          if(c) c.style.display='none';
-        }
-      }
-    }
-  }
-  var t=null;
-  new MutationObserver(function(){ clearTimeout(t); t=setTimeout(hide,300); }).observe(document.body,{childList:true,subtree:true});
-  setInterval(hide,1500); hide();
-})();
-</script>
-
-<script>
-/* UX-EDIT-MODAL-JS : le formulaire d'édition d'enveloppe s'ouvre en modale centrée */
-(function(){
-  function cancel(){
-    var bs=document.querySelectorAll('#ux-edit-panel button');
-    for(var i=0;i<bs.length;i++){ if((bs[i].textContent||'').trim()==='Annuler'){ bs[i].click(); return; } }
-  }
-  function overlay(){
-    var o=document.getElementById('ux-edit-modal');
-    if(o) return o;
-    o=document.createElement('div'); o.id='ux-edit-modal';
-    o.style.cssText='position:fixed;inset:0;z-index:9990;display:none;background:rgba(15,23,42,0.55);overflow:auto;padding:4vh 16px';
-    o.innerHTML='<div id="ux-edit-panel" style="max-width:1150px;margin:0 auto"></div>';
-    document.body.appendChild(o);
-    o.addEventListener('click',function(e){ if(e.target===o) cancel(); });
-    document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&o.style.display==='block') cancel(); });
-    return o;
+  function cancelBtn(card){
+    var bs=card.querySelectorAll('button');
+    for(var i=0;i<bs.length;i++){ if((bs[i].textContent||'').trim()==='Annuler') return bs[i]; }
+    return null;
   }
   function tick(){
-    var o=overlay();
+    var b=backdrop();
     var save=null;
     var bs=document.querySelectorAll('button');
     for(var i=0;i<bs.length;i++){ if((bs[i].textContent||'').trim()==='Enregistrer'){ save=bs[i]; break; } }
-    var card=save?(save.closest('.rounded-xl')||save.closest('div')):null;
-    var visible=card&&card.offsetParent!==null;
-    if(!visible){ if(o.style.display==='block'){ o.style.display='none'; document.body.style.overflow=''; } return; }
-    var p=document.getElementById('ux-edit-panel');
-    if(card.parentElement!==p){ p.appendChild(card); card.style.width='100%'; card.style.margin='0'; }
-    o.style.display='block';
-    document.body.style.overflow='hidden';
+    var card=save?(save.closest('.rounded-2xl')||save.closest('.rounded-xl')||save.closest('div')):null;
+    var visible=card&&card.getClientRects().length>0&&getComputedStyle(card).display!=='none';
+    if(!visible){
+      var fixed=document.querySelector('[data-ux-fixed="1"]');
+      if(fixed){
+        fixed.style.position='';fixed.style.left='';fixed.style.top='';fixed.style.transform='';
+        fixed.style.width='';fixed.style.maxHeight='';fixed.style.overflow='';fixed.style.zIndex='';fixed.style.margin='';
+        delete fixed.dataset.uxFixed;
+      }
+      b.style.display='none'; document.body.style.overflow='';
+      return;
+    }
+    if(card.dataset.uxFixed!=='1'){
+      card.dataset.uxFixed='1';
+      card.style.position='fixed'; card.style.left='50%'; card.style.top='50%';
+      card.style.transform='translate(-50%,-50%)'; card.style.width='min(1150px, 94vw)';
+      card.style.maxHeight='92vh'; card.style.overflow='auto'; card.style.zIndex='9991'; card.style.margin='0';
+      b.onclick=function(){ var c=cancelBtn(card); if(c) c.click(); };
+    }
+    b.style.display='block'; document.body.style.overflow='hidden';
   }
+  document.addEventListener('keydown',function(e){
+    if(e.key==='Escape'){ var f=document.querySelector('[data-ux-fixed="1"]'); if(f){ var c=cancelBtn(f); if(c) c.click(); } }
+  });
   var t=null;
   new MutationObserver(function(){ clearTimeout(t); t=setTimeout(tick,250); }).observe(document.body,{childList:true,subtree:true,attributes:true});
   setInterval(tick,700);
