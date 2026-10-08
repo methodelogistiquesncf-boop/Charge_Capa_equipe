@@ -2809,5 +2809,29 @@ window.deleteUserClean = async function(uid){
   setInterval(hide,1500); hide();
 })();
 </script>
+
+<script>
+/* HIDE-DASH-CARDS-JS : masque Enveloppes&budgets / Checklists / Top activités du Dashboard */
+(function(){
+  var TITLES=['Enveloppes & budgets','Checklists projets','Top activités consommatrices'];
+  function hide(){
+    var root=document.getElementById('view-dashboard');
+    if(!root) return;
+    var hs=root.querySelectorAll('h3,h4');
+    for(var i=0;i<hs.length;i++){
+      var t=hs[i].textContent||'';
+      for(var k=0;k<TITLES.length;k++){
+        if(t.indexOf(TITLES[k])!==-1){
+          var c=hs[i].closest('.rounded-xl')||hs[i].parentElement;
+          if(c) c.style.display='none';
+        }
+      }
+    }
+  }
+  var t=null;
+  new MutationObserver(function(){ clearTimeout(t); t=setTimeout(hide,300); }).observe(document.body,{childList:true,subtree:true});
+  setInterval(hide,1500); hide();
+})();
+</script>
 </body>
 </html>
