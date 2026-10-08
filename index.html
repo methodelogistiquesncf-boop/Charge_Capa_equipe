@@ -2775,8 +2775,8 @@ window.deleteUserClean = async function(uid){
     if(chart){ chart.data.labels=st.weeks; chart.data.datasets=ds; chart.options.scales.y.max=M; chart.update(); drawAxis(); return; }
     chart=new Chart(cv,{ type:'bar', data:{ labels:st.weeks, datasets:ds }, options:{
       responsive:true, maintainAspectRatio:false,
-      interaction:{ mode:'index', intersect:false }, plugins:{ tooltip:{ titleFont:{ weight:'bold' }, bodyFont:{ weight:'normal' }, footerFont:{ weight:'bold' }, footerMarginTop:8, footerColor:'#1e293b' } },
-      layout:{ padding:{ left:56 } }, plugins:{ legend:{ display:false }, tooltip:{ filter:function(item){ return item.parsed.y > 0; }, callbacks:{ footer:function(items){ var s=items.reduce(function(a,i){ return a+(i.parsed.y||0); },0); return 'Total semaine : '+s.toFixed(1)+' h'; } } },
+      interaction:{ mode:'index', intersect:false },
+      layout:{ padding:{ left:56 } }, plugins:{ legend:{ display:false }, tooltip:{ filter:function(item){ return item.parsed.y > 0; } } },
       scales:{ x:{ stacked:true }, y:{ stacked:true, min:0, max:M, ticks:{ display:false, stepSize: (M<=60?10: M<=140?20: M<=400?50:100) }, grid:{ color:'rgba(100,116,139,0.15)' } } }
     }});
     drawAxis();
