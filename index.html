@@ -1242,8 +1242,15 @@ function renderProjects() {
   window.__projStats = { remDated, reqRate, overdue, teamCapW, perEtpW: sumEtp ? teamCapW/sumEtp : 0, actualRate: actualH/4, actualByCat: { projet: actualByCat.projet/4, mco: actualByCat.mco/4, support: actualByCat.support/4, transverse: actualByCat.transverse/4 } };
   const __wList = [];
   const __mon = new Date(); const __dn3 = (__mon.getDay()+6)%7; __mon.setDate(__mon.getDate()-__dn3); __mon.setHours(0,0,0,0);
-  for (let i=0;i<13;i++){
-    const t = __mon.getTime()+i*7*86400000;
+  const __act = allProjects.filter(p => (p.cat||'projet')==='projet' && p.active !== false && Math.max(0,(p.budgetH||0)-projectConsumed(p)) > 0);
+  let __endT = __mon.getTime()+12*7*86400000;
+  __act.forEach(p => { if (p.end) { const t2 = new Date(p.end).getTime(); if (t2 > __endT) __endT = t2; } });
+  let __startT = __mon.getTime();
+  __act.forEach(p => { if (p.start) { const t2 = new Date(p.start).getTime(); if (t2 < __startT) __startT = t2; } });
+  __startT -= ((new Date(__startT).getDay()+6)%7)*86400000;
+  const __nW = Math.max(13, Math.round((__endT - __startT)/(7*86400000)) + 1);
+  for (let i=0;i<__nW;i++){
+    const t = __startT + i*7*86400000;
     const d = new Date(t+3*86400000);
     const ft = new Date(d.getFullYear(),0,4); const fn=(ft.getDay()+6)%7; ft.setDate(ft.getDate()-fn+3);
     __wList.push({ label:'S'+(1+Math.round((d-ft)/604800000)), t: t });
@@ -2725,8 +2732,8 @@ window.deleteUserClean = async function(uid){
     if(!dash) return null;
     c=document.createElement('div');
     c.id='proj-load-card'; c.className='bg-slate-50 p-6 rounded-xl mt-8';
-    c.innerHTML='<h3 class="font-black text-slate-800 mb-4">📊 Charge projets par semaine (3 mois, lissée par enveloppe)</h3>'+
-      '<div style="height:340px"><canvas id="chart-proj-load"></canvas></div>'+
+    c.innerHTML='<h3 class="font-black text-slate-800 mb-4">📊 Charge projets par semaine (toutes semaines, lissée par enveloppe) — scroll horizontal si besoin</h3>'+
+      '<div style="overflow-x:auto"><div id="proj-load-inner" style="height:340px;min-width:100%"><canvas id="chart-proj-load"></canvas></div></div>'+
       '<p class="text-[10px] text-slate-400 mt-2">Barres empilées = reste à faire de chaque enveloppe, lissé entre ses dates début → fin. Ligne verte pointillée = capacité hebdo de l\'équipe (ETP). Une barre qui touche ou dépasse la ligne = semaine en surcharge → lisser ce projet.</p>';
     dash.appendChild(c);
     return c;
@@ -2739,6 +2746,8 @@ window.deleteUserClean = async function(uid){
     if(s2===sig && chart) return;
     sig=s2;
     if(typeof Chart==='undefined') return;
+    var inner=document.getElementById('proj-load-inner');
+    if(inner){ var wp=Math.max((inner.parentElement?inner.parentElement.clientWidth:600)-2, st.weeks.length*42); inner.style.width=wp+'px'; }
     var cv=document.getElementById('chart-proj-load');
     if(!cv) return;
     var ds=st.datasets.map(function(d){ return { type:'bar', label:d.code, data:d.values, backgroundColor:d.color, stack:'proj' }; });
