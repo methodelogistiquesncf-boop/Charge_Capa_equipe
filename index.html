@@ -1229,7 +1229,7 @@ function renderProjects() {
     const cons = projectConsumed(p);
     const rest = Math.max(0, (p.budgetH||0) - cons);
     if (p.end) {
-      const wl = (__ms(p.end) - __ms(__today)) / (7*86400000);
+      const __eD = __ms(p.end); const __eMon = __eD - ((new Date(__eD).getDay()+6)%7)*86400000; const __cD = __ms(__today); const __cMon = __cD - ((new Date(__cD).getDay()+6)%7)*86400000; const wl = Math.max(1, Math.round((__eMon - __cMon)/(7*86400000)) + 1);
       if (wl <= 0) { if (rest > 0) overdue.push({ code: p.code || p.name, rest }); }
       else { remDated += rest; reqRate += rest / wl; }
     }
@@ -1263,7 +1263,8 @@ function renderProjects() {
     const sT = Math.max(p.start ? new Date(p.start).getTime() : w0, w0);
     const eT = p.end ? new Date(p.end).getTime() : wE;
     if (eT < w0 || sT > wE) return;
-    const nFull = Math.max(1, Math.round((Math.max(eT, sT+7*86400000) - sT)/(7*86400000)));
+    const __monOf = function(t){ return t - ((new Date(t).getDay()+6)%7)*86400000; };
+    const nFull = Math.max(1, Math.round((__monOf(Math.max(eT,sT)) - __monOf(sT))/(7*86400000)) + 1);
     const rate = rest / nFull;
     const vals = __wList.map(w => (w.t <= eT && w.t + 6*86400000 >= sT) ? Math.round(rate*10)/10 : 0);
     if (vals.some(v => v > 0)) __ds.push({ code: p.code || p.name, name: (p.name || p.code || '').replace(/"/g,'&quot;'), values: vals, color: __pal[pi % __pal.length] });
