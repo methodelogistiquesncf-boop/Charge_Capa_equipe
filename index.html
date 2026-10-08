@@ -2536,14 +2536,365 @@ document.addEventListener('keydown', function(e) {
   renderPanel();
 })();
 </script>
+<!-- ═══════════════════════════════════════════════════════════════════════
+     PROJ-ETP-INFO-JS : modal explicatif simple (bouton i de la carte)
+     ═══════════════════════════════════════════════════════════════════════ -->
+<div id="proj-etp-modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl shadow-2xl max-w-xl w-full max-h-[90vh] overflow-y-auto">
+    <div class="p-5 border-b border-slate-200 flex justify-between items-center sticky top-0 bg-white z-10">
+      <h3 class="text-lg font-black text-slate-800">📦 Comment cet indicateur est construit ?</h3>
+      <button onclick="toggleProjEtpModal()" class="text-slate-400 hover:text-red-500 hover:bg-red-50 p-2 rounded-full transition">✕</button>
+    </div>
+    <div class="p-6 space-y-4 text-sm text-slate-700">
+      <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
+        <h4 class="font-bold text-slate-800 mb-1">1️⃣ Ce qui reste à faire</h4>
+        <p>Pour chaque projet <strong>actif avec une date de fin</strong> : heures restantes = budget de l'enveloppe − heures déjà saisies.</p>
+      </div>
+      <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg">
+        <h4 class="font-bold text-slate-800 mb-1">2️⃣ Le rythme nécessaire pour tenir</h4>
+        <p>Heures restantes ÷ semaines restantes jusqu'à la date de fin = <strong>h/semaine nécessaires</strong> pour ce projet. Additionné sur tous les projets = la <strong>barre rouge</strong>.</p>
+      </div>
+      <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded-r-lg">
+        <h4 class="font-bold text-slate-800 mb-1">3️⃣ Ce que permet l'effectif</h4>
+        <p>Capacité hebdo de l'équipe (ex. 4 ETP × ~24,5 h) × part du temps dédiée aux projets (ta cible 🎯, par défaut 50-60 %) = la <strong>barre verte</strong>.</p>
+      </div>
+      <div class="bg-slate-50 border border-slate-200 p-4 rounded-xl">
+        <h4 class="font-bold text-slate-800 mb-1">🎯 Cibles catégories & ETP</h4>
+        <p>Chaque cible (%) est convertie en h/sem selon la capacité de l'équipe, puis comparée aux heures réellement passées sur la catégorie (4 semaines). Une catégorie sous cible affiche des heures manquantes ; une catégorie over cible affiche une marge récupérable. Si les marges couvrent les manques → rééquilibrer suffit ; sinon le reste est converti en ETP.</p>
+      </div>
+      <div class="bg-slate-50 border border-slate-200 p-4 rounded-xl">
+        <h4 class="font-bold text-slate-800 mb-2">✅ Comment lire</h4>
+        <ul class="space-y-2">
+          <li><strong>Barre rouge &lt; barre verte</strong> → ✅ on peut tenir les échéances avec l'effectif actuel (la marge s'affiche).</li>
+          <li><strong>Barre rouge &gt; barre verte</strong> → 🔴 il manque des heures : l'écart est converti en ETP (1 ETP ≈ 24,5 h/sem).</li>
+          <li><strong>Barre bleue</strong> = ce que l'équipe passe <em>réellement</em> sur les projets (4 dernières semaines) : la réalité du terrain.</li>
+        </ul>
+      </div>
+      <div class="bg-yellow-50 border border-yellow-300 p-4 rounded-xl">
+        <p class="font-bold text-yellow-800 mb-1">⚠️ À savoir</p>
+        <ul class="list-disc ml-5 space-y-1 text-yellow-700">
+          <li>Le calcul s'appuie sur les <strong>budgets des enveloppes</strong> : si un budget est faux, l'indicateur est faussé → révise les budgets régulièrement.</li>
+          <li>Les projets <strong>sans date de fin</strong> ne sont pas comptés ici.</li>
+          <li>Cet indicateur ne juge pas le passé : il répond à « <em>de quoi a-t-on besoin dès maintenant pour tenir les dates ?</em> ».</li>
+        </ul>
+      </div>
+    </div>
+    <div class="p-4 border-t border-slate-200 bg-slate-50 rounded-b-2xl">
+      <button onclick="toggleProjEtpModal()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-xl transition">✅ Compris</button>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  window.toggleProjEtpModal = function(){
+    var m = document.getElementById('proj-etp-modal');
+    if (!m) return;
+    var hidden = m.classList.toggle('hidden');
+    document.body.style.overflow = hidden ? '' : 'hidden';
+  };
+  document.addEventListener('click', function(e){
+    var m = document.getElementById('proj-etp-modal');
+    if (m && !m.classList.contains('hidden') && e.target === m) toggleProjEtpModal();
+  });
+  document.addEventListener('keydown', function(e){
+    var m = document.getElementById('proj-etp-modal');
+    if (e.key === 'Escape' && m && !m.classList.contains('hidden')) toggleProjEtpModal();
+  });
+})();
+</script>
 
+<!-- ═══════════════════════════════════════════════════════════════════════
+     UX-DELETE-USER-JS : suppression propre d'un compte (compte + saisies)
+     ═══════════════════════════════════════════════════════════════════════ -->
+<script type="module">
+import { db, auth, PATHS, doc, deleteDoc, collection, query, where, getDocs } from './firebase.js';
+window.deleteUserClean = async function(uid){
+  if (auth.currentUser && auth.currentUser.uid === uid) {
+    alert('❌ Impossible de supprimer votre propre compte.');
+    return;
+  }
+  try {
+    const snap = await getDocs(query(collection(db, PATHS.blocks), where('owner', '==', uid)));
+    const hours = snap.docs.reduce((s2, d) => s2 + (d.data().duration || 0), 0);
+    if (!confirm('🗑️ Supprimer définitivement ce compte ?\n\n• ' + snap.docs.length + ' semaine(s) saisie(s) (' + Math.round(hours) + ' h) seront supprimées\n• Capacités, historiques et dashboard seront recalculés sans cette personne\n\nAction IRRÉVERSIBLE.')) return;
+    if (!confirm('⚠️ Confirmation finale : supprimer le compte ET toutes ses saisies ?')) return;
+    for (const d of snap.docs) await deleteDoc(d.ref);
+    await deleteDoc(doc(db, PATHS.users, uid));
+    alert('✅ Compte et saisies supprimés.\n\nℹ️ Le compte de connexion (email) reste dans Firebase Auth : pour le retirer totalement, Console Firebase → Authentication → supprimer l\'utilisateur.');
+  } catch (e) {
+    console.error('Erreur suppression utilisateur :', e);
+    alert('❌ Erreur à la suppression : ' + (e.code || e.message) + '\n\nVérifiez les règles Firestore (droits admin).');
+  }
+};
+</script>
+<script>
+(function(){
+  function enhance(){
+    var tbody = document.getElementById('users-table-body');
+    if (!tbody) return;
+    var thead = document.querySelector('#view-users table thead tr');
+    if (thead && !thead.querySelector('th.ux-actions')) {
+      thead.insertAdjacentHTML('beforeend', '<th class="text-center p-3 font-bold text-xs uppercase no-print ux-actions">Actions</th>');
+    }
+    Array.prototype.forEach.call(tbody.rows, function(tr){
+      if (tr.querySelector('.ux-del-btn')) return;
+      var m = tr.innerHTML.match(/\(['"]([A-Za-z0-9]{20,})['"]/);
+      if (!m) return;
+      var uid = m[1];
+      var td = document.createElement('td');
+      td.className = 'text-center p-3 no-print';
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'ux-del-btn text-red-500 hover:text-red-700 font-black text-xs';
+      b.title = 'Supprimer définitivement ce compte et ses saisies';
+      b.textContent = '🗑️';
+      b.onclick = function(){ if (window.deleteUserClean) window.deleteUserClean(uid); else alert('⚠️ Module de suppression non chargé.'); };
+      td.appendChild(b);
+      tr.appendChild(td);
+    });
+  }
+  var t = null;
+  new MutationObserver(function(){ clearTimeout(t); t = setTimeout(enhance, 400); })
+    .observe(document.body, {childList:true, subtree:true});
+  setInterval(enhance, 1500);
+  enhance();
+})();
+</script>
+
+
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     CHART-UNIT-FINAL : unité h (axe vertical + tooltip) via config brute
+     ═══════════════════════════════════════════════════════════════════════ -->
+<script>
+(function(){
+  function patch(){
+    if (typeof Chart === 'undefined' || !Chart.getChart) return;
+    var cv = document.getElementById('chart-weeks');
+    if (!cv) return;
+    var ch = Chart.getChart(cv);
+    if (!ch || ch.__unitFinal) return;
+    ch.__unitFinal = true;
+    var o = ch.config && ch.config.options;
+    if (!o) { o = {}; ch.config.options = o; }
+    o.scales = o.scales || {};
+    o.scales.y = o.scales.y || {};
+    o.scales.y.ticks = o.scales.y.ticks || {};
+    o.scales.y.ticks.callback = function(v){ return v + ' h'; };
+    o.plugins = o.plugins || {};
+    o.plugins.tooltip = o.plugins.tooltip || {};
+    o.plugins.tooltip.callbacks = o.plugins.tooltip.callbacks || {};
+    o.plugins.tooltip.callbacks.label = function(c){
+      var v = (c.parsed && c.parsed.y != null) ? c.parsed.y : c.parsed;
+      return (c.dataset && c.dataset.label ? c.dataset.label : '') + ' : ' + v + ' h';
+    };
+    ch.update();
+  }
+  var t = null;
+  new MutationObserver(function(){ clearTimeout(t); t = setTimeout(patch, 400); })
+    .observe(document.body, {childList:true, subtree:true});
+  setInterval(patch, 1200);
+  patch();
+})();
+</script>
+
+
+
+
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     UX-SCOPE-DEFAULT-JS : au chargement, active le périmètre "Réalisé"
+     ═══════════════════════════════════════════════════════════════════════ -->
+<script>
+(function(){
+  var done = false;
+  function apply(){
+    if (done) return;
+    var btns = document.querySelectorAll('button');
+    for (var i = 0; i < btns.length; i++) {
+      var t = (btns[i].textContent || '').trim();
+      if (t.indexOf('Réalisé') !== -1 && t.length < 20) { done = true; btns[i].click(); return; }
+    }
+  }
+  document.addEventListener('DOMContentLoaded', function(){ setTimeout(apply, 300); });
+  setTimeout(apply, 800);
+  setTimeout(apply, 2000);
+})();
+</script>
 
 <script>
-/* UX-EDIT-MODAL-V5 : #proj-form centré écran, nœud conservé (rattaché au body, jamais dupliqué) */
+/* PROJ-LOAD-JS : histogramme empilé charge projets 3 mois + capacité ETP */
 (function(){
-  function cancelIn(card){
+  var chart=null, axisChart=null, sig='';
+  function fmtH(v){ return (Math.round(v*10)/10).toString().replace('.',','); }
+  function extTip(ctx){
+    var el=document.getElementById('proj-load-tip');
+    if(!el){ el=document.createElement('div'); el.id='proj-load-tip'; el.style.cssText='position:fixed;pointer-events:none;background:rgba(15,23,42,0.94);color:#f8fafc;border-radius:8px;padding:8px 10px;font-size:11px;font-weight:700;z-index:9999;opacity:0;transition:opacity .1s;min-width:190px'; document.body.appendChild(el); }
+    var tt=ctx.tooltip;
+    if(!tt || tt.opacity===0){ el.style.opacity='0'; return; }
+    var pts=(tt.dataPoints||[]).filter(function(p){ return (p.parsed.y||0)>0; });
+    var tot=0, cap=null, rows='';
+    pts.forEach(function(p){
+      var isLine=(p.dataset.type==='line');
+      var col=isLine?(p.dataset.borderColor||'#16a34a'):(p.dataset.backgroundColor||'#94a3b8');
+      if(isLine){ cap=p.parsed.y; return; }
+      tot+=p.parsed.y||0;
+      rows+='<div style="display:flex;align-items:center;gap:6px;margin:1px 0"><span style="width:9px;height:9px;border-radius:2px;background:'+col+';display:inline-block;flex:none"></span><span>'+p.dataset.label+' : '+fmtH(p.parsed.y)+' h</span></div>';
+    });
+    var html='<div style="margin-bottom:4px">'+((tt.title&&tt.title[0])||'')+'</div>'+rows;
+    html+='<div style="border-top:1px solid rgba(248,250,252,.3);margin-top:5px;padding-top:5px">Total projets : '+fmtH(tot)+' h</div>';
+    if(cap!=null){
+      var d=tot-cap; var colD=d>0?'#f87171':'#4ade80'; var sign=d>0?'+':'';
+      html+='<div>Capacité équipe : '+fmtH(cap)+' h</div>';
+      html+='<div style="color:'+colD+'">Delta : '+sign+fmtH(d)+' h</div>';
+    }
+    el.innerHTML=html;
+    el.style.opacity='1';
+    var cv=document.getElementById('chart-proj-load'); var rc=cv?cv.getBoundingClientRect():{left:0,top:0};
+    var lx=rc.left+tt.caretX+14; if(lx+220>window.innerWidth){ lx=rc.left+tt.caretX-230; }
+    var ty=rc.top+tt.caretY-20; var eh=el.offsetHeight||150; if(ty+eh>window.innerHeight-8){ ty=window.innerHeight-eh-8; }
+    if(ty<8){ ty=8; }
+    el.style.left=lx+'px'; el.style.top=ty+'px';
+  }
+  function ensureCard(){
+    var ps=document.querySelectorAll('#view-dashboard .p-8');
+    var dash=ps.length?ps[ps.length-1]:null;
+    var c=document.getElementById('proj-load-card');
+    if(c){ if(dash&&c.parentElement!==dash){ dash.appendChild(c); } return c; }
+    if(!dash) return null;
+    c=document.createElement('div');
+    c.id='proj-load-card'; c.className='bg-slate-50 p-6 rounded-xl mt-8';
+    c.innerHTML='<h3 class="font-black text-slate-800 mb-4">📊 Charge projets par semaine (toutes semaines, lissée par enveloppe)</h3>'+
+      '<div style="position:relative">'+
+      '<div style="overflow-x:auto"><div id="proj-load-inner" style="position:relative;height:340px;min-width:100%">'+
+      '<canvas id="chart-proj-load" style="position:absolute;inset:0"></canvas></div></div>'+
+      '<div id="proj-load-axis" style="position:absolute;left:0;top:0;bottom:0;width:52px;pointer-events:none;z-index:5;background:#f8fafc;border-right:1px solid rgba(100,116,139,0.25)"></div></div>'+
+      '<div id="proj-load-legend" class="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[10px] font-bold text-slate-600"></div>'+
+      '<p class="text-[10px] text-slate-400 mt-2">Barres empilées = reste à faire de chaque enveloppe, lissé entre ses dates début → fin. Ligne verte pointillée = capacité hebdo de l\'équipe (ETP). Une barre qui touche ou dépasse la ligne = semaine en surcharge → lisser ce projet.</p>';
+    dash.appendChild(c);
+    return c;
+  }
+  function render(){
+    var st=window.__projLoad;
+    if(!st) return;
+    if(!ensureCard()) return;
+    var s2=JSON.stringify(st)+'|'+(window.__projSolo||'');
+    if(s2===sig && chart) return;
+    sig=s2;
+    if(typeof Chart==='undefined') return;
+    var inner=document.getElementById('proj-load-inner');
+    if(inner){ var wp=Math.max((inner.parentElement?inner.parentElement.clientWidth:600)-2, st.weeks.length*42); inner.style.width=wp+'px'; }
+    var cv=document.getElementById('chart-proj-load');
+    if(!cv) return;
+    var sums=st.weeks.map(function(_,i){ return st.datasets.reduce(function(a,d){ return a+(d.values[i]||0); },0); });
+    var M=Math.ceil((Math.max(st.capW, Math.max.apply(null,sums.concat([10])))*1.1)/10)*10;
+    var lg=document.getElementById('proj-load-legend');
+    if(lg){
+      var soloL=window.__projSolo||null;
+      lg.innerHTML=st.datasets.map(function(d){
+        var off=soloL&&d.code!==soloL;
+        return '<span data-code="'+d.code+'" class="inline-flex items-center gap-1" title="'+(d.name||d.code)+' — cliquer pour isoler" style="cursor:pointer;'+(off?'opacity:0.35;filter:grayscale(1);':'')+(soloL===d.code?'font-weight:800;':'')+'"><span style="width:10px;height:10px;background:'+d.color+';display:inline-block;border-radius:2px"></span>'+d.code+'</span>';
+      }).join(' ')+' <span class="inline-flex items-center gap-1"><span style="width:14px;height:0;border-top:2px dashed #16a34a;display:inline-block"></span>Capacité équipe (ETP)</span>';
+      Array.prototype.forEach.call(lg.querySelectorAll('span[data-code]'),function(sp){
+        sp.onclick=function(){ var c=sp.getAttribute('data-code'); window.__projSolo=(window.__projSolo===c)?null:c; render(); };
+      });
+    }
+    var solo=window.__projSolo||null;
+    var ds=st.datasets.map(function(d){ return { type:'bar', label:d.code, data:d.values, backgroundColor:(solo&&d.code!==solo)?'#cbd5e1':d.color, stack:'proj' }; });
+    ds.push({ type:'line', label:'Capacité équipe (ETP)', data: st.weeks.map(function(){ return Math.round(st.capW*10)/10; }), borderColor:'#16a34a', borderDash:[8,6], borderWidth:2, pointRadius:0, fill:false });
+    if(chart){ chart.data.labels=st.weeks; chart.data.datasets=ds; chart.options.scales.y.max=M; chart.update(); drawAxis(); return; }
+    chart=new Chart(cv,{ type:'bar', data:{ labels:st.weeks, datasets:ds }, options:{
+      responsive:true, maintainAspectRatio:false,
+      interaction:{ mode:'index', intersect:false },
+      layout:{ padding:{ left:56 } }, plugins:{ legend:{ display:false }, tooltip:{ filter:function(item){ return item.parsed.y > 0; }, enabled:false, external:extTip } },
+      scales:{ x:{ stacked:true }, y:{ stacked:true, min:0, max:M, ticks:{ display:false, stepSize: (M<=60?10: M<=140?20: M<=400?50:100) }, grid:{ color:'rgba(100,116,139,0.15)' } } }
+    }});
+    drawAxis();
+  }
+  function drawAxis(){
+    var ax=document.getElementById('proj-load-axis');
+    if(!ax||!chart) return;
+    var ca=chart.chartArea; var M=chart.options.scales.y.max;
+    var step= M<=60?10: M<=140?20: M<=400?50:100;
+    var h='';
+    for(var v=0; v<=M; v+=step){
+      var y=ca.bottom-(v/M)*(ca.bottom-ca.top);
+      h+='<div style="position:absolute;left:2px;top:'+(y-8)+'px;width:48px;text-align:right;font-size:10px;font-weight:700;color:#475569;background:rgba(248,250,252,0.9);border-radius:4px;padding:0 3px">'+v+' h</div>';
+    }
+    ax.innerHTML=h;
+  }
+  window.addEventListener('resize', function(){ setTimeout(drawAxis, 250); });
+  var t=null;
+  new MutationObserver(function(){ clearTimeout(t); t=setTimeout(render,500); }).observe(document.body,{childList:true,subtree:true});
+  setInterval(render,1500);
+  render();
+})();
+</script>
+
+<script>
+/* HIDE-TEAMSUB-JS : masque la ligne effectif/base du bandeau pilotage */
+(function(){
+  function hide(){
+    var els=document.querySelectorAll('p,div,span');
+    var target=null;
+    for(var i=0;i<els.length;i++){
+      var t=els[i].textContent||'';
+      if(t.indexOf('Équipe Performance')!==-1 && t.length<220) target=els[i];
+    }
+    if(target) target.style.display='none';
+  }
+  var t=null;
+  new MutationObserver(function(){ clearTimeout(t); t=setTimeout(hide,300); }).observe(document.body,{childList:true,subtree:true});
+  setInterval(hide,1500); hide();
+})();
+</script>
+
+<script>
+/* HIDE-DASH-CARDS-JS : masque Enveloppes&budgets / Checklists / Top activités du Dashboard */
+(function(){
+  var TITLES=['Enveloppes & budgets','Checklists projets','Top activités consommatrices','Trajectoire charge vs capacité'];
+  function hide(){
+    var root=document.getElementById('view-dashboard');
+    if(!root) return;
+    var hs=root.querySelectorAll('h3,h4');
+    for(var i=0;i<hs.length;i++){
+      var t=hs[i].textContent||'';
+      for(var k=0;k<TITLES.length;k++){
+        if(t.indexOf(TITLES[k])!==-1){
+          var c=hs[i].closest('.rounded-xl')||hs[i].parentElement;
+          if(c) c.style.display='none';
+        }
+      }
+    }
+  }
+  var t=null;
+  new MutationObserver(function(){ clearTimeout(t); t=setTimeout(hide,300); }).observe(document.body,{childList:true,subtree:true});
+  setInterval(hide,1500); hide();
+})();
+</script>
+
+<script>
+/* UX-MODAL-FINAL : fenêtres centrées pour #proj-form ET panneau checklist */
+(function(){
+  function styleCard(card,w){
+    if(card.parentElement!==document.body){ document.body.appendChild(card); }
+    card.style.position='fixed'; card.style.left='50%'; card.style.top='50%';
+    card.style.transform='translate(-50%,-50%)'; card.style.width=w;
+    card.style.maxHeight='92vh'; card.style.overflow='auto'; card.style.zIndex='9991'; card.style.margin='0';
+  }
+  function cancelForm(card){
     var bs=card.querySelectorAll('button');
     for(var i=0;i<bs.length;i++){ if((bs[i].textContent||'').trim()==='Annuler'){ bs[i].click(); return; } }
+  }
+  function jalonPanel(){
+    var jt=document.getElementById('jalon-title');
+    return jt?jt.parentElement.parentElement:null;
+  }
+  function closeAny(){
+    var f=document.getElementById('proj-form');
+    if(f&&f.getClientRects().length>0){ cancelForm(f); return; }
+    var jp=jalonPanel();
+    if(jp&&jp.getClientRects().length>0&&typeof window.closeJalons==='function'){ window.closeJalons(); }
   }
   function backdrop(){
     var b=document.getElementById('ux-edit-backdrop');
@@ -2551,27 +2902,25 @@ document.addEventListener('keydown', function(e) {
     b=document.createElement('div'); b.id='ux-edit-backdrop';
     b.style.cssText='position:fixed;inset:0;z-index:9990;display:none;background:rgba(15,23,42,0.55)';
     document.body.appendChild(b);
-    b.addEventListener('click',function(){ var c=document.getElementById('proj-form'); if(c) cancelIn(c); });
+    b.addEventListener('click',function(){ closeAny(); });
     return b;
   }
   function tick(){
     var b=backdrop();
     var forms=document.querySelectorAll('#proj-form');
-    var card=null, i;
-    for(i=0;i<forms.length;i++){ if(forms[i].getClientRects().length>0){ card=forms[i]; } }
+    var card=null,i;
+    for(i=0;i<forms.length;i++){ if(forms[i].getClientRects().length>0) card=forms[i]; }
     if(forms.length>1){
-      for(i=0;i<forms.length;i++){ if(forms[i]!==card && forms[i].getClientRects().length===0){ forms[i].remove(); } }
+      for(i=0;i<forms.length;i++){ if(forms[i]!==card&&forms[i].getClientRects().length===0) forms[i].remove(); }
     }
-    if(!card){ b.style.display='none'; document.body.style.overflow=''; return; }
-    if(card.parentElement!==document.body){ document.body.appendChild(card); }
-    card.style.position='fixed'; card.style.left='50%'; card.style.top='50%';
-    card.style.transform='translate(-50%,-50%)'; card.style.width='min(1150px,94vw)';
-    card.style.maxHeight='92vh'; card.style.overflow='auto'; card.style.zIndex='9991'; card.style.margin='0';
-    b.style.display='block'; document.body.style.overflow='hidden';
+    var jp=jalonPanel();
+    var jopen=jp&&jp.getClientRects().length>0;
+    if(card) styleCard(card,'min(1150px,94vw)');
+    if(jopen) styleCard(jp,'min(900px,94vw)');
+    if(card||jopen){ b.style.display='block'; document.body.style.overflow='hidden'; }
+    else { b.style.display='none'; document.body.style.overflow=''; }
   }
-  document.addEventListener('keydown',function(e){
-    if(e.key==='Escape'){ var c=document.getElementById('proj-form'); if(c&&c.getClientRects().length>0) cancelIn(c); }
-  });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeAny(); });
   var t=null;
   new MutationObserver(function(){ clearTimeout(t); t=setTimeout(tick,250); }).observe(document.body,{childList:true,subtree:true});
   setInterval(tick,700);
