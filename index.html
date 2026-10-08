@@ -1240,6 +1240,30 @@ function renderProjects() {
   const teamCapW = __saisit.reduce((s2,[uid]) => s2 + capWeekOf(uid), 0);
   const sumEtp = __saisit.reduce((s2,[uid]) => s2 + (etpOf(uid)||1), 0);
   window.__projStats = { remDated, reqRate, overdue, teamCapW, perEtpW: sumEtp ? teamCapW/sumEtp : 0, actualRate: actualH/4, actualByCat: { projet: actualByCat.projet/4, mco: actualByCat.mco/4, support: actualByCat.support/4, transverse: actualByCat.transverse/4 } };
+  const __wList = [];
+  const __mon = new Date(); const __dn3 = (__mon.getDay()+6)%7; __mon.setDate(__mon.getDate()-__dn3); __mon.setHours(0,0,0,0);
+  for (let i=0;i<13;i++){
+    const t = __mon.getTime()+i*7*86400000;
+    const d = new Date(t+3*86400000);
+    const ft = new Date(d.getFullYear(),0,4); const fn=(ft.getDay()+6)%7; ft.setDate(ft.getDate()-fn+3);
+    __wList.push({ label:'S'+(1+Math.round((d-ft)/604800000)), t: t });
+  }
+  const __pal = ['#2563eb','#dc2626','#16a34a','#f59e0b','#7c3aed','#0891b2','#db2777','#65a30d','#ea580c','#64748b','#9333ea','#0d9488'];
+  const __ds = [];
+  allProjects.forEach((p, pi) => {
+    if ((p.cat||'projet') !== 'projet' || p.active === false) return;
+    const rest = Math.max(0, (p.budgetH||0) - projectConsumed(p));
+    if (rest <= 0) return;
+    const w0 = __wList[0].t, wE = __wList[__wList.length-1].t + 6*86400000;
+    const sT = Math.max(p.start ? new Date(p.start).getTime() : w0, w0);
+    const eT = p.end ? new Date(p.end).getTime() : wE;
+    if (eT < w0 || sT > wE) return;
+    const nFull = Math.max(1, Math.round((Math.max(eT, sT+7*86400000) - sT)/(7*86400000)));
+    const rate = rest / nFull;
+    const vals = __wList.map(w => (w.t <= eT && w.t + 6*86400000 >= sT) ? Math.round(rate*10)/10 : 0);
+    if (vals.some(v => v > 0)) __ds.push({ code: p.code || p.name, values: vals, color: __pal[pi % __pal.length] });
+  });
+  window.__projLoad = { weeks: __wList.map(w => w.label), datasets: __ds, capW: teamCapW };
   } catch (e) { console.error('❌ Stats échéances/ETP :', e); }
 }
 
@@ -2687,6 +2711,50 @@ window.deleteUserClean = async function(uid){
   document.addEventListener('DOMContentLoaded', function(){ setTimeout(apply, 300); });
   setTimeout(apply, 800);
   setTimeout(apply, 2000);
+})();
+</script>
+
+<script>
+/* PROJ-LOAD-JS : histogramme empilé charge projets 3 mois + capacité ETP */
+(function(){
+  var chart=null, sig='';
+  function ensureCard(){
+    var c=document.getElementById('proj-load-card');
+    if(c) return c;
+    var dash=document.querySelector('#view-dashboard .p-8');
+    if(!dash) return null;
+    c=document.createElement('div');
+    c.id='proj-load-card'; c.className='bg-slate-50 p-6 rounded-xl mt-8';
+    c.innerHTML='<h3 class="font-black text-slate-800 mb-4">📊 Charge projets par semaine (3 mois, lissée par enveloppe)</h3>'+
+      '<div style="height:340px"><canvas id="chart-proj-load"></canvas></div>'+
+      '<p class="text-[10px] text-slate-400 mt-2">Barres empilées = reste à faire de chaque enveloppe, lissé entre ses dates début → fin. Ligne verte pointillée = capacité hebdo de l\'équipe (ETP). Une barre qui touche ou dépasse la ligne = semaine en surcharge → lisser ce projet.</p>';
+    dash.appendChild(c);
+    return c;
+  }
+  function render(){
+    var st=window.__projLoad;
+    if(!st) return;
+    if(!ensureCard()) return;
+    var s2=JSON.stringify(st);
+    if(s2===sig && chart) return;
+    sig=s2;
+    if(typeof Chart==='undefined') return;
+    var cv=document.getElementById('chart-proj-load');
+    if(!cv) return;
+    var ds=st.datasets.map(function(d){ return { type:'bar', label:d.code, data:d.values, backgroundColor:d.color, stack:'proj' }; });
+    ds.push({ type:'line', label:'Capacité équipe (ETP)', data: st.weeks.map(function(){ return Math.round(st.capW*10)/10; }), borderColor:'#16a34a', borderDash:[8,6], borderWidth:2, pointRadius:0, fill:false });
+    if(chart){ chart.data.labels=st.weeks; chart.data.datasets=ds; chart.update(); return; }
+    chart=new Chart(cv,{ type:'bar', data:{ labels:st.weeks, datasets:ds }, options:{
+      responsive:true, maintainAspectRatio:false,
+      interaction:{ mode:'index', intersect:false },
+      plugins:{ legend:{ position:'bottom', labels:{ boxWidth:12, font:{ size:10 } } } },
+      scales:{ x:{ stacked:true }, y:{ stacked:true, beginAtZero:true, title:{ display:true, text:'h / semaine' }, ticks:{ callback:function(v){ return v+' h'; } } } }
+    }});
+  }
+  var t=null;
+  new MutationObserver(function(){ clearTimeout(t); t=setTimeout(render,500); }).observe(document.body,{childList:true,subtree:true});
+  setInterval(render,1500);
+  render();
 })();
 </script>
 </body>
