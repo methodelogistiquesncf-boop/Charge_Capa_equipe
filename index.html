@@ -2603,84 +2603,11 @@ document.addEventListener('keydown', function(e) {
 })();
 </script>
 
-<!-- ═══════════════════════════════════════════════════════════════════════
-     UX-DELETE-USER-JS : suppression propre d'un compte (compte + saisies)
-     ═══════════════════════════════════════════════════════════════════════ -->
-<script type="module">
-import { db, auth, PATHS, doc, deleteDoc, collection, query, where, getDocs } from './firebase.js';
-window.deleteUserClean = async function(uid){
-  if (auth.currentUser && auth.currentUser.uid === uid) {
-    alert('❌ Impossible de supprimer votre propre compte.');
-    return;
-  }
-  try {
-    const snap = await getDocs(query(collection(db, PATHS.blocks), where('owner', '==', uid)));
-    const hours = snap.docs.reduce((s2, d) => s2 + (d.data().duration || 0), 0);
-    if (!confirm('🗑️ Supprimer définitivement ce compte ?\n\n• ' + snap.docs.length + ' semaine(s) saisie(s) (' + Math.round(hours) + ' h) seront supprimées\n• Capacités, historiques et dashboard seront recalculés sans cette personne\n\nAction IRRÉVERSIBLE.')) return;
-    if (!confirm('⚠️ Confirmation finale : supprimer le compte ET toutes ses saisies ?')) return;
-    for (const d of snap.docs) await deleteDoc(d.ref);
-    await deleteDoc(doc(db, PATHS.users, uid));
-    alert('✅ Compte et saisies supprimés.\n\nℹ️ Le compte de connexion (email) reste dans Firebase Auth : pour le retirer totalement, Console Firebase → Authentication → supprimer l\'utilisateur.');
-  } catch (e) {
-    console.error('Erreur suppression utilisateur :', e);
-    alert('❌ Erreur à la suppression : ' + (e.code || e.message) + '\n\nVérifiez les règles Firestore (droits admin).');
-  }
-};
-</script>
-<script>
-(function(){
-  function enhance(){
-    var tbody = document.getElementById('users-table-body');
-    if (!tbody) return;
-    var thead = document.querySelector('#view-users table thead tr');
-    if (thead && !thead.querySelector('th.ux-actions')) {
-      thead.insertAdjacentHTML('beforeend', '<th class="text-center p-3 font-bold text-xs uppercase no-print ux-actions">Actions</th>');
-    }
-    Array.prototype.forEach.call(tbody.rows, function(tr){
-      if (tr.querySelector('.ux-del-btn')) return;
-      var m = tr.innerHTML.match(/\(['"]([A-Za-z0-9]{20,})['"]/);
-      if (!m) return;
-      var uid = m[1];
-      var td = document.createElement('td');
-      td.className = 'text-center p-3 no-print';
-      var b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'ux-del-btn text-red-500 hover:text-red-700 font-black text-xs';
-      b.title = 'Supprimer définitivement ce compte et ses saisies';
-      b.textContent = '🗑️';
-      b.onclick = function(){ if (window.deleteUserClean) window.deleteUserClean(uid); else alert('⚠️ Module de suppression non chargé.'); };
-      td.appendChild(b);
-      tr.appendChild(td);
-    });
-  }
-  var t = null;
-  new MutationObserver(function(){ clearTimeout(t); t = setTimeout(enhance, 400); })
-    .observe(document.body, {childList:true, subtree:true});
-  setInterval(enhance, 1500);
-  enhance();
-})();
-</script>
-
-
-
 
 
 <script>
-/* UX-EDIT-MODAL-V3 : vraie fenêtre modale pour le formulaire d'édition (overlay body) */
+/* UX-EDIT-MODAL-V4 : modale d'édition via #proj-form (id stable), overlay body */
 (function(){
-  function findSave(){
-    var bs=document.querySelectorAll('button');
-    for(var i=0;i<bs.length;i++){ var t=(bs[i].textContent||'').trim(); if(t.indexOf('Enregistrer')===0){ return bs[i]; } }
-    return null;
-  }
-  function formCard(btn){
-    var el=btn.parentElement;
-    while(el && el!==document.body){
-      if(el.querySelector('input,select') && (el.textContent||'').indexOf('Annuler')!==-1) return el;
-      el=el.parentElement;
-    }
-    return null;
-  }
   function doCancel(){
     var bs=document.querySelectorAll('#ux-edit-panel button');
     for(var i=0;i<bs.length;i++){ if((bs[i].textContent||'').trim()==='Annuler'){ bs[i].click(); return; } }
@@ -2699,17 +2626,15 @@ window.deleteUserClean = async function(uid){
   function tick(){
     var o=overlay();
     var panel=document.getElementById('ux-edit-panel');
-    var save=findSave();
-    if(!save){ o.style.display='none'; document.body.style.overflow=''; return; }
-    var card=formCard(save);
-    if(!card){ return; }
+    var card=document.getElementById('proj-form');
+    if(!card){ o.style.display='none'; document.body.style.overflow=''; return; }
     var openNow=card.getClientRects().length>0;
     if(!openNow){ o.style.display='none'; document.body.style.overflow=''; return; }
     if(!panel.contains(card)){
       panel.innerHTML='';
       panel.appendChild(card);
     }
-    card.style.width='100%'; card.style.margin='0'; card.style.background='#fff'; card.style.borderRadius='12px';
+    card.style.width='100%'; card.style.margin='0';
     o.style.display='block'; document.body.style.overflow='hidden';
   }
   var t=null;
