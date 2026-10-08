@@ -2724,7 +2724,7 @@ window.deleteUserClean = async function(uid){
 <script>
 /* PROJ-LOAD-JS : histogramme empilé charge projets 3 mois + capacité ETP */
 (function(){
-  var chart=null, sig='';
+  var chart=null, axisChart=null, sig='';
   function ensureCard(){
     var c=document.getElementById('proj-load-card');
     if(c) return c;
@@ -2733,7 +2733,9 @@ window.deleteUserClean = async function(uid){
     c=document.createElement('div');
     c.id='proj-load-card'; c.className='bg-slate-50 p-6 rounded-xl mt-8';
     c.innerHTML='<h3 class="font-black text-slate-800 mb-4">📊 Charge projets par semaine (toutes semaines, lissée par enveloppe) — scroll horizontal si besoin</h3>'+
-      '<div style="overflow-x:auto"><div id="proj-load-inner" style="height:340px;min-width:100%"><canvas id="chart-proj-load"></canvas></div></div>'+
+      '<div style="display:flex"><div style="width:64px;flex:none;height:340px"><canvas id="chart-proj-axis"></canvas></div>'+
+      '<div style="overflow-x:auto;flex:1"><div id="proj-load-inner" style="height:340px;min-width:100%"><canvas id="chart-proj-load"></canvas></div></div></div>'+
+      '<div id="proj-load-legend" class="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[10px] font-bold text-slate-600"></div>'+
       '<p class="text-[10px] text-slate-400 mt-2">Barres empilées = reste à faire de chaque enveloppe, lissé entre ses dates début → fin. Ligne verte pointillée = capacité hebdo de l\'équipe (ETP). Une barre qui touche ou dépasse la ligne = semaine en surcharge → lisser ce projet.</p>';
     dash.appendChild(c);
     return c;
@@ -2750,14 +2752,20 @@ window.deleteUserClean = async function(uid){
     if(inner){ var wp=Math.max((inner.parentElement?inner.parentElement.clientWidth:600)-2, st.weeks.length*42); inner.style.width=wp+'px'; }
     var cv=document.getElementById('chart-proj-load');
     if(!cv) return;
+    var sums=st.weeks.map(function(_,i){ return st.datasets.reduce(function(a,d){ return a+(d.values[i]||0); },0); });
+    var M=Math.ceil((Math.max(st.capW, Math.max.apply(null,sums.concat([10])))*1.1)/10)*10;
+    var lg=document.getElementById('proj-load-legend');
+    if(lg){ lg.innerHTML=st.datasets.map(function(d){ return '<span class="inline-flex items-center gap-1"><span style="width:10px;height:10px;background:'+d.color+';display:inline-block;border-radius:2px"></span>'+d.code+'</span>'; }).join(' ')+' <span class="inline-flex items-center gap-1"><span style="width:14px;height:0;border-top:2px dashed #16a34a;display:inline-block"></span>Capacité équipe (ETP)</span>'; }
+    var ax=document.getElementById('chart-proj-axis');
+    if(ax && !axisChart){ axisChart=new Chart(ax,{type:'bar',data:{labels:[''],datasets:[{data:[0]}]},options:{responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:false},tooltip:{enabled:false}},scales:{x:{display:false},y:{min:0,max:M,beginAtZero:true,title:{display:true,text:'h / semaine'},ticks:{callback:function(v){return v+' h';}}}}}}); }
     var ds=st.datasets.map(function(d){ return { type:'bar', label:d.code, data:d.values, backgroundColor:d.color, stack:'proj' }; });
     ds.push({ type:'line', label:'Capacité équipe (ETP)', data: st.weeks.map(function(){ return Math.round(st.capW*10)/10; }), borderColor:'#16a34a', borderDash:[8,6], borderWidth:2, pointRadius:0, fill:false });
-    if(chart){ chart.data.labels=st.weeks; chart.data.datasets=ds; chart.update(); return; }
+    if(chart){ chart.data.labels=st.weeks; chart.data.datasets=ds; chart.options.scales.y.max=M; if(axisChart){ axisChart.options.scales.y.max=M; axisChart.update(); } chart.update(); return; }
     chart=new Chart(cv,{ type:'bar', data:{ labels:st.weeks, datasets:ds }, options:{
       responsive:true, maintainAspectRatio:false,
       interaction:{ mode:'index', intersect:false },
-      plugins:{ legend:{ position:'bottom', labels:{ boxWidth:12, font:{ size:10 } } }, tooltip:{ filter:function(item){ return item.parsed.y > 0; } } },
-      scales:{ x:{ stacked:true }, y:{ stacked:true, beginAtZero:true, title:{ display:true, text:'h / semaine' }, ticks:{ callback:function(v){ return v+' h'; } } } }
+      plugins:{ legend:{ display:false }, tooltip:{ filter:function(item){ return item.parsed.y > 0; } } },
+      scales:{ x:{ stacked:true }, y:{ stacked:true, min:0, max:M, ticks:{ display:false } } }
     }});
   }
   var t=null;
