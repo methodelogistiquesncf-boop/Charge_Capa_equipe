@@ -2726,6 +2726,34 @@ window.deleteUserClean = async function(uid){
 /* PROJ-LOAD-JS : histogramme empilé charge projets 3 mois + capacité ETP */
 (function(){
   var chart=null, axisChart=null, sig='';
+  function fmtH(v){ return (Math.round(v*10)/10).toString().replace('.',','); }
+  function extTip(ctx){
+    var host=document.getElementById('proj-load-inner');
+    if(!host) return;
+    var el=document.getElementById('proj-load-tip');
+    if(!el){ el=document.createElement('div'); el.id='proj-load-tip'; el.style.cssText='position:absolute;pointer-events:none;background:rgba(15,23,42,0.94);color:#f8fafc;border-radius:8px;padding:8px 10px;font-size:11px;font-weight:700;z-index:60;opacity:0;transition:opacity .1s;min-width:190px'; host.appendChild(el); }
+    var tt=ctx.tooltip;
+    if(!tt || tt.opacity===0){ el.style.opacity='0'; return; }
+    var pts=(tt.dataPoints||[]).filter(function(p){ return (p.parsed.y||0)>0; });
+    var tot=0, cap=null, rows='';
+    pts.forEach(function(p){
+      var isLine=(p.dataset.type==='line');
+      var col=isLine?(p.dataset.borderColor||'#16a34a'):(p.dataset.backgroundColor||'#94a3b8');
+      if(isLine){ cap=p.parsed.y; } else { tot+=p.parsed.y||0; }
+      rows+='<div style="display:flex;align-items:center;gap:6px;margin:1px 0"><span style="width:9px;height:9px;border-radius:2px;background:'+col+';display:inline-block;flex:none"></span><span>'+p.dataset.label+' : '+fmtH(p.parsed.y)+' h</span></div>';
+    });
+    var html='<div style="margin-bottom:4px">'+((tt.title&&tt.title[0])||'')+'</div>'+rows;
+    html+='<div style="border-top:1px solid rgba(248,250,252,.3);margin-top:5px;padding-top:5px">Total projets : '+fmtH(tot)+' h</div>';
+    if(cap!=null){
+      var d=tot-cap; var colD=d>0?'#f87171':'#4ade80'; var sign=d>0?'+':'';
+      html+='<div>Capacité équipe : '+fmtH(cap)+' h</div>';
+      html+='<div style="color:'+colD+'">Delta : '+sign+fmtH(d)+' h</div>';
+    }
+    el.innerHTML=html;
+    el.style.opacity='1';
+    var lx=tt.caretX+14; if(lx>host.clientWidth-210){ lx=tt.caretX-210; }
+    el.style.left=lx+'px'; el.style.top=Math.max(0,tt.caretY-20)+'px';
+  }
   function ensureCard(){
     var ps=document.querySelectorAll('#view-dashboard .p-8');
     var dash=ps.length?ps[ps.length-1]:null;
@@ -2776,7 +2804,7 @@ window.deleteUserClean = async function(uid){
     chart=new Chart(cv,{ type:'bar', data:{ labels:st.weeks, datasets:ds }, options:{
       responsive:true, maintainAspectRatio:false,
       interaction:{ mode:'index', intersect:false },
-      layout:{ padding:{ left:56 } }, plugins:{ legend:{ display:false }, tooltip:{ filter:function(item){ return item.parsed.y > 0; }, footerFont:{ weight:'bold' }, footerMarginTop:8, callbacks:{ footer:function(items){ var t=0; for(var k=0;k<items.length;k++){ if(items[k].dataset && items[k].dataset.stack==='proj'){ t+=items[k].parsed.y||0; } } return 'Total projets : '+t.toFixed(1)+' h'; } } } },
+      layout:{ padding:{ left:56 } }, plugins:{ legend:{ display:false }, tooltip:{ filter:function(item){ return item.parsed.y > 0; }, enabled:false, external:extTip } },
       scales:{ x:{ stacked:true }, y:{ stacked:true, min:0, max:M, ticks:{ display:false, stepSize: (M<=60?10: M<=140?20: M<=400?50:100) }, grid:{ color:'rgba(100,116,139,0.15)' } } }
     }});
     drawAxis();
