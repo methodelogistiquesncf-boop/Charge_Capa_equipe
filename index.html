@@ -2872,5 +2872,43 @@ window.deleteUserClean = async function(uid){
   setInterval(hide,1500); hide();
 })();
 </script>
+
+<script>
+/* UX-EDIT-MODAL-JS : le formulaire d'édition d'enveloppe s'ouvre en modale centrée */
+(function(){
+  function cancel(){
+    var bs=document.querySelectorAll('#ux-edit-panel button');
+    for(var i=0;i<bs.length;i++){ if((bs[i].textContent||'').trim()==='Annuler'){ bs[i].click(); return; } }
+  }
+  function overlay(){
+    var o=document.getElementById('ux-edit-modal');
+    if(o) return o;
+    o=document.createElement('div'); o.id='ux-edit-modal';
+    o.style.cssText='position:fixed;inset:0;z-index:9990;display:none;background:rgba(15,23,42,0.55);overflow:auto;padding:4vh 16px';
+    o.innerHTML='<div id="ux-edit-panel" style="max-width:1150px;margin:0 auto"></div>';
+    document.body.appendChild(o);
+    o.addEventListener('click',function(e){ if(e.target===o) cancel(); });
+    document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&o.style.display==='block') cancel(); });
+    return o;
+  }
+  function tick(){
+    var o=overlay();
+    var save=null;
+    var bs=document.querySelectorAll('button');
+    for(var i=0;i<bs.length;i++){ if((bs[i].textContent||'').trim()==='Enregistrer'){ save=bs[i]; break; } }
+    var card=save?(save.closest('.rounded-xl')||save.closest('div')):null;
+    var visible=card&&card.offsetParent!==null;
+    if(!visible){ if(o.style.display==='block'){ o.style.display='none'; document.body.style.overflow=''; } return; }
+    var p=document.getElementById('ux-edit-panel');
+    if(card.parentElement!==p){ p.appendChild(card); card.style.width='100%'; card.style.margin='0'; }
+    o.style.display='block';
+    document.body.style.overflow='hidden';
+  }
+  var t=null;
+  new MutationObserver(function(){ clearTimeout(t); t=setTimeout(tick,250); }).observe(document.body,{childList:true,subtree:true,attributes:true});
+  setInterval(tick,700);
+  tick();
+})();
+</script>
 </body>
 </html>
