@@ -2728,9 +2728,10 @@ window.deleteUserClean = async function(uid){
 (function(){
   var chart=null, axisChart=null, sig='';
   function ensureCard(){
+    var ps=document.querySelectorAll('#view-dashboard .p-8');
+    var dash=ps.length?ps[ps.length-1]:null;
     var c=document.getElementById('proj-load-card');
-    if(c) return c;
-    var dash=document.querySelector('#view-dashboard .p-8');
+    if(c){ if(dash&&c.parentElement!==dash){ dash.appendChild(c); } return c; }
     if(!dash) return null;
     c=document.createElement('div');
     c.id='proj-load-card'; c.className='bg-slate-50 p-6 rounded-xl mt-8';
@@ -2799,7 +2800,7 @@ window.deleteUserClean = async function(uid){
     var target=null;
     for(var i=0;i<els.length;i++){
       var t=els[i].textContent||'';
-      if(t.indexOf('j travaillés/an')!==-1 && t.length<220) target=els[i];
+      if(t.indexOf('Équipe Performance')!==-1 && t.length<220) target=els[i];
     }
     if(target) target.style.display='none';
   }
