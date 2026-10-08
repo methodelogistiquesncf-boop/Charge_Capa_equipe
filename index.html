@@ -2616,11 +2616,11 @@ document.addEventListener('keydown', function(e) {
     var o=document.getElementById('ux-edit-modal');
     if(o) return o;
     o=document.createElement('div'); o.id='ux-edit-modal';
-    o.style.cssText='position:fixed;inset:0;z-index:9990;display:none;background:rgba(15,23,42,0.55);overflow:auto;padding:4vh 16px';
-    o.innerHTML='<div id="ux-edit-panel" style="max-width:1150px;margin:0 auto"></div>';
+    o.style.cssText='position:fixed;inset:0;z-index:9990;display:none;background:rgba(15,23,42,0.55);overflow:auto;padding:16px';
+    o.innerHTML='<div id="ux-edit-panel" style="width:min(1150px,96vw);margin:auto;max-height:92vh;overflow:auto"></div>';
     document.body.appendChild(o);
     o.addEventListener('click',function(e){ if(e.target===o) doCancel(); });
-    document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&o.style.display==='block') doCancel(); });
+    document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&o.style.display==='flex') doCancel(); });
     return o;
   }
   function tick(){
@@ -2635,7 +2635,7 @@ document.addEventListener('keydown', function(e) {
       panel.appendChild(card);
     }
     card.style.width='100%'; card.style.margin='0';
-    o.style.display='block'; document.body.style.overflow='hidden';
+    o.style.display='flex'; o.style.alignItems='center'; o.style.justifyContent='center'; document.body.style.overflow='hidden';
   }
   var t=null;
   new MutationObserver(function(){ clearTimeout(t); t=setTimeout(tick,250); }).observe(document.body,{childList:true,subtree:true});
