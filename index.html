@@ -2776,7 +2776,7 @@ window.deleteUserClean = async function(uid){
     chart=new Chart(cv,{ type:'bar', data:{ labels:st.weeks, datasets:ds }, options:{
       responsive:true, maintainAspectRatio:false,
       interaction:{ mode:'index', intersect:false },
-      layout:{ padding:{ left:56 } }, plugins:{ legend:{ display:false }, tooltip:{ filter:function(item){ return item.parsed.y > 0; } } },
+      layout:{ padding:{ left:56 } }, plugins:{ legend:{ display:false }, tooltip:{ filter:function(item){ return item.parsed.y > 0; }, footerFont:{ weight:'bold' }, footerMarginTop:8, callbacks:{ footer:function(items){ var t=0; for(var k=0;k<items.length;k++){ t+=items[k].parsed.y||0; } return 'Total semaine : '+t.toFixed(1)+' h'; } } } },
       scales:{ x:{ stacked:true }, y:{ stacked:true, min:0, max:M, ticks:{ display:false, stepSize: (M<=60?10: M<=140?20: M<=400?50:100) }, grid:{ color:'rgba(100,116,139,0.15)' } } }
     }});
     drawAxis();
