@@ -2734,7 +2734,7 @@ window.deleteUserClean = async function(uid){
     if(!dash) return null;
     c=document.createElement('div');
     c.id='proj-load-card'; c.className='bg-slate-50 p-6 rounded-xl mt-8';
-    c.innerHTML='<h3 class="font-black text-slate-800 mb-4">📊 Charge projets par semaine (toutes semaines, lissée par enveloppe) — scroll horizontal si besoin</h3>'+
+    c.innerHTML='<h3 class="font-black text-slate-800 mb-4">📊 Charge projets par semaine (toutes semaines, lissée par enveloppe)</h3>'+
       '<div style="position:relative">'+
       '<div style="overflow-x:auto"><div id="proj-load-inner" style="position:relative;height:340px;min-width:100%">'+
       '<canvas id="chart-proj-load" style="position:absolute;inset:0"></canvas></div></div>'+
@@ -2788,6 +2788,24 @@ window.deleteUserClean = async function(uid){
   new MutationObserver(function(){ clearTimeout(t); t=setTimeout(render,500); }).observe(document.body,{childList:true,subtree:true});
   setInterval(render,1500);
   render();
+})();
+</script>
+
+<script>
+/* HIDE-TEAMSUB-JS : masque la ligne effectif/base du bandeau pilotage */
+(function(){
+  function hide(){
+    var els=document.querySelectorAll('p,div,span');
+    var target=null;
+    for(var i=0;i<els.length;i++){
+      var t=els[i].textContent||'';
+      if(t.indexOf('j travaillés/an')!==-1 && t.length<220) target=els[i];
+    }
+    if(target) target.style.display='none';
+  }
+  var t=null;
+  new MutationObserver(function(){ clearTimeout(t); t=setTimeout(hide,300); }).observe(document.body,{childList:true,subtree:true});
+  setInterval(hide,1500); hide();
 })();
 </script>
 </body>
