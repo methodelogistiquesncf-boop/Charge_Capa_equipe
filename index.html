@@ -2536,107 +2536,42 @@ document.addEventListener('keydown', function(e) {
   renderPanel();
 })();
 </script>
-<!-- ═══════════════════════════════════════════════════════════════════════
-     PROJ-ETP-INFO-JS : modal explicatif simple (bouton i de la carte)
-     ═══════════════════════════════════════════════════════════════════════ -->
-<div id="proj-etp-modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-  <div class="bg-white rounded-2xl shadow-2xl max-w-xl w-full max-h-[90vh] overflow-y-auto">
-    <div class="p-5 border-b border-slate-200 flex justify-between items-center sticky top-0 bg-white z-10">
-      <h3 class="text-lg font-black text-slate-800">📦 Comment cet indicateur est construit ?</h3>
-      <button onclick="toggleProjEtpModal()" class="text-slate-400 hover:text-red-500 hover:bg-red-50 p-2 rounded-full transition">✕</button>
-    </div>
-    <div class="p-6 space-y-4 text-sm text-slate-700">
-      <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
-        <h4 class="font-bold text-slate-800 mb-1">1️⃣ Ce qui reste à faire</h4>
-        <p>Pour chaque projet <strong>actif avec une date de fin</strong> : heures restantes = budget de l'enveloppe − heures déjà saisies.</p>
-      </div>
-      <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg">
-        <h4 class="font-bold text-slate-800 mb-1">2️⃣ Le rythme nécessaire pour tenir</h4>
-        <p>Heures restantes ÷ semaines restantes jusqu'à la date de fin = <strong>h/semaine nécessaires</strong> pour ce projet. Additionné sur tous les projets = la <strong>barre rouge</strong>.</p>
-      </div>
-      <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded-r-lg">
-        <h4 class="font-bold text-slate-800 mb-1">3️⃣ Ce que permet l'effectif</h4>
-        <p>Capacité hebdo de l'équipe (ex. 4 ETP × ~24,5 h) × part du temps dédiée aux projets (ta cible 🎯, par défaut 50-60 %) = la <strong>barre verte</strong>.</p>
-      </div>
-      <div class="bg-slate-50 border border-slate-200 p-4 rounded-xl">
-        <h4 class="font-bold text-slate-800 mb-1">🎯 Cibles catégories & ETP</h4>
-        <p>Chaque cible (%) est convertie en h/sem selon la capacité de l'équipe, puis comparée aux heures réellement passées sur la catégorie (4 semaines). Une catégorie sous cible affiche des heures manquantes ; une catégorie over cible affiche une marge récupérable. Si les marges couvrent les manques → rééquilibrer suffit ; sinon le reste est converti en ETP.</p>
-      </div>
-      <div class="bg-slate-50 border border-slate-200 p-4 rounded-xl">
-        <h4 class="font-bold text-slate-800 mb-2">✅ Comment lire</h4>
-        <ul class="space-y-2">
-          <li><strong>Barre rouge &lt; barre verte</strong> → ✅ on peut tenir les échéances avec l'effectif actuel (la marge s'affiche).</li>
-          <li><strong>Barre rouge &gt; barre verte</strong> → 🔴 il manque des heures : l'écart est converti en ETP (1 ETP ≈ 24,5 h/sem).</li>
-          <li><strong>Barre bleue</strong> = ce que l'équipe passe <em>réellement</em> sur les projets (4 dernières semaines) : la réalité du terrain.</li>
-        </ul>
-      </div>
-      <div class="bg-yellow-50 border border-yellow-300 p-4 rounded-xl">
-        <p class="font-bold text-yellow-800 mb-1">⚠️ À savoir</p>
-        <ul class="list-disc ml-5 space-y-1 text-yellow-700">
-          <li>Le calcul s'appuie sur les <strong>budgets des enveloppes</strong> : si un budget est faux, l'indicateur est faussé → révise les budgets régulièrement.</li>
-          <li>Les projets <strong>sans date de fin</strong> ne sont pas comptés ici.</li>
-          <li>Cet indicateur ne juge pas le passé : il répond à « <em>de quoi a-t-on besoin dès maintenant pour tenir les dates ?</em> ».</li>
-        </ul>
-      </div>
-    </div>
-    <div class="p-4 border-t border-slate-200 bg-slate-50 rounded-b-2xl">
-      <button onclick="toggleProjEtpModal()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-xl transition">✅ Compris</button>
-    </div>
-  </div>
-</div>
-<script>
-(function(){
-  window.toggleProjEtpModal = function(){
-    var m = document.getElementById('proj-etp-modal');
-    if (!m) return;
-    var hidden = m.classList.toggle('hidden');
-    document.body.style.overflow = hidden ? '' : 'hidden';
-  };
-  document.addEventListener('click', function(e){
-    var m = document.getElementById('proj-etp-modal');
-    if (m && !m.classList.contains('hidden') && e.target === m) toggleProjEtpModal();
-  });
-  document.addEventListener('keydown', function(e){
-    var m = document.getElementById('proj-etp-modal');
-    if (e.key === 'Escape' && m && !m.classList.contains('hidden')) toggleProjEtpModal();
-  });
-})();
-</script>
-
 
 
 <script>
-/* UX-EDIT-MODAL-V4 : modale d'édition via #proj-form (id stable), overlay body */
+/* UX-EDIT-MODAL-V5 : #proj-form centré écran, nœud conservé (rattaché au body, jamais dupliqué) */
 (function(){
-  function doCancel(){
-    var bs=document.querySelectorAll('#ux-edit-panel button');
+  function cancelIn(card){
+    var bs=card.querySelectorAll('button');
     for(var i=0;i<bs.length;i++){ if((bs[i].textContent||'').trim()==='Annuler'){ bs[i].click(); return; } }
   }
-  function overlay(){
-    var o=document.getElementById('ux-edit-modal');
-    if(o) return o;
-    o=document.createElement('div'); o.id='ux-edit-modal';
-    o.style.cssText='position:fixed;inset:0;z-index:9990;display:none;background:rgba(15,23,42,0.55);overflow:auto;padding:16px';
-    o.innerHTML='<div id="ux-edit-panel" style="width:min(1150px,96vw);margin:auto;max-height:92vh;overflow:auto"></div>';
-    document.body.appendChild(o);
-    o.addEventListener('click',function(e){ if(e.target===o) doCancel(); });
-    document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&o.style.display==='flex') doCancel(); });
-    return o;
+  function backdrop(){
+    var b=document.getElementById('ux-edit-backdrop');
+    if(b) return b;
+    b=document.createElement('div'); b.id='ux-edit-backdrop';
+    b.style.cssText='position:fixed;inset:0;z-index:9990;display:none;background:rgba(15,23,42,0.55)';
+    document.body.appendChild(b);
+    b.addEventListener('click',function(){ var c=document.getElementById('proj-form'); if(c) cancelIn(c); });
+    return b;
   }
   function tick(){
-    var o=overlay();
-    var panel=document.getElementById('ux-edit-panel');
-    var card=document.getElementById('proj-form');
-    if(!card){ o.style.display='none'; document.body.style.overflow=''; return; }
-    var openNow=card.getClientRects().length>0;
-    if(!openNow){ o.style.display='none'; document.body.style.overflow=''; return; }
-    if(!panel.contains(card)){
-      panel.innerHTML='';
-      panel.appendChild(card);
+    var b=backdrop();
+    var forms=document.querySelectorAll('#proj-form');
+    var card=null, i;
+    for(i=0;i<forms.length;i++){ if(forms[i].getClientRects().length>0){ card=forms[i]; } }
+    if(forms.length>1){
+      for(i=0;i<forms.length;i++){ if(forms[i]!==card && forms[i].getClientRects().length===0){ forms[i].remove(); } }
     }
-    card.style.width='100%'; card.style.margin='0';
-    o.style.display='flex'; o.style.alignItems='center'; o.style.justifyContent='center'; document.body.style.overflow='hidden';
+    if(!card){ b.style.display='none'; document.body.style.overflow=''; return; }
+    if(card.parentElement!==document.body){ document.body.appendChild(card); }
+    card.style.position='fixed'; card.style.left='50%'; card.style.top='50%';
+    card.style.transform='translate(-50%,-50%)'; card.style.width='min(1150px,94vw)';
+    card.style.maxHeight='92vh'; card.style.overflow='auto'; card.style.zIndex='9991'; card.style.margin='0';
+    b.style.display='block'; document.body.style.overflow='hidden';
   }
+  document.addEventListener('keydown',function(e){
+    if(e.key==='Escape'){ var c=document.getElementById('proj-form'); if(c&&c.getClientRects().length>0) cancelIn(c); }
+  });
   var t=null;
   new MutationObserver(function(){ clearTimeout(t); t=setTimeout(tick,250); }).observe(document.body,{childList:true,subtree:true});
   setInterval(tick,700);
