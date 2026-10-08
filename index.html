@@ -1246,8 +1246,6 @@ function renderProjects() {
   let __endT = __mon.getTime()+12*7*86400000;
   __act.forEach(p => { if (p.end) { const t2 = new Date(p.end).getTime(); if (t2 > __endT) __endT = t2; } });
   let __startT = __mon.getTime();
-  __act.forEach(p => { if (p.start) { const t2 = new Date(p.start).getTime(); if (t2 < __startT) __startT = t2; } });
-  __startT -= ((new Date(__startT).getDay()+6)%7)*86400000;
   const __nW = Math.max(13, Math.round((__endT - __startT)/(7*86400000)) + 1);
   for (let i=0;i<__nW;i++){
     const t = __startT + i*7*86400000;
