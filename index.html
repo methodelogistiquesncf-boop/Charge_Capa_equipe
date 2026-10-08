@@ -2747,7 +2747,7 @@ window.deleteUserClean = async function(uid){
     chart=new Chart(cv,{ type:'bar', data:{ labels:st.weeks, datasets:ds }, options:{
       responsive:true, maintainAspectRatio:false,
       interaction:{ mode:'index', intersect:false },
-      plugins:{ legend:{ position:'bottom', labels:{ boxWidth:12, font:{ size:10 } } } },
+      plugins:{ legend:{ position:'bottom', labels:{ boxWidth:12, font:{ size:10 } } }, tooltip:{ filter:function(item){ return item.parsed.y > 0; } } },
       scales:{ x:{ stacked:true }, y:{ stacked:true, beginAtZero:true, title:{ display:true, text:'h / semaine' }, ticks:{ callback:function(v){ return v+' h'; } } } }
     }});
   }
