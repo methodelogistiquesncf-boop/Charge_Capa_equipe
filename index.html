@@ -1271,8 +1271,9 @@ function renderProjects() {
     if (vals.some(v => v > 0)) __ds.push({ code: p.code || p.name, name: (p.name || p.code || '').replace(/"/g,'&quot;'), values: vals, color: __pal[pi % __pal.length] });
   });
     let __mcoPct = 22.5;
-    try { const __tg = JSON.parse(localStorage.getItem('catRuleTargets') || 'null'); if (__tg && __tg.mco) { __mcoPct = Array.isArray(__tg.mco) ? (__tg.mco[0]+__tg.mco[1])/2 : __tg.mco; } } catch(e){}
-    const __mcoW = Math.round(teamCapW * __mcoPct)/100;
+    try { const __tg = JSON.parse(localStorage.getItem('catRuleTargets') || 'null'); if (__tg && __tg.mco) { const __m = __tg.mco; let __v = NaN; if (Array.isArray(__m)) __v = (parseFloat(__m[0])+parseFloat(__m[1]))/2; else if (typeof __m === 'object') __v = (parseFloat(__m.min!=null?__m.min:__m.from!=null?__m.from:__m[0])+parseFloat(__m.max!=null?__m.max:__m.to!=null?__m.to:__m[1]))/2; else __v = parseFloat(__m); if (isFinite(__v)) __mcoPct = __v; } } catch(e){}
+    let __mcoW = Math.round(teamCapW * __mcoPct)/100;
+    if (!isFinite(__mcoW)) __mcoW = Math.round(teamCapW * 22.5)/100;
     __ds.unshift({ code: 'MCO (cible)', name: 'MCO — cible '+__mcoPct+'% de la capacité équipe', values: __wList.map(function(){ return __mcoW; }), color: '#334155', isTarget: true });
     return { weeks: __wList.map(w => w.label), datasets: __ds, capW: teamCapW };
   };
