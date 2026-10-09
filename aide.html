@@ -1,374 +1,336 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aide — Planning Activités</title>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#1a2744">
-<link rel="icon" type="image/svg+xml" href="icons/logo.svg">
-<link rel="apple-touch-icon" href="icons/icon-512.png">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Planning Activités">
-<script src="https://cdn.tailwindcss.com"></script>
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
-body { font-family: 'Inter', sans-serif; }
-.tab-active { background: #1a2744; color: white; }
-@media print { .no-print { display: none !important; } body { background: white; } }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aide - Planning Activités</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-slate-100 min-h-screen">
-
-<header class="text-white sticky top-0 z-50 shadow-lg no-print" style="background: linear-gradient(135deg, #1a2744 0%, #2d4373 100%);">
-  <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between gap-3">
-    <div class="flex items-center gap-3">
-      <img src="icons/logo.svg" alt="" class="w-9 h-9 rounded-xl shadow-sm">
+<body class="bg-slate-50 text-slate-800 p-4 md:p-8">
+  <div class="max-w-5xl mx-auto bg-white rounded-2xl shadow-xl p-6 md:p-8 border border-slate-200">
+    
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
       <div>
-        <h1 class="text-base md:text-lg font-black">Aide — Planning Activités</h1>
-        <p class="text-white/60 text-[11px]">Guide complet · Équipe Performance & Méthodes logistique</p>
+        <h1 class="text-2xl md:text-3xl font-black text-slate-900 mb-1">📚 Aide & Documentation</h1>
+        <p class="text-slate-500 text-sm">Guide complet de l'application « Planning Activités — Charge / Capacité » · Mis à jour Octobre 2026</p>
       </div>
+      <a href="/" class="text-sm font-bold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-4 py-2 rounded-lg transition">← Retour à l'application</a>
     </div>
-    <div class="flex gap-2">
-      <button onclick="window.print()" class="bg-white/10 hover:bg-white/20 px-3 py-2 rounded-lg text-xs font-bold">🖨️ Imprimer</button>
-      <a href="index.html" class="bg-blue-600 hover:bg-blue-700 px-3 py-2 rounded-lg text-xs font-black">← Retour à l'application</a>
+
+    <nav class="bg-slate-100 rounded-lg p-4 mb-8">
+      <h2 class="font-black text-slate-800 mb-2">📑 Sommaire</h2>
+      <ul class="text-sm space-y-1 text-slate-700">
+        <li><a href="#dashboard" class="hover:text-blue-600">1. Dashboard de Pilotage</a></li>
+        <li><a href="#histogramme" class="hover:text-blue-600">2. Histogramme Charge / Capacité</a></li>
+        <li><a href="#synthese" class="hover:text-blue-600">3. Carte Synthèse Globale ETP</a></li>
+        <li><a href="#manager" class="hover:text-blue-600">4. Vue Manager</a></li>
+        <li><a href="#planning" class="hover:text-blue-600">5. Mon Planning (Agent)</a></li>
+        <li><a href="#utilisateurs" class="hover:text-blue-600">6. Gestion des Utilisateurs</a></li>
+        <li><a href="#faq" class="hover:text-blue-600">7. FAQ & Problèmes courants</a></li>
+      </ul>
+    </nav>
+
+    <section id="dashboard" class="mb-10">
+      <h2 class="text-2xl font-black text-slate-900 mb-4 border-b-2 border-blue-500 pb-2">1. Dashboard de Pilotage</h2>
+      <p class="text-slate-700 mb-4">Le Dashboard est la vue direction de l'application. Il agrège toutes les données pour donner une vision synthétique de la charge, de la capacité et des arbitrages nécessaires.</p>
+      
+      <div class="grid md:grid-cols-2 gap-4 mb-4">
+        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
+          <h3 class="font-bold text-blue-900 mb-2"> Histogramme Charge / Capacité</h3>
+          <p class="text-sm text-slate-700">Visualisation lissée des projets actifs avec socles cibles hachurés (MCO, Support, Transverse), ligne de capacité au premier plan, et export CSV.</p>
+        </div>
+        <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg">
+          <h3 class="font-bold text-red-900 mb-2">📦 Synthèse Globale ETP</h3>
+          <p class="text-sm text-slate-700">Indicateur principal : "+X ETP au total" pour tenir les échéances projets ET les cibles catégories combinés.</p>
+        </div>
+      </div>
+
+      <div class="bg-slate-50 border border-slate-200 p-4 rounded-lg">
+        <h3 class="font-bold text-slate-800 mb-2">🔄 Rafraîchissement continu</h3>
+        <p class="text-sm text-slate-700">Toutes les données du Dashboard sont recalculées automatiquement toutes les 2,5 secondes. Les chiffres affichés sont toujours à jour avec les dernières saisies.</p>
+      </div>
+    </section>
+
+    <section id="histogramme" class="mb-10">
+      <h2 class="text-2xl font-black text-slate-900 mb-4 border-b-2 border-blue-500 pb-2">2. Histogramme Charge / Capacité</h2>
+      
+      <h3 class="text-lg font-bold text-slate-800 mt-6 mb-3">🎨 Lecture visuelle</h3>
+      <div class="space-y-3 text-sm text-slate-700 mb-4">
+        <div class="flex items-start gap-3">
+          <span class="text-2xl">📊</span>
+          <div>
+            <strong>Barres empilées colorées</strong> = projets actifs, lissés entre leurs dates début/fin. Chaque couleur = un projet différent.
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <span class="text-2xl">▨</span>
+          <div>
+            <strong>Socles hachurés en bas</strong> = charges cibles théoriques :
+            <ul class="ml-4 mt-1 space-y-1">
+              <li>• <strong>Ambre</strong> = Support terrain (cible 0-15%)</li>
+              <li>• <strong>Violet</strong> = Transverse (cible 10-15%)</li>
+              <li>• <strong>Ardoise</strong> = MCO (cible 20-25%)</li>
+            </ul>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <span class="text-2xl">━</span>
+          <div>
+            <strong>Ligne noire pleine (4px) avec halo blanc</strong> = capacité hebdo de l'équipe (ETP). Toujours au premier plan. Une barre qui touche ou dépasse cette ligne = semaine en surcharge.
+          </div>
+        </div>
+      </div>
+
+      <h3 class="text-lg font-bold text-slate-800 mt-6 mb-3">🖱️ Interactions</h3>
+      <ul class="text-sm text-slate-700 space-y-2 mb-4">
+        <li><strong>Survol d'une barre</strong> : bulle tooltip affichant le détail des projets + Total agrégé (projets + cibles) + Capacité équipe + Delta (coloré vert/rouge).</li>
+        <li><strong>Clic sur un projet dans la légende</strong> : mode solo → ce projet reste coloré, tous les autres (y compris les socles cibles) se grisent. Re-clic pour tout réafficher.</li>
+        <li><strong>Clic sur MCO/Support/Transverse</strong> : mode solo sur la cible → seule cette cible reste visible, tout le reste se grise.</li>
+      </ul>
+
+      <h3 class="text-lg font-bold text-slate-800 mt-6 mb-3">⚙️ Ajustement des cibles</h3>
+      <p class="text-sm text-slate-700 mb-2">Bouton <strong>"⚙️ Régler mes cibles"</strong> en haut à droite de la carte. Modifie les % cibles pour MCO, Support, Transverse, Projets.</p>
+      <div class="bg-yellow-50 border-l-4 border-yellow-500 p-3 rounded-r-lg text-sm text-slate-700">
+        <strong>💡 Dynamique :</strong> les socles hachurés se recalculent instantanément (sous ~2,5s) sans rechargement de page. Les valeurs sont mémorisées dans ton navigateur (localStorage).
+      </div>
+
+      <h3 class="text-lg font-bold text-slate-800 mt-6 mb-3">📥 Export CSV</h3>
+      <p class="text-sm text-slate-700 mb-2">Bouton <strong>"📥 CSV"</strong> à côté du titre de la carte. Télécharge un fichier <code>charge_projets_YYYY-MM-DD.csv</code> compatible Excel (point-virgule, virgules décimales).</p>
+      <div class="overflow-x-auto">
+        <table class="w-full text-xs border-collapse bg-white rounded-lg overflow-hidden">
+          <thead class="bg-slate-100 text-slate-700">
+            <tr><th class="p-2 text-left">Semaine</th><th class="p-2 text-left">Total projets</th><th class="p-2 text-left">MCO (cible)</th><th class="p-2 text-left">Transverse (cible)</th><th class="p-2 text-left">Support (cible)</th><th class="p-2 text-left">Capacité équipe</th><th class="p-2 text-left">Delta</th></tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            <tr><td class="p-2">S41</td><td class="p-2">105,0</td><td class="p-2">22,0</td><td class="p-2">12,2</td><td class="p-2">4,9</td><td class="p-2">97,9</td><td class="p-2 text-red-600 font-bold">+46,2</td></tr>
+            <tr><td class="p-2">S42</td><td class="p-2">98,5</td><td class="p-2">22,0</td><td class="p-2">12,2</td><td class="p-2">4,9</td><td class="p-2">97,9</td><td class="p-2 text-red-600 font-bold">+39,7</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="synthese" class="mb-10">
+      <h2 class="text-2xl font-black text-slate-900 mb-4 border-b-2 border-red-500 pb-2">3. Carte Synthèse Globale ETP</h2>
+      
+      <p class="text-slate-700 mb-4">Cette carte répond à la question : <strong>"Combien d'ETP faut-il pour tenir toutes les échéances projets ET les cibles catégories ?"</strong></p>
+
+      <h3 class="text-lg font-bold text-slate-800 mt-6 mb-3"> Les 4 indicateurs</h3>
+      <div class="grid md:grid-cols-2 gap-3 mb-4">
+        <div class="bg-white border border-slate-200 p-3 rounded-lg">
+          <div class="text-xs text-slate-500 mb-1">Charge projets (échéances)</div>
+          <div class="text-xl font-black text-slate-800">127,5 h/sem</div>
+          <div class="text-xs text-slate-600 mt-1">Reste à faire lissé jusqu'aux dates de fin de chaque projet</div>
+        </div>
+        <div class="bg-white border border-slate-200 p-3 rounded-lg">
+          <div class="text-xs text-slate-500 mb-1">Manque catégories</div>
+          <div class="text-xl font-black text-red-600">13,2 h/sem</div>
+          <div class="text-xs text-slate-600 mt-1">Cibles MCO/Support/Transverse − réel (4 dernières semaines). Marges over-cible déduites.</div>
+        </div>
+        <div class="bg-white border border-slate-200 p-3 rounded-lg">
+          <div class="text-xs text-slate-500 mb-1">Charge totale requise</div>
+          <div class="text-xl font-black text-slate-800">140,7 h/sem</div>
+          <div class="text-xs text-slate-600 mt-1">= Charge projets + Manque catégories</div>
+        </div>
+        <div class="bg-white border border-slate-200 p-3 rounded-lg">
+          <div class="text-xs text-slate-500 mb-1">Capacité équipe</div>
+          <div class="text-xl font-black text-green-700">97,9 h/sem</div>
+          <div class="text-xs text-slate-600 mt-1">= ETP × h/ETP/sem (ex: 4 × 24,5)</div>
+        </div>
+      </div>
+
+      <h3 class="text-lg font-bold text-slate-800 mt-6 mb-3">🎯 Lecture du résultat</h3>
+      <div class="bg-red-50 border-2 border-red-300 p-4 rounded-lg mb-4">
+        <div class="text-2xl font-black text-red-700 text-center mb-2"> +1,7 ETP au total</div>
+        <div class="text-sm text-red-700 text-center">projets + catégories combinés</div>
+      </div>
+      <div class="bg-slate-50 border border-slate-200 p-4 rounded-lg text-sm text-slate-700">
+        <strong>Formule :</strong> (Charge totale requise − Capacité équipe) ÷ Capacité d'1 ETP standard (24,5 h/sem)<br>
+        <strong>Exemple :</strong> (140,7 − 97,9) ÷ 24,5 = 42,8 ÷ 24,5 ≈ <strong>+1,7 ETP</strong><br><br>
+        <strong>Interprétation :</strong>
+        <ul class="ml-4 mt-2 space-y-1">
+          <li>• <strong>Positif</strong> → il faut recruter ou renégocier les échéances/cibles</li>
+          <li>• <strong>Négatif</strong> → tenable avec l'effectif actuel (marge disponible)</li>
+          <li>• <strong>Proche de 0</strong> → équilibre précaire, moindre imprévu = surcharge</li>
+        </ul>
+      </div>
+
+      <h3 class="text-lg font-bold text-slate-800 mt-6 mb-3">️ Modal explicatif</h3>
+      <p class="text-sm text-slate-700">Clique sur le <strong>ⓘ</strong> en haut à droite de la carte pour ouvrir le modal détaillant chaque calcul, les hypothèses et les limites.</p>
+    </section>
+
+    <section id="manager" class="mb-10">
+      <h2 class="text-2xl font-black text-slate-900 mb-4 border-b-2 border-blue-500 pb-2">4. Vue Manager</h2>
+      
+      <h3 class="text-lg font-bold text-slate-800 mt-6 mb-3">📋 Tableau des enveloppes</h3>
+      <p class="text-sm text-slate-700 mb-3">Liste de tous les projets et catégories avec :</p>
+      <ul class="text-sm text-slate-700 space-y-1 mb-4 ml-4">
+        <li>• Code, nom, catégorie (Projet / MCO / Support / Transverse)</li>
+        <li>• Priorité (P1 🔴 / P2  / P3 🟢) — ordre de tri et repère d'arbitrage</li>
+        <li>• Budget (heures et € via taux horaire paramétré)</li>
+        <li>• Consommé, Reste, % avancement</li>
+        <li>• Rythme (h/sem) et horizon (≈ semaines restantes)</li>
+        <li>• Jalons (cases cochées / total, prochaine échéance, retard)</li>
+        <li>• Actions : ✏️ Modifier, ⚪ Clôturer/Rouvrir, ✅ Checklist, 🗑️ Supprimer</li>
+      </ul>
+
+      <h3 class="text-lg font-bold text-slate-800 mt-6 mb-3">📊 Courbe Charge / Capacité</h3>
+      <p class="text-sm text-slate-700 mb-2">Graphique montrant l'évolution de la charge vs capacité sur les semaines saisies. Lecture :</p>
+      <ul class="text-sm text-slate-700 space-y-1 ml-4">
+        <li>• <strong>≤ 100%</strong> → maîtrisé</li>
+        <li>• <strong>100-110%</strong> → tendu</li>
+        <li>• <strong>> 110%</strong> → surcharge avérée</li>
+      </ul>
+
+      <h3 class="text-lg font-bold text-slate-800 mt-6 mb-3">👥 Consolidation par collaborateur</h3>
+      <p class="text-sm text-slate-700">Vue individuelle de chaque agent : capacité réelle (ETP × rendement × facteur congés), heures saisies, taux C/C, répartition par catégorie.</p>
+    </section>
+
+    <section id="planning" class="mb-10">
+      <h2 class="text-2xl font-black text-slate-900 mb-4 border-b-2 border-green-500 pb-2">5. Mon Planning (Agent)</h2>
+      
+      <h3 class="text-lg font-bold text-slate-800 mt-6 mb-3"> Calendrier hebdomadaire</h3>
+      <p class="text-sm text-slate-700 mb-3">Vue semaine avec blocs colorés représentant les activités saisies.</p>
+
+      <h3 class="text-lg font-bold text-slate-800 mt-6 mb-3">➕ Saisie rapide (2 min/semaine)</h3>
+      <ol class="text-sm text-slate-700 space-y-2 mb-4 list-decimal ml-6">
+        <li><strong>Copier la semaine précédente</strong> : bouton "📋 Copier semaine précédente" → tous les blocs de la semaine N-1 sont dupliqués en semaine N.</li>
+        <li><strong>Ajuster les blocs</strong> : modifier les durées, déplacer, supprimer les blocs qui ne s'appliquent plus.</li>
+        <li><strong>Ajouter un nouveau bloc</strong> : choisir la catégorie (Projet / MCO / Support / Transverse), le libellé, le jour, l'horaire, la durée.</li>
+      </ol>
+
+      <h3 class="text-lg font-bold text-slate-800 mt-6 mb-3">🎨 Codes couleur des catégories</h3>
+      <div class="grid md:grid-cols-2 gap-3 mb-4">
+        <div class="flex items-center gap-2">
+          <span class="w-4 h-4 rounded bg-blue-600"></span>
+          <span class="text-sm text-slate-700"><strong>Projet</strong> : blocs rattachés à une enveloppe budgétaire</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="w-4 h-4 rounded bg-slate-700"></span>
+          <span class="text-sm text-slate-700"><strong>MCO</strong> : Maintien en Condition Opérationnelle (récurrent)</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="w-4 h-4 rounded bg-amber-600"></span>
+          <span class="text-sm text-slate-700"><strong>Support</strong> : support terrain, assistance</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="w-4 h-4 rounded bg-violet-600"></span>
+          <span class="text-sm text-slate-700"><strong>Transverse</strong> : activités transverses, réunions, formation</span>
+        </div>
+      </div>
+
+      <h3 class="text-lg font-bold text-slate-800 mt-6 mb-3"> Fonctions gain de temps</h3>
+      <ul class="text-sm text-slate-700 space-y-1 mb-4 ml-4">
+        <li>• <strong>Copier la semaine type</strong> : duplique un modèle prédéfini (ex: semaine type d'un agent)</li>
+        <li>• <strong>Dupliquer un bloc</strong> : clic droit sur un bloc → "Dupliquer" → copie à la même heure le jour suivant</li>
+        <li>• <strong>Glisser-déposer</strong> : déplace un bloc d'un jour à l'autre, ou change l'horaire</li>
+      </ul>
+    </section>
+
+    <section id="utilisateurs" class="mb-10">
+      <h2 class="text-2xl font-black text-slate-900 mb-4 border-b-2 border-purple-500 pb-2">6. Gestion des Utilisateurs (Admin)</h2>
+      
+      <h3 class="text-lg font-bold text-slate-800 mt-6 mb-3"> Création de compte</h3>
+      <ol class="text-sm text-slate-700 space-y-2 mb-4 list-decimal ml-6">
+        <li>Aller dans l'onglet <strong>"Utilisateurs"</strong></li>
+        <li>Remplir : Nom, Email, Mot de passe (6 caractères min), Rôle (Agent / Manager / Admin), ETP, Rendement</li>
+        <li>Cliquer sur <strong>"Créer"</strong></li>
+      </ol>
+
+      <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded-r-lg mb-4">
+        <h4 class="font-bold text-yellow-900 mb-2">⚠️ Erreur "Email déjà utilisé"</h4>
+        <p class="text-sm text-slate-700">Si tu vois <code>Firebase: Error (auth/email-already-in-use)</code>, c'est que l'email existe déjà dans Firebase Auth (compte supprimé de la liste mais pas de l'authentification).</p>
+        <p class="text-sm text-slate-700 mt-2"><strong>Solution :</strong></p>
+        <ol class="text-sm text-slate-700 list-decimal ml-4 mt-1">
+          <li>Ouvrir <a href="https://console.firebase.google.com" target="_blank" class="text-blue-600 underline">Console Firebase</a> → ton projet → <strong>Authentication → Utilisateurs</strong></li>
+          <li>Chercher l'email → supprimer le compte fantôme (menu ⋮ → Supprimer)</li>
+          <li>Revenir dans l'app → recréer le compte</li>
+        </ol>
+      </div>
+
+      <h3 class="text-lg font-bold text-slate-800 mt-6 mb-3">⚙️ Paramètres par utilisateur</h3>
+      <ul class="text-sm text-slate-700 space-y-1 mb-4 ml-4">
+        <li>• <strong>ETP</strong> : 1 = temps plein, 0.8 = 80%, 0.5 = mi-temps</li>
+        <li>• <strong>Rendement</strong> : part du temps contractuel réellement productive (défaut 0,85). Réglable ensuite dans le tableau Manager.</li>
+        <li>• <strong>Mode de saisie</strong> : " Saisit" (compte dans la charge) ou "🧭 Gestion seule" (exclu de la charge)</li>
+      </ul>
+
+      <h3 class="text-lg font-bold text-slate-800 mt-6 mb-3">🔐 Rôles et droits</h3>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm border-collapse">
+          <thead class="bg-slate-100 text-slate-700">
+            <tr><th class="p-3 text-left">Rôle</th><th class="p-3 text-left">Droits</th></tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            <tr><td class="p-3 font-bold text-green-700">🟢 Agent</td><td class="p-3">Saisit son propre planning. Voit sa capacité personnelle.</td></tr>
+            <tr><td class="p-3 font-bold text-blue-700">🔵 Manager</td><td class="p-3">Vue équipe, règle les rendements, gère enveloppes/priorités/checklists, accède au Dashboard.</td></tr>
+            <tr><td class="p-3 font-bold text-red-700">🔴 Admin</td><td class="p-3">Tout ce qui précède + création des comptes, ETP, paramètres annuels, référentiels.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="faq" class="mb-10">
+      <h2 class="text-2xl font-black text-slate-900 mb-4 border-b-2 border-orange-500 pb-2">7. FAQ & Problèmes courants</h2>
+      
+      <div class="space-y-4">
+        <div class="bg-white border border-slate-200 rounded-lg p-4">
+          <h3 class="font-bold text-slate-800 mb-2">❓ Pourquoi je vois "0 h/sem" sur les projets au chargement ?</h3>
+          <p class="text-sm text-slate-700"><strong>Résolu.</strong> Les calculs sont maintenant rafraîchis en continu (toutes les 2,5s). Si tu vois encore 0, attends 2-3 secondes ou recharge la page (Ctrl+Shift+R).</p>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-lg p-4">
+          <h3 class="font-bold text-slate-800 mb-2">❓ Comment sont calculées les cibles MCO/Support/Transverse ?</h3>
+          <p class="text-sm text-slate-700">Ce sont des % de la capacité totale de l'équipe, réglables via "⚙️ Régler mes cibles". Ex: MCO 20-25% × 97,9 h = 19,6-24,5 h/sem. Les socles hachurés dans l'histogramme montrent ces valeurs en temps réel.</p>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-lg p-4">
+          <h3 class="font-bold text-slate-800 mb-2">❓ Pourquoi le "+X ETP" change quand je modifie les cibles ?</h3>
+          <p class="text-sm text-slate-700">Le calcul de la Synthèse Globale inclut le "Manque catégories" (cibles − réel). Si tu augmentes une cible, le manque augmente → l'ETP total augmente. C'est normal : tu demandes plus de temps pour cette catégorie.</p>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-lg p-4">
+          <h3 class="font-bold text-slate-800 mb-2">❓ Comment exporter les données pour la direction ?</h3>
+          <p class="text-sm text-slate-700">Deux options :</p>
+          <ul class="text-sm text-slate-700 list-disc ml-4 mt-1">
+            <li><strong>Export CSV</strong> : bouton "📥 CSV" dans la carte Histogramme → fichier Excel avec toutes les semaines</li>
+            <li><strong>Export PDF</strong> : bouton "️ Imprimer PDF" en haut du Dashboard → impression de toutes les cartes</li>
+          </ul>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-lg p-4">
+          <h3 class="font-bold text-slate-800 mb-2">❓ Les congés sont-ils pris en compte ?</h3>
+          <p class="text-sm text-slate-700"><strong>Oui, automatiquement.</strong> La capacité réelle de chaque agent est réduite du facteur congés (jours travaillés ÷ jours ouvrés). Ex: 46 jours de congés/an → facteur 0,823. Les agents n'ont aucun congé à saisir.</p>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-lg p-4">
+          <h3 class="font-bold text-slate-800 mb-2">❓ Pourquoi certaines semaines ont des barres très hautes et d'autres très basses ?</h3>
+          <p class="text-sm text-slate-700">L'histogramme lisse les projets entre leurs dates début/fin. Si un projet a 100h de reste sur 4 semaines → 25h/sem. Si un autre a 100h sur 20 semaines → 5h/sem. Les pics = plusieurs projets qui se terminent en même temps.</p>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-lg p-4">
+          <h3 class="font-bold text-slate-800 mb-2">❓ Comment interpréter le Delta dans la bulle tooltip ?</h3>
+          <p class="text-sm text-slate-700"><strong>Delta = Total (projets + cibles) − Capacité équipe.</strong></p>
+          <ul class="text-sm text-slate-700 list-disc ml-4 mt-1">
+            <li><strong>Positif (rouge)</strong> : surcharge → il faut lisser un projet ou renégocier une cible</li>
+            <li><strong>Négatif (vert)</strong> : marge disponible → tu peux accepter plus de charge</li>
+          </ul>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-lg p-4">
+          <h3 class="font-bold text-slate-800 mb-2">❓ Les données sont-elles sauvegardées automatiquement ?</h3>
+          <p class="text-sm text-slate-700"><strong>Oui.</strong> Chaque saisie est immédiatement envoyée à Firebase. Pas de bouton "Enregistrer". Si tu vois "Synchronisé" en haut à gauche, tout est sauvegardé.</p>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-lg p-4">
+          <h3 class="font-bold text-slate-800 mb-2">❓ Comment contacter le support ?</h3>
+          <p class="text-sm text-slate-700">Pour les bugs ou demandes d'évolution : <a href="mailto:support@exemple.com" class="text-blue-600 underline">support@exemple.com</a></p>
+        </div>
+      </div>
+    </section>
+
+    <div class="mt-8 pt-6 border-t border-slate-200 text-center text-xs text-slate-400">
+      Version 2.0 · Documentation complète · Mis à jour avec toutes les fonctionnalités de pilotage avancées (Octobre 2026)
     </div>
   </div>
-</header>
-
-<!-- Onglets : ceux interdits au rôle sont masqués par le script de rôle en bas de page -->
-<div class="max-w-5xl mx-auto px-4 mt-6 flex gap-2 flex-wrap no-print">
-  <button onclick="showTab('start')" id="tab-start" class="px-4 py-2.5 rounded-xl font-black text-sm bg-white border border-slate-200">🚀 Démarrage</button>
-  <button onclick="showTab('agent')" id="tab-agent" class="px-4 py-2.5 rounded-xl font-black text-sm bg-white border border-slate-200">🟢 Agent</button>
-  <button onclick="showTab('manager')" id="tab-manager" class="hidden px-4 py-2.5 rounded-xl font-black text-sm bg-white border border-slate-200">🔵 Manager</button>
-  <button onclick="showTab('admin')" id="tab-admin" class="hidden px-4 py-2.5 rounded-xl font-black text-sm bg-white border border-slate-200">🔴 Admin</button>
-  <button onclick="showTab('faq')" id="tab-faq" class="hidden px-4 py-2.5 rounded-xl font-black text-sm bg-white border border-slate-200">❓ FAQ</button>
-</div>
-
-<main class="max-w-5xl mx-auto px-4 py-6 space-y-6">
-
-<!-- ================= DÉMARRAGE ================= -->
-<section id="view-start" class="space-y-6">
-  <div class="bg-indigo-50 border-l-4 border-indigo-500 rounded-xl p-5">
-    <h2 class="font-black text-indigo-800 text-lg">🚀 Bien démarrer en 5 minutes</h2>
-    <p class="text-sm text-slate-700 mt-1">Cette application dit <strong>où passent vos heures chaque semaine</strong>. Les données accumulées deviennent l'argumentaire chiffré de l'équipe : effectifs (ETP), surcharge, arbitrages, budgets projets et MCO. <strong>Les congés ne se saisissent plus</strong> : ils sont déduits automatiquement de la capacité.</p>
-  </div>
-
-  <div class="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
-    <h3 class="font-black text-slate-800">🔑 Se connecter & installer</h3>
-    <div class="flex gap-4 items-start p-4 bg-slate-50 rounded-xl">
-      <div class="w-8 h-8 shrink-0 rounded-full bg-blue-600 text-white font-black flex items-center justify-center">1</div>
-      <p class="text-sm text-slate-700">Email + mot de passe fournis par l'administrateur. <strong>« 🔑 Mot de passe oublié ? »</strong> envoie un email de réinitialisation.</p>
-    </div>
-    <div class="flex gap-4 items-start p-4 bg-slate-50 rounded-xl">
-      <div class="w-8 h-8 shrink-0 rounded-full bg-blue-600 text-white font-black flex items-center justify-center">2</div>
-      <p class="text-sm text-slate-700"><strong>Installer l'app</strong> (recommandé) : Android/Chrome ⋮ → « Installer l'application » · iPhone/Safari → Partager → « Sur l'écran d'accueil » · PC Chrome/Edge → icône ⊕ dans la barre d'adresse.</p>
-    </div>
-    <div class="flex gap-4 items-start p-4 bg-slate-50 rounded-xl">
-      <div class="w-8 h-8 shrink-0 rounded-full bg-blue-600 text-white font-black flex items-center justify-center">3</div>
-      <p class="text-sm text-slate-700">Chaque vendredi : semaine courante → <strong>« ⧉ Copier semaine préc. »</strong> (ou « 📐 Copier semaine type » la première fois), ajustez 2-3 blocs. <strong>2 minutes maximum.</strong></p>
-    </div>
-  </div>
-
-  <div class="bg-white rounded-2xl border border-slate-200 p-6">
-    <h3 class="font-black text-slate-800 mb-3">🧮 Les deux notions clés : ETP & rendement</h3>
-    <p class="text-sm text-slate-600 mb-3"><strong>ETP = Équivalent Temps Plein</strong> : force de travail d'une personne sur la base d'un temps plein.</p>
-    <table class="w-full text-sm border border-slate-200 rounded-lg overflow-hidden mb-4">
-      <thead><tr class="bg-slate-800 text-white"><th class="text-left p-2">Situation</th><th class="text-center p-2">ETP</th><th class="text-center p-2">Heures contrat / sem.</th></tr></thead>
-      <tbody>
-        <tr class="border-b border-slate-100"><td class="p-2">Temps plein</td><td class="p-2 text-center font-black">1.0</td><td class="p-2 text-center">35 h</td></tr>
-        <tr class="border-b border-slate-100"><td class="p-2">80 %</td><td class="p-2 text-center font-black">0.8</td><td class="p-2 text-center">28 h</td></tr>
-        <tr class="border-b border-slate-100"><td class="p-2">Mi-temps</td><td class="p-2 text-center font-black">0.5</td><td class="p-2 text-center">17,5 h</td></tr>
-        <tr><td class="p-2">Équipe : 6 TP + 2 à 80 %</td><td class="p-2 text-center font-black">7.6</td><td class="p-2 text-center">266 h</td></tr>
-      </tbody>
-    </table>
-    <p class="text-sm text-slate-600 mb-2"><strong>Taux de rendement</strong> (défaut <strong>0,85</strong>, réglé par personne) : part du temps réellement productive (aléas, temps masqués, pauses techniques…). Il est modifiable par le <strong>manager</strong> dans le tableau de consolidation, et par l'<strong>admin</strong> dans Utilisateurs.</p>
-  </div>
-
-  <div class="bg-white rounded-2xl border border-slate-200 p-6">
-    <h3 class="font-black text-slate-800 mb-3">⚙️ La capacité réelle, calculée automatiquement</h3>
-    <div class="p-4 bg-slate-50 rounded-xl text-sm font-mono text-slate-700 mb-3">
-      Capacité hebdo = heures contrat × ETP × rendement × ((jours ouvrés − jours congés) ÷ jours ouvrés)
-    </div>
-    <ul class="text-sm text-slate-600 space-y-2 list-disc pl-5">
-      <li><strong>Jours ouvrés</strong> = semaines/an × 5 (ex : 52 × 5 = 260 j).</li>
-      <li><strong>Jours congés</strong> = paramètre annuel (défaut <strong>46 j</strong>, CP + RTT) → 260 − 46 = <strong>214 j travaillés/an</strong>.</li>
-      <li>Exemple pour 1 ETP à 35 h, rendement 0,85 : 35 × 0,85 × (214 ÷ 260) = <strong>24,5 h/semaine</strong> de capacité réelle.</li>
-      <li><strong>Aucun congé à saisir</strong> : la déduction est automatique, pour tout le monde, toute l'année.</li>
-    </ul>
-  </div>
-
-  <div class="bg-white rounded-2xl border border-slate-200 p-6">
-    <h3 class="font-black text-slate-800 mb-3">🎨 Les 4 catégories d'activité</h3>
-    <div class="flex flex-wrap gap-2 mb-4">
-      <span class="px-3 py-1.5 rounded-lg text-xs font-bold text-white" style="background:#2563eb">🚀 Projets</span>
-      <span class="px-3 py-1.5 rounded-lg text-xs font-bold text-white" style="background:#dc2626">🔧 MCO</span>
-      <span class="px-3 py-1.5 rounded-lg text-xs font-bold text-white" style="background:#ea580c">🆘 Support terrain</span>
-      <span class="px-3 py-1.5 rounded-lg text-xs font-bold text-white" style="background:#475569">📋 Transverse</span>
-    </div>
-    <ul class="text-sm text-slate-600 space-y-1 list-disc pl-5">
-      <li><strong>Projets</strong> : rattachés à une enveloppe budget via la liste « Projet budgété ».</li>
-      <li><strong>MCO / Support / Transverse</strong> : débitent automatiquement l'enveloppe « auto » de leur catégorie si elle existe.</li>
-      <li>Les anciens blocs 🌴 (congés) restent visibles en historique mais n'ont plus aucun effet sur les calculs.</li>
-    </ul>
-  </div>
-
-  <div class="grid md:grid-cols-2 gap-4">
-    <div class="bg-blue-50 border-l-4 border-blue-500 rounded-xl p-5 text-sm text-slate-700"><strong class="text-blue-800">📐 Semaine type vs semaines réelles</strong><p class="mt-1">La <em>semaine type</em> = référence théorique remplie une fois. Les <em>semaines réelles</em> = saisies du vendredi. Toutes les statistiques équipe utilisent le <strong>réel</strong>.</p></div>
-    <div class="bg-emerald-50 border-l-4 border-emerald-500 rounded-xl p-5 text-sm text-slate-700"><strong class="text-emerald-800">💰 Enveloppes & budgets</strong><p class="mt-1">Projets = rattachement explicite bloc par bloc. MCO/support/transverse = consommation automatique de tous les blocs de la catégorie. Suivi : consommé, reste, %, rythme, horizon.</p></div>
-    <div class="bg-violet-50 border-l-4 border-violet-500 rounded-xl p-5 text-sm text-slate-700"><strong class="text-violet-800">🧭 Mode « gestion seule »</strong><p class="mt-1">Certains managers/admins ne remplissent pas de planning : leur compte est en « 🧭 Gestion seule » (réglé par l'admin). Ils pilotent sans saisir, et ne comptent pas dans la charge.</p></div>
-    <div class="bg-slate-50 border-l-4 border-slate-400 rounded-xl p-5 text-sm text-slate-700"><strong class="text-slate-800">🔒 Confidentialité</strong><p class="mt-1">Un agent ne voit que son planning. Managers/admins voient l'équipe (lecture seule pour les blocs des autres). Garanti côté serveur par les règles Firestore.</p></div>
-  </div>
-</section>
-
-<!-- ================= AGENT ================= -->
-<section id="view-agent" class="space-y-6 hidden">
-  <div class="bg-green-50 border-l-4 border-green-500 rounded-xl p-5">
-    <h2 class="font-black text-green-800 text-lg">🟢 Agent : 2 minutes par semaine</h2>
-    <p class="text-sm text-slate-700 mt-1">Sauvegarde automatique (☁️) : aucun bouton « enregistrer » pour les blocs. Vous ne saisissez <strong>que vos activités</strong> — jamais vos congés.</p>
-  </div>
-
-  <div class="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
-    <h3 class="font-black text-slate-800">📅 La barre de semaine</h3>
-    <ul class="text-sm text-slate-600 space-y-2 list-disc pl-5">
-      <li><strong>◀ ▶</strong> : naviguer entre les semaines · <strong>« Aujourd'hui »</strong> : revenir à la semaine courante.</li>
-      <li><strong>« 📐 Semaine type »</strong> : votre référence théorique (non comptée dans les stats).</li>
-      <li><strong>« ⧉ Copier semaine préc. »</strong> : recopie tous les blocs de la semaine d'avant → base de départ du vendredi.</li>
-      <li><strong>« 📐 Copier semaine type »</strong> : pour la toute première semaine réelle, part de votre référence.</li>
-    </ul>
-  </div>
-
-  <div class="bg-white rounded-2xl border border-slate-200 p-6">
-    <h3 class="font-black text-slate-800 mb-4">🧱 Manipuler les blocs</h3>
-    <div class="grid md:grid-cols-2 gap-4 text-sm">
-      <div class="p-4 bg-slate-50 rounded-xl"><strong class="text-blue-700">➕ Ajouter</strong><p class="text-slate-600 mt-1">Clic sur un <strong>créneau vide</strong> (un « + » apparaît) → catégorie, projet/enveloppe, libellé, jour, heure, durée.</p></div>
-      <div class="p-4 bg-slate-50 rounded-xl"><strong class="text-indigo-700">✏️ Modifier / 🗑️ Supprimer</strong><p class="text-slate-600 mt-1">Clic sur un <strong>bloc coloré</strong> : la fenêtre s'ouvre avec tous les champs.</p></div>
-      <div class="p-4 bg-slate-50 rounded-xl"><strong class="text-emerald-700">↔️ Déplacer</strong><p class="text-slate-600 mt-1"><strong>Glisser-déposer</strong> (souris) sur un autre jour / une autre heure. Calage automatique à la demi-heure.</p></div>
-      <div class="p-4 bg-slate-50 rounded-xl"><strong class="text-teal-700">⧉ Dupliquer</strong><p class="text-slate-600 mt-1">Clic bloc → zone <strong>« ⧉ Dupliquer ce bloc vers… »</strong> : boutons [Lundi]…[Vendredi] ou <strong>« ⇉ Tous les jours »</strong>. Ou <strong>Ctrl + glisser</strong> (⌘ Mac) pour copier vers un créneau précis.</p></div>
-    </div>
-  </div>
-
-  <div class="bg-white rounded-2xl border border-slate-200 p-6">
-    <h3 class="font-black text-slate-800 mb-3">🧮 Votre capacité affichée</h3>
-    <ul class="text-sm text-slate-600 space-y-2 list-disc pl-5">
-      <li>Le message sous vos totaux compare vos heures travaillées à votre <strong>capacité réelle</strong> = heures contrat × votre ETP × votre rendement × congés déduits.</li>
-      <li>Exemple : 35 h × 1 ETP × 0,85 × (214/260) = <strong>24,5 h/semaine</strong>.</li>
-      <li>✅ Semaine cohérente · ⚠️ débordement · ℹ️ semaine légère : suivez le message, c'est lui votre boussole.</li>
-      <li>Votre ETP et votre rendement sont réglés par l'admin / le manager : demandez-leur si la valeur vous semble incorrecte.</li>
-    </ul>
-  </div>
-
-  <div class="bg-white rounded-2xl border border-slate-200 p-6">
-    <h3 class="font-black text-slate-800 mb-3">💰 Projets & enveloppes : ce que ça débite</h3>
-    <ul class="text-sm text-slate-600 space-y-2 list-disc pl-5">
-      <li>Catégorie 🚀 → liste <strong>« Projet budgété »</strong> : vos heures débitent l'enveloppe de ce projet.</li>
-      <li>Catégorie 🔧 / 🆘 / 📋 : si une enveloppe « auto » existe pour la catégorie, <strong>toutes</strong> vos heures de la catégorie la débitent — vous n'avez rien à rattacher.</li>
-      <li>⚠️ Message informatif si l'enveloppe choisie est déjà dépassée : prévenez votre manager, ce n'est pas bloquant.</li>
-    </ul>
-  </div>
-
-  <div class="bg-slate-50 border-l-4 border-slate-400 rounded-xl p-5 text-sm text-slate-700">
-    <strong class="text-slate-800">👀 Qui voit quoi ?</strong> Votre planning n'est visible que par vous, et en <strong>lecture seule</strong> par managers/admins. Personne d'autre.
-  </div>
-</section>
-
-<!-- ================= MANAGER ================= -->
-<section id="view-manager" class="space-y-6 hidden">
-  <div class="bg-blue-50 border-l-4 border-blue-500 rounded-xl p-5">
-    <h2 class="font-black text-blue-800 text-lg">🔵 Manager : piloter en ETP, rendements & budgets</h2>
-    <p class="text-sm text-slate-700 mt-1">Consolidation équipe, enveloppes budgétaires, dashboard direction. Les capacités intègrent automatiquement ETP, rendements individuels et congés déduits.</p>
-  </div>
-
-  <div class="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
-    <h3 class="font-black text-slate-800">🎚️ Taux de rendement par agent</h3>
-    <ul class="text-sm text-slate-600 space-y-2 list-disc pl-5">
-      <li>Colonne <strong>« Rendement »</strong> du tableau de consolidation : modifiable directement (défaut <strong>0,85</strong>, pas de 0,05).</li>
-      <li>Il reflète la part de temps réellement productive de chaque personne (aléas, temps masqués…).</li>
-      <li>Impact immédiat : capacité hebdo de l'agent, courbes, taux C/C, dashboard, recommandation ETP.</li>
-      <li>Règle de sécurité : en tant que manager, vous ne pouvez modifier <strong>que</strong> le rendement (pas les rôles ni les ETP, réservés à l'admin).</li>
-    </ul>
-  </div>
-
-  <div class="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
-    <h3 class="font-black text-slate-800">📋 Lire la consolidation</h3>
-    <ul class="text-sm text-slate-600 space-y-2 list-disc pl-5">
-      <li><strong>Période</strong> : mois, mois dernier, trimestre, année, 12 mois, tout.</li>
-      <li><strong>Colonnes</strong> : ETP · Rendement · Capacité/sem (calculée) · Travaillé · Semaines saisies / semaines de la période · Taux C/C.</li>
-      <li><strong>Taux C/C</strong> = heures travaillées ÷ capacité réelle de la personne sur ses semaines saisies. 🔴 &gt; 110 % surcharge · 🟠 100-110 % tendu · 🟡 80-100 % vigilance · 🟢 OK.</li>
-      <li><strong>📈 Courbe</strong> : charge équipe vs capacité réelle (ETP × rendements × congés déduits), semaine par semaine.</li>
-      <li><strong>🧮 Chiffres de période</strong> : Σ ETP, rendement moyen, jours travaillés/an, capacité hebdo & annuelle équipe, taux de saisie, activité n°1, comptes « gestion seule ».</li>
-      <li><strong>« Où partent les heures ? »</strong> : agrégat par activité précise, tous agents confondus.</li>
-    </ul>
-  </div>
-
-  <div class="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
-    <h3 class="font-black text-slate-800">💰 Enveloppes & budgets</h3>
-    <ul class="text-sm text-slate-600 space-y-2 list-disc pl-5">
-      <li><strong>Projet (rattachement explicite)</strong> : se débite uniquement quand un bloc 🚀 lui est rattaché.</li>
-      <li><strong>Auto (MCO / support / transverse)</strong> : débite <strong>tous</strong> les blocs de la catégorie, sans action des agents — adapté aux charges récurrentes. Une seule enveloppe auto active par catégorie.</li>
-      <li><strong>Méthode MCO</strong> : période « 12 derniers mois » → « Où partent les heures » → total MCO ÷ semaines saisies = run-rate h/sem → × semaines/an = budget annuel.</li>
-      <li><strong>Suivi</strong> : consommé, reste, %, rythme (h/sem), horizon « ≈ X sem. rest. », état 🟢🟠🔴.</li>
-      <li><strong>Actions</strong> : ✏️ modifier · <strong>⚪/♻️ clôturer/rouvrir</strong> (recommandé en fin de projet : historique conservé) · <strong>🗑️ supprimer</strong> (double confirmation ; les blocs saisis restent dans leurs catégories mais perdent le rattachement budgétaire).</li>
-    </ul>
-  </div>
-
-  <div class="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
-    <h3 class="font-black text-slate-800">📊 Dashboard direction</h3>
-    <ul class="text-sm text-slate-600 space-y-2 list-disc pl-5">
-      <li>Capacité annuelle = Σ (ETP × rendement × jours travaillés) de chaque compte « 📝 Saisit ».</li>
-      <li>Courbe cumulée depuis janvier : bleue au-dessus de la verte = surcharge <strong>structurelle</strong>.</li>
-      <li>Bloc 💰 : budget total, consommé, reste, enveloppes dépassées, top consommation.</li>
-      <li>Recommandation automatique : « il manque X ETP » + coût de l'inaction en €.</li>
-      <li><strong>🖨️ Imprimer PDF</strong> : le support CODIR / revue annuelle.</li>
-    </ul>
-  </div>
-
-  <div class="bg-orange-50 border-l-4 border-orange-500 rounded-xl p-5 text-sm text-slate-700">
-    <strong class="text-orange-800">🗓️ Rituel conseillé</strong>
-    <ul class="list-disc pl-5 mt-2 space-y-1">
-      <li><strong>Lundi matin</strong> : colonne « Semaines saisies » → relancer les manquants (objectif ≥ 80 %).</li>
-      <li><strong>En continu</strong> : ajuster les rendements quand la réalité terrain change.</li>
-      <li><strong>Fin de mois</strong> : période « Mois dernier » + budgets → PDF dashboard pour le CODIR.</li>
-    </ul>
-  </div>
-</section>
-
-<!-- ================= ADMIN ================= -->
-<section id="view-admin" class="space-y-6 hidden">
-  <div class="bg-red-50 border-l-4 border-red-500 rounded-xl p-5">
-    <h2 class="font-black text-red-800 text-lg">🔴 Admin : comptes, ETP, rendements, paramètres</h2>
-    <p class="text-sm text-slate-700 mt-1">Tous les droits : utilisateurs, édition de tous les calendriers, référentiels, paramètres de calcul, purge.</p>
-  </div>
-
-  <div class="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
-    <h3 class="font-black text-slate-800">👥 Utilisateurs</h3>
-    <div class="flex gap-4 items-start p-4 bg-slate-50 rounded-xl">
-      <div class="w-8 h-8 shrink-0 rounded-full bg-red-500 text-white font-black flex items-center justify-center">1</div>
-      <p class="text-sm text-slate-700"><strong>Créer un compte</strong> : nom, email, mot de passe temporaire (6 car. min), rôle, <strong>ETP</strong> (1 = temps plein, 0.8 = 80 %…). Le rendement est créé à <strong>0,85</strong> par défaut.</p>
-    </div>
-    <div class="flex gap-4 items-start p-4 bg-slate-50 rounded-xl">
-      <div class="w-8 h-8 shrink-0 rounded-full bg-red-500 text-white font-black flex items-center justify-center">2</div>
-      <p class="text-sm text-slate-700"><strong>Régler ETP & rendement</strong> directement dans le tableau (champs numériques) : effet immédiat sur toutes les capacités et le dashboard.</p>
-    </div>
-    <div class="flex gap-4 items-start p-4 bg-slate-50 rounded-xl">
-      <div class="w-8 h-8 shrink-0 rounded-full bg-red-500 text-white font-black flex items-center justify-center">3</div>
-      <p class="text-sm text-slate-700"><strong>Mode de saisie</strong> : « 📝 Saisit » = remplit un planning et compte dans la charge · « 🧭 Gestion seule » = pilote sans saisir, hors charge. <strong>Accès</strong> : ✅ Actif / ⛔ Désactivé.</p>
-    </div>
-  </div>
-
-  <div class="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
-    <h3 class="font-black text-slate-800">⚙️ Paramètres de projection (onglet Manager)</h3>
-    <ul class="text-sm text-slate-600 space-y-2 list-disc pl-5">
-      <li><strong>Heures contrat / sem. (1 ETP)</strong> : base de calcul (35 h).</li>
-      <li><strong>Semaines / an</strong> : ex. 52 → jours ouvrés = 52 × 5 = 260 j.</li>
-      <li><strong>Jours congés+RTT / an</strong> : défaut <strong>46</strong> → 260 − 46 = 214 j travaillés/an. La formule complète s'affiche sous les paramètres.</li>
-      <li><strong>Effectif cible ETP</strong> : référence direction, comparée à l'effectif réel (Σ ETP saisis).</li>
-      <li><strong>Taux horaire (€)</strong> : conversion des budgets et du coût de surcharge en euros.</li>
-    </ul>
-  </div>
-
-  <div class="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
-    <h3 class="font-black text-slate-800">🏷️ Référentiels & purge</h3>
-    <ul class="text-sm text-slate-600 space-y-2 list-disc pl-5">
-      <li><strong>Référentiels</strong> : suggestions de libellés pour MCO, support, transverse (les projets se gèrent dans « 💰 Enveloppes »).</li>
-      <li><strong>🗑️ Purger</strong> : supprime tous les blocs de tous les agents (double confirmation). Réservé aux tests.</li>
-    </ul>
-  </div>
-
-  <div class="bg-slate-800 text-white rounded-2xl p-6 text-sm">
-    <h3 class="font-black mb-3">🛡️ Matrice des droits</h3>
-    <table class="w-full text-xs">
-      <thead><tr class="text-left text-white/60 uppercase"><th class="p-2">Fonction</th><th class="p-2">🟢 Agent</th><th class="p-2">🔵 Manager</th><th class="p-2">🔴 Admin</th></tr></thead>
-      <tbody class="divide-y divide-white/10">
-        <tr><td class="p-2 font-bold">Son propre calendrier</td><td class="p-2">✏️ (si 📝)</td><td class="p-2">✏️ (si 📝)</td><td class="p-2">✏️ (si 📝)</td></tr>
-        <tr><td class="p-2 font-bold">Calendriers des autres</td><td class="p-2">🚫</td><td class="p-2">👁️ lecture seule</td><td class="p-2">✏️</td></tr>
-        <tr><td class="p-2 font-bold">Rendement des agents</td><td class="p-2">🚫</td><td class="p-2">✏️</td><td class="p-2">✏️</td></tr>
-        <tr><td class="p-2 font-bold">ETP, rôles, accès, mode saisie</td><td class="p-2">🚫</td><td class="p-2">🚫</td><td class="p-2">✏️</td></tr>
-        <tr><td class="p-2 font-bold">Enveloppes & budgets</td><td class="p-2">🚫 (voient les listes)</td><td class="p-2">✏️</td><td class="p-2">✏️</td></tr>
-        <tr><td class="p-2 font-bold">Consolidation + Dashboard</td><td class="p-2">🚫</td><td class="p-2">✅</td><td class="p-2">✅</td></tr>
-        <tr><td class="p-2 font-bold">Paramètres, référentiels, purge</td><td class="p-2">🚫</td><td class="p-2">👁️ /  purge</td><td class="p-2">✏️</td></tr>
-      </tbody>
-    </table>
-  </div>
-</section>
-
-<!-- ================= FAQ ================= -->
-<section id="view-faq" class="space-y-6 hidden">
-  <div class="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
-    <h3 class="font-black text-slate-800">❓ Questions fréquentes</h3>
-    <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">🧮 Qu'est-ce qu'un ETP ?</summary><p class="text-sm text-slate-600 mt-2">Équivalent Temps Plein : 1 ETP = une personne à temps plein. La somme des ETP de l'équipe = sa force de travail réelle, base de toutes les capacités.</p></details>
-    <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">🎚️ Qu'est-ce que le taux de rendement ?</summary><p class="text-sm text-slate-600 mt-2">La part du temps réellement productive (défaut 0,85). Il est réglé par personne : le manager le modifie dans le tableau de consolidation, l'admin dans Utilisateurs. Il s'applique à toute la capacité.</p></details>
-    <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">🌴 Comment sont gérés les congés ?</summary><p class="text-sm text-slate-600 mt-2">Automatiquement : plus aucune saisie de congés. La capacité annuelle retire les jours de congés+RTT (paramètre, défaut 46 j) des jours ouvrés (semaines/an × 5). La déduction est lissée sur toutes les semaines.</p></details>
-    <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">🧮 Pourquoi mon total ≠ 35 h ?</summary><p class="text-sm text-slate-600 mt-2">Normal : votre capacité réelle = 35 h × ETP × rendement × congés déduits (ex : 24,5 h). Comparez vos heures travaillées au total « capacité réelle » affiché sous vos totaux, pas à 35 h.</p></details>
-    <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">💰 Projet vs enveloppe « auto » ?</summary><p class="text-sm text-slate-600 mt-2">Un <strong>projet</strong> se débite seulement quand un bloc 🚀 lui est rattaché. Une enveloppe <strong>auto</strong> (MCO/support/transverse) débite tous les blocs de sa catégorie, sans action des agents — adapté aux charges récurrentes.</p></details>
-    <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">🗑️ Supprimer ou clôturer une enveloppe ?</summary><p class="text-sm text-slate-600 mt-2"><strong>⚪ Clôturer</strong> = conserve historique et consommation, retire l'enveloppe des suggestions (recommandé en fin de projet). <strong>🗑️ Supprimer</strong> = efface définitivement (double confirmation) ; les blocs saisis restent dans leurs catégories mais perdent le rattachement budgétaire.</p></details>
-    <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">🔧 Comment budgétiser le MCO ?</summary><p class="text-sm text-slate-600 mt-2">Mesurez le run-rate : période « 12 derniers mois » → « Où partent les heures » → total MCO ÷ semaines saisies = h/sem. Multipliez par les semaines/an = budget annuel. Créez ensuite une enveloppe « 🔧 MCO (auto) ».</p></details>
-    <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">🔑 Mot de passe oublié ?</summary><p class="text-sm text-slate-600 mt-2">Lien « 🔑 Mot de passe oublié ? » sur l'écran de connexion → email de réinitialisation automatique.</p></details>
-    <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">⧉ Dupliquer un bloc ?</summary><p class="text-sm text-slate-600 mt-2">Clic bloc → « ⧉ Dupliquer ce bloc vers… » → boutons jours ou « ⇉ Tous les jours ». Ou Ctrl + glisser (⌘ Mac) pour copier vers un créneau précis.</p></details>
-    <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">🧭 Planning en lecture seule ?</summary><p class="text-sm text-slate-600 mt-2">Deux cas : compte « 🧭 Gestion seule » (bandeau gris : aucune saisie attendue), ou consultation du planning d'un autre (bandeau orange). Pour contribuer, demandez le passage en « 📝 Saisit ».</p></details>
-    <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">📲 Installer l'application ?</summary><p class="text-sm text-slate-600 mt-2">Android/Chrome : ⋮ → « Installer l'application ». iPhone/Safari : Partager → « Sur l'écran d'accueil ». PC Chrome/Edge : icône ⊕ dans la barre d'adresse.</p></details>
-    <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">👀 Qui voit mes semaines ?</summary><p class="text-sm text-slate-600 mt-2">Vous, et en lecture seule vos managers/admins. Personne d'autre. Protection garantie côté serveur.</p></details>
-    <details class="group p-4 bg-slate-50 rounded-xl"><summary class="font-bold text-sm text-slate-800 cursor-pointer">📴 Sans réseau ?</summary><p class="text-sm text-slate-600 mt-2">L'app installée s'ouvre hors connexion (coquille en cache), mais lire/écrire les données de l'équipe nécessite du réseau : c'est un outil collaboratif temps réel.</p></details>
-  </div>
-  <div class="bg-indigo-50 border-l-4 border-indigo-500 rounded-xl p-5 text-sm text-slate-700">
-    <strong class="text-indigo-800">🎯 Pourquoi tout ceci ?</strong> Heures saisies + ETP + rendements + congés déduits + enveloppes = un dossier charge/capacité <strong>opposable en direction</strong>, chiffré en ETP manquants et en euros, sans aucune saisie superflue côté agent.
-  </div>
-</section>
-
-</main>
-
-<footer class="max-w-5xl mx-auto px-4 pb-10 text-center text-xs text-slate-400">
-  Planning Activités — Charge / Capacité · Équipe Performance & Méthodes Logistique · <span id="year"></span>
-</footer>
-
-<script>
-function showTab(key) {
-  const btn = document.getElementById('tab-' + key);
-  if (btn && btn.classList.contains('hidden')) return; // onglet interdit pour ce rôle
-  ['start','agent','manager','admin','faq'].forEach(k => {
-    document.getElementById('view-' + k).classList.toggle('hidden', k !== key);
-    const b = document.getElementById('tab-' + k);
-    b.classList.toggle('tab-active', k === key);
-    b.classList.toggle('bg-white', k !== key);
-  });
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-document.getElementById('year').textContent = new Date().getFullYear();
-showTab('start');
-</script>
-
-<!-- ===== Contrôle d'accès aux onglets selon le rôle connecté ===== -->
-<script type="module">
-import { db, auth, PATHS, doc, onSnapshot, onAuthStateChanged } from './firebase.js';
-
-/* Onglets autorisés par rôle — modifiez ici si besoin
-   (ex : pour donner la FAQ à tout le monde, ajoutez 'faq' aux lignes manager et agent) */
-const TABS_BY_ROLE = {
-  admin:   ['start','agent','manager','admin','faq'],
-  manager: ['start','agent','manager'],
-  agent:   ['start','agent']
-};
-const ALL_TABS = ['start','agent','manager','admin','faq'];
-
-function applyRole(role) {
-  const allowed = TABS_BY_ROLE[role] || TABS_BY_ROLE.agent;
-  ALL_TABS.forEach(t => {
-    const btn = document.getElementById('tab-' + t);
-    if (btn) btn.classList.toggle('hidden', !allowed.includes(t));
-  });
-  // si l'onglet actuellement affiché devient interdit → retour Démarrage
-  const current = ALL_TABS.find(t => !document.getElementById('view-' + t).classList.contains('hidden'));
-  if (current && !allowed.includes(current)) showTab('start');
-}
-
-onAuthStateChanged(auth, user => {
-  if (!user) { applyRole('agent'); return; }  // visiteur non connecté (depuis l'écran de connexion) = vue agent
-  onSnapshot(doc(db, PATHS.users, user.uid), snap => {
-    applyRole(snap.exists() ? (snap.data().role || 'agent') : 'agent');
-  }, () => applyRole('agent'));
-});
-</script>
 </body>
 </html>
