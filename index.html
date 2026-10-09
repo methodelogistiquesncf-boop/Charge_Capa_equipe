@@ -1270,6 +1270,10 @@ function renderProjects() {
     const vals = __wList.map(w => (w.t <= eT && w.t + 6*86400000 >= sT) ? Math.round(rate*10)/10 : 0);
     if (vals.some(v => v > 0)) __ds.push({ code: p.code || p.name, name: (p.name || p.code || '').replace(/"/g,'&quot;'), values: vals, color: __pal[pi % __pal.length] });
   });
+    let __mcoPct = 22.5;
+    try { const __tg = JSON.parse(localStorage.getItem('catRuleTargets') || 'null'); if (__tg && __tg.mco) { __mcoPct = Array.isArray(__tg.mco) ? (__tg.mco[0]+__tg.mco[1])/2 : __tg.mco; } } catch(e){}
+    const __mcoW = Math.round(teamCapW * __mcoPct)/100;
+    __ds.unshift({ code: 'MCO (cible)', name: 'MCO — cible '+__mcoPct+'% de la capacité équipe', values: __wList.map(function(){ return __mcoW; }), color: '#334155', isTarget: true });
     return { weeks: __wList.map(w => w.label), datasets: __ds, capW: teamCapW };
   };
   window.__projLoad = window.__projLoadFn();
@@ -2738,18 +2742,19 @@ window.deleteUserClean = async function(uid){
     var tt=ctx.tooltip;
     if(!tt || tt.opacity===0){ el.style.opacity='0'; return; }
     var pts=(tt.dataPoints||[]).filter(function(p){ return (p.parsed.y||0)>0; });
-    var tot=0, cap=null, rows='';
+    var tot=0, mco=0, cap=null, rows='';
     pts.forEach(function(p){
       var isLine=(p.dataset.type==='line');
       var col=isLine?(p.dataset.borderColor||'#16a34a'):(p.dataset.backgroundColor||'#94a3b8');
       if(isLine){ cap=p.parsed.y; return; }
-      tot+=p.parsed.y||0;
+      if(p.dataset.isTarget){ mco+=p.parsed.y||0; } else { tot+=p.parsed.y||0; }
       rows+='<div style="display:flex;align-items:center;gap:6px;margin:1px 0"><span style="width:9px;height:9px;border-radius:2px;background:'+col+';display:inline-block;flex:none"></span><span>'+p.dataset.label+' : '+fmtH(p.parsed.y)+' h</span></div>';
     });
     var html='<div style="margin-bottom:4px">'+((tt.title&&tt.title[0])||'')+'</div>'+rows;
     html+='<div style="border-top:1px solid rgba(248,250,252,.3);margin-top:5px;padding-top:5px">Total projets : '+fmtH(tot)+' h</div>';
     if(cap!=null){
-      var d=tot-cap; var colD=d>0?'#f87171':'#4ade80'; var sign=d>0?'+':'';
+      if(mco>0){ html+='<div>MCO (cible) : '+fmtH(mco)+' h</div>'; }
+      var d=(tot+mco)-cap; var colD=d>0?'#f87171':'#4ade80'; var sign=d>0?'+':'';
       html+='<div>Capacité équipe : '+fmtH(cap)+' h</div>';
       html+='<div style="color:'+colD+'">Delta : '+sign+fmtH(d)+' h</div>';
     }
@@ -2805,7 +2810,7 @@ window.deleteUserClean = async function(uid){
       });
     }
     var solo=window.__projSolo||null;
-    var ds=st.datasets.map(function(d){ return { type:'bar', label:d.code, data:d.values, backgroundColor:(solo&&d.code!==solo)?'#cbd5e1':d.color, stack:'proj' }; });
+    var ds=st.datasets.map(function(d){ return { type:'bar', label:d.code, data:d.values, backgroundColor:(solo&&d.code!==solo&&!d.isTarget)?'#cbd5e1':d.color, stack:'proj', isTarget:!!d.isTarget }; });
     ds.unshift({ type:'line', label:'Capacité équipe (ETP)', data: st.weeks.map(function(){ return Math.round(st.capW*10)/10; }), borderColor:'#111827', borderWidth:4, pointRadius:0, fill:false });
     ds.splice(1,0,{ type:'line', label:'_halo', data: st.weeks.map(function(){ return Math.round(st.capW*10)/10; }), borderColor:'rgba(255,255,255,0.9)', borderWidth:11, pointRadius:0, fill:false });
     if(chart){ chart.data.labels=st.weeks; chart.data.datasets=ds; chart.options.scales.y.max=M; chart.update(); drawAxis(); return; }
