@@ -1240,6 +1240,34 @@ function renderProjects() {
   const teamCapW = __saisit.reduce((s2,[uid]) => s2 + capWeekOf(uid), 0);
   const sumEtp = __saisit.reduce((s2,[uid]) => s2 + (etpOf(uid)||1), 0);
   window.__projStats = { remDated, reqRate, overdue, teamCapW, perEtpW: sumEtp ? teamCapW/sumEtp : 0, actualRate: actualH/4, actualByCat: { projet: actualByCat.projet/4, mco: actualByCat.mco/4, support: actualByCat.support/4, transverse: actualByCat.transverse/4 } };
+  function __projStatsFn(){
+    try {
+      const __today = new Date().toISOString().slice(0,10);
+      const __ms = d => new Date(d).getTime();
+      const __t2 = new Date(); const __dn2 = (__t2.getDay()+6)%7; __t2.setDate(__t2.getDate()-__dn2+3);
+      const __ft2 = new Date(__t2.getFullYear(),0,4); const __fn2 = (__ft2.getDay()+6)%7; __ft2.setDate(__ft2.getDate()-__fn2+3);
+      const __curW = __t2.getFullYear()+'-W'+String(1+Math.round((__t2-__ft2)/604800000)).padStart(2,'0');
+      const __cd = new Date(Date.now()-28*86400000); const __cdn = (__cd.getDay()+6)%7; __cd.setDate(__cd.getDate()-__cdn+3); const __cft = new Date(__cd.getFullYear(),0,4); const __cfn = (__cft.getDay()+6)%7; __cft.setDate(__cft.getDate()-__cfn+3); const __cutW = __cd.getFullYear()+'-W'+String(1+Math.round((__cd-__cft)/604800000)).padStart(2,'0');
+      let remDated=0, reqRate=0, actualH=0; const overdue=[];
+      allProjects.forEach(p => {
+        if ((p.cat||'projet') !== 'projet' || p.active === false) return;
+        const cons = projectConsumed(p);
+        const rest = Math.max(0, (p.budgetH||0) - cons);
+        if (p.end) {
+          const __eD = __ms(p.end); const __eMon = __eD - ((new Date(__eD).getDay()+6)%7)*86400000; const __cD = __ms(__today); const __cMon = __cD - ((new Date(__cD).getDay()+6)%7)*86400000; const wl = Math.max(1, Math.round((__eMon - __cMon)/(7*86400000)) + 1);
+          if (wl <= 0) { if (rest > 0) overdue.push({ code: p.code || p.name, rest }); }
+          else { remDated += rest; reqRate += rest / wl; }
+        }
+      });
+      const actualByCat = { projet:0, mco:0, support:0, transverse:0 };
+      allBlocks.forEach(b => { const w = weekOf(b); if (w && w !== 'TYPE' && w <= __curW && w > __cutW) { if (b.cat === 'projet') actualH += b.duration; if (actualByCat[b.cat] !== undefined) actualByCat[b.cat] += b.duration; } });
+      const __saisit = Object.entries(allUsers).filter(([uid,u]) => saisit(u));
+      const teamCapW = __saisit.reduce((s2,[uid]) => s2 + capWeekOf(uid), 0);
+      const sumEtp = __saisit.reduce((s2,[uid]) => s2 + (etpOf(uid)||1), 0);
+      window.__projStats = { remDated, reqRate, overdue, teamCapW, perEtpW: sumEtp ? teamCapW/sumEtp : 0, actualRate: actualH/4, actualByCat: { projet: actualByCat.projet/4, mco: actualByCat.mco/4, support: actualByCat.support/4, transverse: actualByCat.transverse/4 } };
+    } catch(e){}
+  }
+  setInterval(__projStatsFn, 2500);
   window.__projLoadFn = function(){
   const __wList = [];
   const __mon = new Date(); const __dn3 = (__mon.getDay()+6)%7; __mon.setDate(__mon.getDate()-__dn3); __mon.setHours(0,0,0,0);
