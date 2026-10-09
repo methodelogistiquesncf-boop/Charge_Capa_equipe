@@ -2801,7 +2801,8 @@ window.deleteUserClean = async function(uid){
     }
     var solo=window.__projSolo||null;
     var ds=st.datasets.map(function(d){ return { type:'bar', label:d.code, data:d.values, backgroundColor:(solo&&d.code!==solo)?'#cbd5e1':d.color, stack:'proj' }; });
-    ds.push({ type:'line', label:'Capacité équipe (ETP)', data: st.weeks.map(function(){ return Math.round(st.capW*10)/10; }), borderColor:'#16a34a', borderDash:[8,6], borderWidth:2, pointRadius:0, fill:false });
+    ds.unshift({ type:'line', label:'Capacité équipe (ETP)', data: st.weeks.map(function(){ return Math.round(st.capW*10)/10; }), borderColor:'#059669', borderDash:[12,7], borderWidth:3.5, pointRadius:0, fill:false });
+    ds.push({ type:'line', label:'_halo', data: st.weeks.map(function(){ return Math.round(st.capW*10)/10; }), borderColor:'rgba(5,150,105,0.22)', borderWidth:10, pointRadius:0, fill:false, borderDash:[12,7] });
     if(chart){ chart.data.labels=st.weeks; chart.data.datasets=ds; chart.options.scales.y.max=M; chart.update(); drawAxis(); return; }
     chart=new Chart(cv,{ type:'bar', data:{ labels:st.weeks, datasets:ds }, options:{
       responsive:true, maintainAspectRatio:false,
