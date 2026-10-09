@@ -2737,6 +2737,21 @@ window.deleteUserClean = async function(uid){
 (function(){
   var chart=null, axisChart=null, sig='';
   function fmtH(v){ return (Math.round(v*10)/10).toString().replace('.',','); }
+  function targetPattern(){
+    var cv=document.getElementById('chart-proj-load');
+    if(!cv) return '#334155';
+    var ctx=cv.getContext('2d');
+    if(window.__mcoPatCtx===ctx) return window.__mcoPat;
+    var t=document.createElement('canvas'); t.width=10; t.height=10;
+    var g=t.getContext('2d');
+    g.fillStyle='rgba(51,65,85,0.12)'; g.fillRect(0,0,10,10);
+    g.strokeStyle='#334155'; g.lineWidth=2.5; g.lineCap='square';
+    g.beginPath(); g.moveTo(-3,13); g.lineTo(13,-3); g.stroke();
+    g.beginPath(); g.moveTo(-3,3); g.lineTo(3,-3); g.stroke();
+    g.beginPath(); g.moveTo(7,13); g.lineTo(13,7); g.stroke();
+    window.__mcoPat=ctx.createPattern(t,'repeat'); window.__mcoPatCtx=ctx;
+    return window.__mcoPat;
+  }
   function extTip(ctx){
     var el=document.getElementById('proj-load-tip');
     if(!el){ el=document.createElement('div'); el.id='proj-load-tip'; el.style.cssText='position:fixed;pointer-events:none;background:rgba(15,23,42,0.94);color:#f8fafc;border-radius:8px;padding:8px 10px;font-size:11px;font-weight:700;z-index:9999;opacity:0;transition:opacity .1s;min-width:190px'; document.body.appendChild(el); }
@@ -2746,7 +2761,7 @@ window.deleteUserClean = async function(uid){
     var tot=0, mco=0, cap=null, rows='';
     pts.forEach(function(p){
       var isLine=(p.dataset.type==='line');
-      var col=isLine?(p.dataset.borderColor||'#16a34a'):(p.dataset.backgroundColor||'#94a3b8');
+      var col=isLine?(p.dataset.borderColor||'#16a34a'):(p.dataset.isTarget?'repeating-linear-gradient(45deg,#334155 0 2px,rgba(51,65,85,0.35) 2px 5px)':(p.dataset.backgroundColor||'#94a3b8'));
       if(isLine){ cap=p.parsed.y; return; }
       if(p.dataset.isTarget){ mco+=p.parsed.y||0; } else { tot+=p.parsed.y||0; }
       rows+='<div style="display:flex;align-items:center;gap:6px;margin:1px 0"><span style="width:9px;height:9px;border-radius:2px;background:'+col+';display:inline-block;flex:none"></span><span>'+p.dataset.label+' : '+fmtH(p.parsed.y)+' h</span></div>';
@@ -2804,14 +2819,14 @@ window.deleteUserClean = async function(uid){
       var soloL=window.__projSolo||null;
       lg.innerHTML=st.datasets.map(function(d){
         var off=soloL&&d.code!==soloL;
-        return '<span data-code="'+d.code+'" class="inline-flex items-center gap-1" title="'+(d.name||d.code)+' — cliquer pour isoler" style="cursor:pointer;'+(off?'opacity:0.35;filter:grayscale(1);':'')+(soloL===d.code?'font-weight:800;':'')+'"><span style="width:10px;height:10px;background:'+d.color+';display:inline-block;border-radius:2px"></span>'+d.code+'</span>';
+        return '<span data-code="'+d.code+'" class="inline-flex items-center gap-1" title="'+(d.name||d.code)+' — cliquer pour isoler" style="cursor:pointer;'+(off?'opacity:0.35;filter:grayscale(1);':'')+(soloL===d.code?'font-weight:800;':'')+'"><span style="width:10px;height:10px;background:'+(d.isTarget?'repeating-linear-gradient(45deg,#334155 0 2px,rgba(51,65,85,0.25) 2px 5px)':d.color)+';display:inline-block;border-radius:2px"></span>'+d.code+'</span>';
       }).join(' ')+' <span class="inline-flex items-center gap-1"><span style="width:14px;height:0;border-top:4px solid #111827;display:inline-block"></span>Capacité équipe (ETP)</span>';
       Array.prototype.forEach.call(lg.querySelectorAll('span[data-code]'),function(sp){
         sp.onclick=function(){ var c=sp.getAttribute('data-code'); window.__projSolo=(window.__projSolo===c)?null:c; render(); };
       });
     }
     var solo=window.__projSolo||null;
-    var ds=st.datasets.map(function(d){ return { type:'bar', label:d.code, data:d.values, backgroundColor:(solo&&d.code!==solo&&!d.isTarget)?'#cbd5e1':d.color, stack:'proj', isTarget:!!d.isTarget }; });
+    var ds=st.datasets.map(function(d){ return { type:'bar', label:d.code, data:d.values, backgroundColor:(solo&&d.code!==solo&&!d.isTarget)?'#cbd5e1':(d.isTarget?targetPattern():d.color), stack:'proj', isTarget:!!d.isTarget }; });
     ds.unshift({ type:'line', label:'Capacité équipe (ETP)', data: st.weeks.map(function(){ return Math.round(st.capW*10)/10; }), borderColor:'#111827', borderWidth:4, pointRadius:0, fill:false });
     ds.splice(1,0,{ type:'line', label:'_halo', data: st.weeks.map(function(){ return Math.round(st.capW*10)/10; }), borderColor:'rgba(255,255,255,0.9)', borderWidth:11, pointRadius:0, fill:false });
     if(chart){ chart.data.labels=st.weeks; chart.data.datasets=ds; chart.options.scales.y.max=M; chart.update(); drawAxis(); return; }
