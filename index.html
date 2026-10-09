@@ -1275,6 +1275,11 @@ function renderProjects() {
     let __mcoW = Math.round(teamCapW * __mcoPct)/100;
     if (!isFinite(__mcoW)) __mcoW = Math.round(teamCapW * 22.5)/100;
     __ds.unshift({ code: 'MCO (cible)', name: 'MCO — cible '+__mcoPct+'% de la capacité équipe', values: __wList.map(function(){ return __mcoW; }), color: '#334155', isTarget: true });
+    let __supPct = 7.5;
+    try { const __tg = window.TARGETS || JSON.parse(localStorage.getItem('catRuleTargets') || 'null'); if (__tg && __tg.support) { const __m = __tg.support; let __v = NaN; if (Array.isArray(__m)) __v = (parseFloat(__m[0])+parseFloat(__m[1]))/2; else if (typeof __m === 'object') __v = (parseFloat(__m.lo!=null?__m.lo:__m.min!=null?__m.min:__m[0])+parseFloat(__m.hi!=null?__m.hi:__m.max!=null?__m.max:__m[1]))/2; else __v = parseFloat(__m); if (isFinite(__v)) __supPct = __v; } } catch(e){}
+    let __supW = Math.round(teamCapW * __supPct)/100;
+    if (!isFinite(__supW)) __supW = Math.round(teamCapW * 7.5)/100;
+    __ds.unshift({ code: 'Support (cible)', name: 'Support terrain — cible '+__supPct+'% de la capacité équipe', values: __wList.map(function(){ return __supW; }), color: '#d97706', isTarget: true });
     return { weeks: __wList.map(w => w.label), datasets: __ds, capW: teamCapW };
   };
   window.__projLoad = window.__projLoadFn();
@@ -2737,20 +2742,21 @@ window.deleteUserClean = async function(uid){
 (function(){
   var chart=null, axisChart=null, sig='';
   function fmtH(v){ return (Math.round(v*10)/10).toString().replace('.',','); }
-  function targetPattern(){
+  function targetPattern(color){
     var cv=document.getElementById('chart-proj-load');
-    if(!cv) return '#334155';
+    if(!cv) return color;
     var ctx=cv.getContext('2d');
-    if(window.__mcoPatCtx===ctx) return window.__mcoPat;
+    if(window.__patCtx===ctx && window.__patColor===color) return window.__pat;
+    window.__patCtx=ctx; window.__patColor=color;
     var t=document.createElement('canvas'); t.width=10; t.height=10;
     var g=t.getContext('2d');
-    g.fillStyle='rgba(51,65,85,0.12)'; g.fillRect(0,0,10,10);
-    g.strokeStyle='#334155'; g.lineWidth=2.5; g.lineCap='square';
+    g.fillStyle=color+'22'; g.fillRect(0,0,10,10);
+    g.strokeStyle=color; g.lineWidth=2.5; g.lineCap='square';
     g.beginPath(); g.moveTo(-3,13); g.lineTo(13,-3); g.stroke();
     g.beginPath(); g.moveTo(-3,3); g.lineTo(3,-3); g.stroke();
     g.beginPath(); g.moveTo(7,13); g.lineTo(13,7); g.stroke();
-    window.__mcoPat=ctx.createPattern(t,'repeat'); window.__mcoPatCtx=ctx;
-    return window.__mcoPat;
+    window.__pat=ctx.createPattern(t,'repeat');
+    return window.__pat;
   }
   function extTip(ctx){
     var el=document.getElementById('proj-load-tip');
@@ -2758,19 +2764,20 @@ window.deleteUserClean = async function(uid){
     var tt=ctx.tooltip;
     if(!tt || tt.opacity===0){ el.style.opacity='0'; return; }
     var pts=(tt.dataPoints||[]).filter(function(p){ return (p.parsed.y||0)>0; });
-    var tot=0, mco=0, cap=null, rows='';
+    var tot=0, mco=0, sup=0, cap=null, rows='';
     pts.forEach(function(p){
       var isLine=(p.dataset.type==='line');
       var col=isLine?(p.dataset.borderColor||'#16a34a'):(p.dataset.isTarget?'repeating-linear-gradient(45deg,#334155 0 2px,rgba(51,65,85,0.35) 2px 5px)':(p.dataset.backgroundColor||'#94a3b8'));
       if(isLine){ cap=p.parsed.y; return; }
-      if(p.dataset.isTarget){ mco+=p.parsed.y||0; } else { tot+=p.parsed.y||0; }
+      if(p.dataset.isTarget){ if(p.dataset.label.indexOf('Support')===0){ sup+=p.parsed.y||0; } else { mco+=p.parsed.y||0; } } else { tot+=p.parsed.y||0; }
       rows+='<div style="display:flex;align-items:center;gap:6px;margin:1px 0"><span style="width:9px;height:9px;border-radius:2px;background:'+col+';display:inline-block;flex:none"></span><span>'+p.dataset.label+' : '+fmtH(p.parsed.y)+' h</span></div>';
     });
     var html='<div style="margin-bottom:4px">'+((tt.title&&tt.title[0])||'')+'</div>'+rows;
     html+='<div style="border-top:1px solid rgba(248,250,252,.3);margin-top:5px;padding-top:5px">Total projets : '+fmtH(tot)+' h</div>';
     if(cap!=null){
       if(mco>0){ html+='<div>MCO (cible) : '+fmtH(mco)+' h</div>'; }
-      var d=(tot+mco)-cap; var colD=d>0?'#f87171':'#4ade80'; var sign=d>0?'+':'';
+      if(sup>0){ html+='<div>Support (cible) : '+fmtH(sup)+' h</div>'; }
+      var d=(tot+mco+sup)-cap; var colD=d>0?'#f87171':'#4ade80'; var sign=d>0?'+':'';
       html+='<div>Capacité équipe : '+fmtH(cap)+' h</div>';
       html+='<div style="color:'+colD+'">Delta : '+sign+fmtH(d)+' h</div>';
     }
