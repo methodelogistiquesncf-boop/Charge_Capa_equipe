@@ -1961,22 +1961,35 @@ import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth
     </div>
     <div class="p-6 space-y-4 text-sm text-slate-700">
       <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
-        <h4 class="font-bold text-slate-800 mb-1">🔵 Courbe bleue — Charge équipe (h)</h4>
-        <p>Total des heures d'activités saisies au planning pour chaque semaine (S37 → S52). Un point = une semaine. Pic = semaine chargée ; creux = période creuse (congés, fêtes…). <strong>Couleurs :</strong> trait bleu plein + points pleins = semaines passées (réel) ; trait orange pointillé + points creux = semaines futures (projeté) ; le point plus gros marque la semaine courante.</p>
+        <h4 class="font-bold text-slate-800 mb-1">📊 Charge projets (échéances)</h4>
+        <p>Pour chaque projet <strong>actif avec une date de fin</strong> : heures restantes = budget − heures saisies. Ces heures sont lissées sur les semaines restantes jusqu'à la date de fin. La somme = <strong>charge projets</strong> (ex. 127,5 h/sem).</p>
       </div>
-      <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded-r-lg">
-        <h4 class="font-bold text-slate-800 mb-1">🟢 Ligne noire pleine — Capacité réelle</h4>
-        <p>Heures maximales que l'équipe peut produire en une semaine : <strong>ETP × h/semaine × rendement, congés déduits</strong>. C'est le plafond à ne pas dépasser.</p>
+      <div class="bg-orange-50 border-l-4 border-orange-500 p-4 rounded-r-lg">
+        <h4 class="font-bold text-slate-800 mb-1">🎯 Manque catégories</h4>
+        <p>Tes cibles (MCO, Support, Transverse) définissent un minimum d'heures/sem. Si le réel est en dessous, c'est un <strong>manque</strong> à combler. Si une catégorie est over-cible, la marge est récupérable. Le <strong>manque net</strong> = manques − marges récupérables (ex. 13,2 h/sem).</p>
       </div>
       <div class="bg-slate-50 border border-slate-200 p-4 rounded-xl">
-        <h4 class="font-bold text-slate-800 mb-2">✅ Interpréter en un coup d'œil</h4>
-        <ul class="space-y-2">
-          <li><span class="font-bold text-green-600">Courbe sous la ligne :</span> OK — charge soutenable, l'équipe a de la marge.</li>
-          <li><span class="font-bold text-orange-500">Courbe proche de la ligne (90-100 %) :</span> tension — marge faible, le moindre imprévu déborde.</li>
-          <li><span class="font-bold text-red-600">Courbe au-dessus de la ligne :</span> surcharge — plus de travail planifié que de capacité. Arbitrer : déplacer des blocs (glisser-déposer), reporter, déléguer ou renforcer.</li>
-        </ul>
+        <h4 class="font-bold text-slate-800 mb-2">🧮 Charge totale requise</h4>
+        <p><strong>Charge projets + Manque catégories</strong> = ce qu'il faut absolument faire chaque semaine pour tenir les échéances ET les cibles (ex. 140,7 h/sem).</p>
+      </div>
+      <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded-r-lg">
+        <h4 class="font-bold text-slate-800 mb-1"> Capacité équipe</h4>
+        <p>Nombre d'ETP × heures/ETP/sem (ex. 4 × 24,5 = 97,9 h/sem). C'est la capacité <strong>totale</strong> de l'équipe, tous usages confondus.</p>
+      </div>
+      <div class="bg-red-50 border-2 border-red-300 p-4 rounded-xl">
+        <h4 class="font-bold text-red-800 mb-2">🔴 +X ETP au total</h4>
+        <p><strong>Charge totale requise − Capacité équipe</strong> = le manque global. Converti en ETP (÷ 24,5 h/sem). Si positif, il faut recruter ou renégocier. Si négatif, c'est tenable avec l'effectif actuel.</p>
+        <p class="mt-2 text-xs text-red-700"><strong>Exemple :</strong> 140,7 − 97,9 = 42,8 h/sem de manque → 42,8 ÷ 24,5 ≈ +1,7 ETP.</p>
       </div>
       <div class="bg-yellow-50 border border-yellow-300 p-4 rounded-xl">
+        <h4 class="font-bold text-slate-800 mb-1">⚠️ Limites</h4>
+        <ul class="text-xs space-y-1">
+          <li>• Les cibles MCO/Support/Transverse sont <strong>théoriques</strong> (réglables via ⚙️)</li>
+          <li>• Le lissage suppose un rythme constant → en réalité, les pics existent</li>
+          <li>• Les heures saisies = 4 dernières semaines (moyenne glissante)</li>
+        </ul>
+      </div>
+    </div><div class="bg-yellow-50 border border-yellow-300 p-4 rounded-xl">
         <p class="font-bold text-yellow-800 mb-1">💡 Le bon réflexe</p>
         <p class="text-yellow-700">Anticipe : un pic qui dépasse la ligne verte dans 2-3 semaines se lisse <strong>maintenant</strong> (report de projet, semaine type), pas dans l'urgence.</p>
       </div>
