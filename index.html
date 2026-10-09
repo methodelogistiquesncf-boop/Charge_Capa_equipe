@@ -1240,6 +1240,7 @@ function renderProjects() {
   const teamCapW = __saisit.reduce((s2,[uid]) => s2 + capWeekOf(uid), 0);
   const sumEtp = __saisit.reduce((s2,[uid]) => s2 + (etpOf(uid)||1), 0);
   window.__projStats = { remDated, reqRate, overdue, teamCapW, perEtpW: sumEtp ? teamCapW/sumEtp : 0, actualRate: actualH/4, actualByCat: { projet: actualByCat.projet/4, mco: actualByCat.mco/4, support: actualByCat.support/4, transverse: actualByCat.transverse/4 } };
+  window.__projLoadFn = function(){
   const __wList = [];
   const __mon = new Date(); const __dn3 = (__mon.getDay()+6)%7; __mon.setDate(__mon.getDate()-__dn3); __mon.setHours(0,0,0,0);
   const __act = allProjects.filter(p => (p.cat||'projet')==='projet' && p.active !== false && Math.max(0,(p.budgetH||0)-projectConsumed(p)) > 0);
@@ -1269,7 +1270,11 @@ function renderProjects() {
     const vals = __wList.map(w => (w.t <= eT && w.t + 6*86400000 >= sT) ? Math.round(rate*10)/10 : 0);
     if (vals.some(v => v > 0)) __ds.push({ code: p.code || p.name, name: (p.name || p.code || '').replace(/"/g,'&quot;'), values: vals, color: __pal[pi % __pal.length] });
   });
-  window.__projLoad = { weeks: __wList.map(w => w.label), datasets: __ds, capW: teamCapW };
+    return { weeks: __wList.map(w => w.label), datasets: __ds, capW: teamCapW };
+  };
+  window.__projLoad = window.__projLoadFn();
+  setInterval(function(){ try{ window.__projLoad = window.__projLoadFn(); }catch(e){} }, 2500);
+
   } catch (e) { console.error('❌ Stats échéances/ETP :', e); }
 }
 
