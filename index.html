@@ -2803,7 +2803,7 @@ window.deleteUserClean = async function(uid){
     if(!dash) return null;
     c=document.createElement('div');
     c.id='proj-load-card'; c.className='bg-slate-50 p-6 rounded-xl mt-8';
-    c.innerHTML='<h3 class="font-black text-slate-800 mb-4">📊 Charge projets par semaine (toutes semaines, lissée par enveloppe)</h3>'+
+    c.innerHTML='<h3 class="font-black text-slate-800 mb-4">📊 Charge projets par semaine (toutes semaines, lissée par enveloppe) <button onclick="__exportProjCSV()" class="no-print text-[11px] font-bold px-2 py-1 rounded-lg bg-slate-100 text-slate-500 hover:bg-slate-200" title="Exporter CSV"> CSV</button></h3>'+
       '<div style="position:relative">'+
       '<div style="overflow-x:auto"><div id="proj-load-inner" style="position:relative;height:340px;min-width:100%">'+
       '<canvas id="chart-proj-load" style="position:absolute;inset:0"></canvas></div></div>'+
@@ -2966,6 +2966,33 @@ window.deleteUserClean = async function(uid){
   setInterval(tick,700);
   tick();
 })();
+</script>
+
+<script>
+/* __exportProjCSV : export CSV de l'histogramme projets (somme projets + targets + capacité + delta) */
+function __exportProjCSV(){
+  var st=window.__projLoad; if(!st){ alert('Données non chargées'); return; }
+  var weeks=st.weeks;
+  var dsProj=st.datasets.filter(function(d){ return !d.isTarget; });
+  var dsMCO=st.datasets.find(function(d){ return d.code==='MCO (cible)'; });
+  var dsTrans=st.datasets.find(function(d){ return d.code==='Transverse (cible)'; });
+  var dsSup=st.datasets.find(function(d){ return d.code==='Support (cible)'; });
+  var cap=st.capW;
+  var rows=['Semaine;Total projets;MCO (cible);Transverse (cible);Support (cible);Capacité équipe;Delta'];
+  for(var i=0;i<weeks.length;i++){
+    var tot=0; dsProj.forEach(function(d){ tot+=d.values[i]||0; });
+    var mco=dsMCO?dsMCO.values[i]||0:0;
+    var trans=dsTrans?dsTrans.values[i]||0:0;
+    var sup=dsSup?dsSup.values[i]||0:0;
+    var d=(tot+mco+trans+sup)-cap;
+    rows.push(weeks[i]+';'+tot.toFixed(1).replace('.',',')+';'+mco.toFixed(1).replace('.',',')+';'+trans.toFixed(1).replace('.',',')+';'+sup.toFixed(1).replace('.',',')+';'+cap.toFixed(1).replace('.',',')+';'+d.toFixed(1).replace('.',','));
+  }
+  var csv='\uFEFF'+rows.join('\n');
+  var blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a'); a.href=url; a.download='charge_projets_'+new Date().toISOString().slice(0,10)+'.csv'; a.click();
+  URL.revokeObjectURL(url);
+}
 </script>
 </body>
 </html>
