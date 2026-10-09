@@ -1316,15 +1316,7 @@ function renderProjects() {
     return { weeks: __wList.map(w => w.label), datasets: __ds, capW: teamCapW };
   };
   window.__projLoad = window.__projLoadFn();
-  window.__projStats = window.__projStatsFn();
-  window.__projDataReady = true;
-  setInterval(function(){ 
-    try{ 
-      window.__projLoad = window.__projLoadFn(); 
-      window.__projStats = window.__projStatsFn(); 
-      window.__projDataReady = true;
-    }catch(e){ window.__projDataReady = false; }
-  }, 2500);
+  setInterval(function(){ try{ window.__projLoad = window.__projLoadFn(); }catch(e){} }, 2500);
 
   } catch (e) { console.error('❌ Stats échéances/ETP :', e); }
 }
@@ -2546,10 +2538,7 @@ document.addEventListener('keydown', function(e) {
     var st = window.__projStats;
     var el = document.getElementById('proj-etp-panel');
     if (!el) return;
-    if (!window.__projDataReady || !st) { 
-      if(el.innerHTML === '') el.innerHTML = '<p class="text-xs text-slate-400 font-bold text-center py-4">⏳ Chargement…</p>';
-      return; 
-    }
+    if (!st) { el.innerHTML = '<p class="text-xs text-orange-600 font-bold">⚠️ Pas encore de données.</p>'; return; }
     var raw = JSON.stringify(st);
     if (raw !== window.__petpLast) { window.__petpLast = raw; el.innerHTML = '<p class="text-xs text-slate-400 font-bold"> Calcul en cours…</p>'; return; }
     function fH(x){ return x.toLocaleString('fr-FR', {maximumFractionDigits:1}); }
