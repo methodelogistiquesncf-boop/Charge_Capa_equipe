@@ -2830,12 +2830,9 @@ window.deleteUserClean = async function(uid){
       rows+='<div style="display:flex;align-items:center;gap:6px;margin:1px 0"><span style="width:9px;height:9px;border-radius:2px;background:'+col+';display:inline-block;flex:none"></span><span>'+p.dataset.label+' : '+fmtH(p.parsed.y)+' h</span></div>';
     });
     var html='<div style="margin-bottom:4px">'+((tt.title&&tt.title[0])||'')+'</div>'+rows;
-    html+='<div style="border-top:1px solid rgba(248,250,252,.3);margin-top:5px;padding-top:5px">Total projets : '+fmtH(tot)+' h</div>';
+    html+='<div style="border-top:1px solid rgba(248,250,252,.3);margin-top:5px;padding-top:5px">Total : '+fmtH(tot+mco+sup+trans)+' h</div>';
     if(cap!=null){
-      if(mco>0){ html+='<div>MCO (cible) : '+fmtH(mco)+' h</div>'; }
-      if(sup>0){ html+='<div>Support (cible) : '+fmtH(sup)+' h</div>'; }
-      if(trans>0){ html+='<div>Transverse (cible) : '+fmtH(trans)+' h</div>'; }
-      var d=(tot+mco+sup+trans)-cap; var colD=d>0?'#f87171':'#4ade80'; var sign=d>0?'+':'';
+                        var d=(tot+mco+sup+trans)-cap; var colD=d>0?'#f87171':'#4ade80'; var sign=d>0?'+':'';
       html+='<div>Capacité équipe : '+fmtH(cap)+' h</div>';
       html+='<div style="color:'+colD+'">Delta : '+sign+fmtH(d)+' h</div>';
     }
