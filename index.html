@@ -1234,16 +1234,12 @@ function renderProjects() {
       else { remDated += rest; reqRate += rest / wl; }
     }
   });
-  function __projStatsFn(){
   const actualByCat = { projet:0, mco:0, support:0, transverse:0 };
   allBlocks.forEach(b => { const w = weekOf(b); if (w && w !== 'TYPE' && w <= __curW && w > __cutW) { if (b.cat === 'projet') actualH += b.duration; if (actualByCat[b.cat] !== undefined) actualByCat[b.cat] += b.duration; } });
   const __saisit = Object.entries(allUsers).filter(([uid,u]) => saisit(u));
   const teamCapW = __saisit.reduce((s2,[uid]) => s2 + capWeekOf(uid), 0);
   const sumEtp = __saisit.reduce((s2,[uid]) => s2 + (etpOf(uid)||1), 0);
-    return { remDated, reqRate, overdue, teamCapW, perEtpW: sumEtp ? teamCapW/sumEtp : 0, actualRate: actualH/4, actualByCat: { projet: actualByCat.projet/4, mco: actualByCat.mco/4, support: actualByCat.support/4, transverse: actualByCat.transverse/4 } };  }
-  window.__projStats = __projStatsFn();
-  setInterval(function(){ try{ window.__projStats = __projStatsFn(); }catch(e){} }, 2500);
-
+  window.__projStats = { remDated, reqRate, overdue, teamCapW, perEtpW: sumEtp ? teamCapW/sumEtp : 0, actualRate: actualH/4, actualByCat: { projet: actualByCat.projet/4, mco: actualByCat.mco/4, support: actualByCat.support/4, transverse: actualByCat.transverse/4 } };
   window.__projLoadFn = function(){
   const __wList = [];
   const __mon = new Date(); const __dn3 = (__mon.getDay()+6)%7; __mon.setDate(__mon.getDate()-__dn3); __mon.setHours(0,0,0,0);
