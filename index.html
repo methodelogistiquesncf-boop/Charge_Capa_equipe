@@ -2877,15 +2877,18 @@ window.deleteUserClean = async function(uid){
       responsive:true, maintainAspectRatio:false,
       interaction:{ mode:'index', intersect:false },
       layout:{ padding:{ left:56 } }, plugins:{ legend:{ display:false }, tooltip:{ filter:function(item){ return item.parsed.y > 0; }, enabled:false, external:extTip } },
-      onClick:function(evt,activeElements){
-      if(activeElements&&activeElements.length>0){
-        var dsIdx=activeElements[0].datasetIndex;
-        var d=chart.data.datasets[dsIdx];
-        if(d&&d.type==='bar'&&d.label){
-          window.__projSolo=(window.__projSolo===d.label)?null:d.label;
-          render();
+      onClick:function(evt){
+      try{
+        var e=evt.native||evt;
+        var els=chart.getElementsAtEventForMode(e,'nearest',{intersect:true},false);
+        if(els&&els.length){
+          var d=chart.data.datasets[els[0].datasetIndex];
+          if(d&&d.type==='bar'&&d.label){
+            window.__projSolo=(window.__projSolo===d.label)?null:d.label;
+            render();
+          }
         }
-      }
+      }catch(err){}
     },scales:{ x:{ stacked:true }, y:{ stacked:true, min:0, max:M, ticks:{ display:false, stepSize: (M<=60?10: M<=140?20: M<=400?50:100) }, grid:{ color:'rgba(100,116,139,0.15)' } } }
     }});
     drawAxis();
