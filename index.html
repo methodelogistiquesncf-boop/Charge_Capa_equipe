@@ -544,31 +544,47 @@ window.importRHExcel = async function(event){
   try{
     const data = await file.arrayBuffer();
     const wb = XLSX.read(data);
-    let processed=0, ignored=0; const unknown={};
+    let processed=0, ignored=0, skipped=0; const unknown={};
     const byUid={};
     wb.SheetNames.forEach(sn=>{
       const rows = XLSX.utils.sheet_to_json(wb.Sheets[sn], { header:1, raw:true, defval:'' });
       if(rows.length<2) return;
       const hd = rows[0].map(h=>String(h).toLowerCase().trim());
-      const ix = n => hd.findIndex(h=>h===n||h.startsWith(n));
-      const iMat=ix('matric'), iD=ix('dated'), iF=ix('datef'), iC=ix('absid'), iU=ix('unite'), iT=ix('temps');
-      if(iMat<0||iD<0) return;
+      const iMat = hd.findIndex(h=>h==='matric');
+      if(iMat<0) return;
+      // Détection des groupes : absid, absid2, absid3... (et potentiellement absid4...)
+      const groups = [];
+      hd.forEach((h,idx)=>{
+        const m = h.match(/^absid(\d*)$/);
+        if(m){
+          const suf = m[1] || ''; // '' pour absid, '2' pour absid2, etc.
+          const iD = hd.indexOf('dated'+suf);
+          const iF = hd.indexOf('datef'+suf);
+          if(iD>=0) groups.push({ iC: idx, iD, iF: iF>=0?iF:iD, suffix: suf||'1' });
+        }
+      });
+      if(!groups.length) return;
       for(let r=1;r<rows.length;r++){
         const row=rows[r]; const mat=String(row[iMat]||'').trim(); if(!mat) continue;
-        const code=String(iC>=0?row[iC]:'').trim().toUpperCase();
-        if(RH_IGNORED.has(code)){ ignored++; continue; }
         const uid = Object.keys(allUsers).find(u=>String(allUsers[u].matricule||'').trim()===mat);
-        if(!uid){ unknown[mat]=(unknown[mat]||0)+1; continue; }
-        (byUid[uid]=byUid[uid]||[]).push({ dated: row[iD], datef: iF>=0?row[iF]:row[iD], absid: code, unite: iU>=0?row[iU]:'J', temps: iT>=0?row[iT]:'0' });
-        processed++;
+        groups.forEach(g=>{
+          const code = String(row[g.iC]||'').trim().toUpperCase();
+          if(!code){ skipped++; return; }
+          if(RH_IGNORED.has(code)){ ignored++; return; }
+          if(!uid){ unknown[mat]=(unknown[mat]||0)+1; return; }
+          const dated = row[g.iD]; const datef = row[g.iF];
+          if(!dated) return;
+          (byUid[uid]=byUid[uid]||[]).push({ dated: dated, datef: datef||dated, absid: code, unite:'J', temps:'0' });
+          processed++;
+        });
       }
     });
-    if(!processed){ if(status) status.textContent='❌ Aucune absence valide (colonnes attendues : matric, dated, datef, absid, unite, temps).'; return; }
+    if(!processed){ if(status) status.textContent='❌ Aucune absence valide détectée (colonnes absid/dated/datef attendues).'; return; }
     if(status) status.textContent='⏳ Enregistrement de '+processed+' absences…';
     const batchId = file.name+'-'+Date.now();
     for(const uid in byUid){ for(const a of byUid[uid]){ await addDoc(collection(db,'cc_absences'), { uid:uid, dated:a.dated, datef:a.datef, absid:a.absid, unite:String(a.unite), temps:String(a.temps), batch:batchId, importedAt: serverTimestamp() }); } }
     const unk=Object.keys(unknown);
-    if(status) status.textContent='✅ '+processed+' absences importées · '+ignored+' lignes ignorées (codes exclus)'+(unk.length?' · matricules inconnus : '+unk.join(', '):'');
+    if(status) status.textContent='✅ '+processed+' absences importées · '+ignored+' lignes ignorées (codes exclus)'+(unk.length?' · matricules inconnus : '+unk.slice(0,5).join(', ')+(unk.length>5?'…':''):'');
     refreshAll();
   }catch(e){ if(status) status.textContent='❌ Erreur import : '+e.message; console.error(e); }
   event.target.value='';
