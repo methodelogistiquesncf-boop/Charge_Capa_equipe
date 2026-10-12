@@ -45,6 +45,7 @@ tr.gs td:nth-child(3)::after, tr.gs td:nth-child(4)::after { content: '—'; col
 <style id="hide-agent-status">/* Masque la ligne récap travaillées/capacité sous le calendrier */ #agent-status{display:none!important}</style>
 <style id="hide-dash-kpis">/* Masque les 4 cartes KPI du haut du dashboard */ #dash-kpis{display:none!important}</style>
 <style id="hide-dashdetail-v2">/* Supprime le tableau détail redondant (toutes occurrences) + bannière diagnostic */ table:has(#dash-detail), #dash-detail, #dash-recommandation{display:none!important}</style>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 <body class="bg-slate-50 min-h-screen">
 
@@ -329,8 +330,19 @@ tr.gs td:nth-child(3)::after, tr.gs td:nth-child(4)::after { content: '—'; col
 <section id="view-users" class="max-w-[1920px] mx-auto px-6 py-8 hidden">
   <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
     <div class="p-6 border-b border-slate-200">
-      <h2 class="text-xl font-black text-slate-800">👥 Utilisateurs & rôles</h2>
-      <p class="text-sm text-slate-500 mt-1">Comptes, rôles, <strong>ETP</strong>, <strong>taux de rendement</strong> (défaut 0,85), mode de saisie, accès</p>
+      <div class="flex justify-between items-start">
+        <div>
+          <h2 class="text-xl font-black text-slate-800">👥 Utilisateurs & rôles</h2>
+          <p class="text-sm text-slate-500 mt-1">Comptes, rôles, <strong>ETP</strong>, <strong>taux de rendement</strong> (défaut 0,85), mode de saisie, accès</p>
+        </div>
+        <div class="flex flex-col gap-2">
+          <label class="bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold text-sm px-4 py-2 cursor-pointer transition">
+            📥 Importer absences RH
+            <input type="file" id="rh-import-file" accept=".xlsx,.xls" class="hidden" onchange="importRHExcel(event)">
+          </label>
+          <div id="rh-import-status" class="text-[11px] text-slate-500 hidden"></div>
+        </div>
+      </div>
     </div>
     <div class="p-6 bg-slate-50 border-b border-slate-200">
       <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">➕ Créer un compte</h3>
@@ -341,6 +353,7 @@ tr.gs td:nth-child(3)::after, tr.gs td:nth-child(4)::after { content: '—'; col
         <select id="nu-role" class="p-2.5 rounded-lg border border-slate-200 text-sm font-bold outline-none">
           <option value="agent">🟢 Agent</option><option value="manager">🔵 Manager</option><option value="admin">🔴 Admin</option>
         </select>
+        <input type="text" id="nu-matricule" placeholder="Matricule RH" class="p-2.5 rounded-lg border border-slate-200 text-sm font-bold outline-none focus:border-blue-500" title="Matricule RH (ex: 7607201)">
         <input type="number" id="nu-etp" placeholder="ETP" min="0.1" max="1" step="0.1" value="1" class="p-2.5 rounded-lg border border-slate-200 text-sm font-bold outline-none focus:border-blue-500 text-center" title="Équivalent Temps Plein">
         <button onclick="createUser()" class="bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold text-sm">Créer</button>
       </div>
@@ -487,7 +500,11 @@ const leaveFactor = () => {
   const joursOuvres = Math.max(1, config.weeks * 5);
   return Math.max(0, (joursOuvres - (config.congeDays ?? 46)) / joursOuvres);
 };
-const capWeekOf = uid => config.hoursWeek * etpOf(uid) * rendementOf(uid) * leaveFactor();
+const capWeekOf = uid => {
+  const base = config.hoursWeek * etpOf(uid) * rendementOf(uid);
+  const absences = absencesWeekOf(uid, currentWeek());
+  return Math.max(0, base - absences);
+};
 const capYearOf = uid => capWeekOf(uid) * config.weeks;
 const stdCapWeek = () => config.hoursWeek * 0.85 * leaveFactor();
 const joursTravaillesAn = () => Math.max(0, config.weeks * 5 - (config.congeDays ?? 46));
@@ -3036,5 +3053,191 @@ function __exportProjCSV(){
   URL.revokeObjectURL(url);
 }
 </script>
+
+
+/* ═══════════════════════════════════════════════════════════════
+   IMPORT ABSENCES RH + CAPACITÉ RÉELLE
+   ═══════════════════════════════════════════════════════════════ */
+
+const IGNORED_CODES = new Set(['OBX', 'OBJ', 'ACB', 'BAZ', 'UMH', 'UAN', 'ACC', 'UAC', 'UAY', 'BCL', 'UAR', 'UDJ', 'URI', 'UCU', 'AOM', 'APN', 'APV', 'UTJ', 'UTQ', 'UTC', 'UTY', 'UBC']);
+
+let allAbsences = {};
+
+function currentWeek() {
+  const now = new Date();
+  const day = (now.getDay() + 6) % 7;
+  const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - day);
+  const yearStart = new Date(monday.getFullYear(), 0, 1);
+  const weekNum = Math.ceil((((monday - yearStart) / 86400000) + yearStart.getDay() + 1) / 7);
+  return `${monday.getFullYear()}-W${String(weekNum).padStart(2, '0')}`;
+}
+
+function weekOf(date) {
+  const d = new Date(date);
+  const day = (d.getDay() + 6) % 7;
+  const monday = new Date(d.getFullYear(), d.getMonth(), d.getDate() - day);
+  const yearStart = new Date(monday.getFullYear(), 0, 1);
+  const weekNum = Math.ceil((((monday - yearStart) / 86400000) + yearStart.getDay() + 1) / 7);
+  return `${monday.getFullYear()}-W${String(weekNum).padStart(2, '0')}`;
+}
+
+function absencesWeekOf(uid, weekKey) {
+  const absences = allAbsences[uid] || [];
+  const [year, weekStr] = weekKey.split('-W');
+  const weekNum = parseInt(weekStr, 10);
+  const monday = new Date(parseInt(year), 0, 1 + (weekNum - 1) * 7);
+  const day = (monday.getDay() + 6) % 7;
+  monday.setDate(monday.getDate() - day);
+  monday.setHours(0, 0, 0, 0);
+  const sunday = new Date(monday);
+  sunday.setDate(monday.getDate() + 6);
+  sunday.setHours(23, 59, 59, 999);
+  
+  let totalHours = 0;
+  absences.forEach(abs => {
+    const start = new Date(abs.dated);
+    const end = new Date(abs.datef);
+    if (end < monday || start > sunday) return;
+    
+    const overlapStart = start > monday ? start : monday;
+    const overlapEnd = end < sunday ? end : sunday;
+    
+    let days = 0;
+    const current = new Date(overlapStart);
+    while (current <= overlapEnd) {
+      const dayOfWeek = current.getDay();
+      if (dayOfWeek !== 0 && dayOfWeek !== 6) days++;
+      current.setDate(current.getDate() + 1);
+    }
+    
+    if (abs.unite === 'J') {
+      totalHours += days * config.hoursWeek / 5;
+    } else if (abs.unite === 'H') {
+      totalHours += parseFloat(abs.temps) || 0;
+    }
+  });
+  return totalHours;
+}
+
+async function importRHExcel(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  
+  const status = document.getElementById('rh-import-status');
+  status.classList.remove('hidden');
+  status.textContent = '⏳ Lecture du fichier...';
+  
+  try {
+    const data = await file.arrayBuffer();
+    const workbook = XLSX.read(data, { dense: true });
+    
+    let totalRows = 0;
+    let processed = 0;
+    let ignored = 0;
+    let unknownMatricules = [];
+    
+    const newAbsences = {};
+    
+    for (const sheetName of workbook.sheetNames) {
+      const sheet = workbook.sheets[sheetName];
+      const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: false });
+      
+      if (rows.length < 2) continue;
+      const headers = rows[0].map(h => (h || '').toString().toLowerCase());
+      const matricIdx = headers.findIndex(h => h.includes('matric'));
+      const datedIdx = headers.findIndex(h => h.includes('dated'));
+      const datefIdx = headers.findIndex(h => h.includes('datef'));
+      const absidIdx = headers.findIndex(h => h.includes('absid'));
+      const uniteIdx = headers.findIndex(h => h.includes('unite'));
+      const tempsIdx = headers.findIndex(h => h.includes('temps'));
+      
+      if (matricIdx === -1 || datedIdx === -1 || datefIdx === -1) continue;
+      
+      for (let i = 1; i < rows.length; i++) {
+        const row = rows[i];
+        if (!row || !row[matricIdx]) continue;
+        
+        const matricule = row[matricIdx].toString().trim();
+        const absid = (absidIdx !== -1 ? row[absidIdx] : '').toString().trim().toUpperCase();
+        
+        totalRows++;
+        
+        if (IGNORED_CODES.has(absid)) {
+          ignored++;
+          continue;
+        }
+        
+        const uid = Object.keys(allUsers).find(u => allUsers[u].matricule === matricule);
+        if (!uid) {
+          unknownMatricules.push(matricule);
+          continue;
+        }
+        
+        if (!newAbsences[uid]) newAbsences[uid] = [];
+        newAbsences[uid].push({
+          dated: row[datedIdx],
+          datef: datefIdx !== -1 ? row[datefIdx] : row[datedIdx],
+          absid: absid,
+          unite: uniteIdx !== -1 ? row[uniteIdx] : 'J',
+          temps: tempsIdx !== -1 ? row[tempsIdx] : '0'
+        });
+        processed++;
+      }
+    }
+    
+    if (processed === 0) {
+      status.textContent = '❌ Aucune absence valide trouvée. Vérifiez les colonnes (matric, dated, datef).';
+      return;
+    }
+    
+    status.textContent = `⏳ Sauvegarde de ${processed} absences...`;
+    
+    const batch = [];
+    for (const uid in newAbsences) {
+      newAbsences[uid].forEach((abs, idx) => {
+        batch.push({
+          uid: uid,
+          ...abs,
+          importedAt: serverTimestamp(),
+          fileId: file.name + '-' + Date.now()
+        });
+      });
+    }
+    
+    for (const abs of batch) {
+      await addDoc(collection(db, 'cc_absences'), abs);
+    }
+    
+    allAbsences = newAbsences;
+    
+    status.textContent = `✅ ${processed} absences importées · ${ignored} codes ignorés · ${unknownMatricules.length} matricules inconnus`;
+    if (unknownMatricules.length > 0 && unknownMatricules.length <= 5) {
+      status.textContent += ` (${unknownMatricules.join(', ')})`;
+    }
+    
+    renderUsers();
+    refreshAll();
+    
+  } catch (e) {
+    status.textContent = '❌ Erreur : ' + e.message;
+    console.error('Import RH error:', e);
+  }
+  
+  event.target.value = '';
+}
+
+// Écouteur Firestore pour les absences
+onSnapshot(query(collection(db, 'cc_absences'), orderBy('importedAt', 'desc')), (snap) => {
+  const latest = {};
+  snap.forEach(doc => {
+    const d = doc.data();
+    if (!latest[d.uid]) latest[d.uid] = [];
+    latest[d.uid].push(d);
+  });
+  allAbsences = latest;
+  renderUsers();
+  refreshAll();
+});
+
 </body>
 </html>
