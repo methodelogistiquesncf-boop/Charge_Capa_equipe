@@ -2879,12 +2879,11 @@ window.deleteUserClean = async function(uid){
       layout:{ padding:{ left:56 } }, plugins:{ legend:{ display:false }, tooltip:{ filter:function(item){ return item.parsed.y > 0; }, enabled:false, external:extTip } },
       onClick:function(evt,activeElements){
       if(activeElements&&activeElements.length>0){
-        var idx=activeElements[0].index;
-        var ds=window.__projLoad.datasets[idx];
-        if(ds&&ds.code){
-          var solo=window.__histSolo;
-          window.__histSolo=(solo===ds.code)?null:ds.code;
-          renderChart();
+        var dsIdx=activeElements[0].datasetIndex;
+        var d=chart.data.datasets[dsIdx];
+        if(d&&d.type==='bar'&&d.label){
+          window.__projSolo=(window.__projSolo===d.label)?null:d.label;
+          render();
         }
       }
     },scales:{ x:{ stacked:true }, y:{ stacked:true, min:0, max:M, ticks:{ display:false, stepSize: (M<=60?10: M<=140?20: M<=400?50:100) }, grid:{ color:'rgba(100,116,139,0.15)' } } }
