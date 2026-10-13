@@ -45,6 +45,7 @@ tr.gs td:nth-child(3)::after, tr.gs td:nth-child(4)::after { content: '—'; col
 <style id="hide-agent-status">/* Masque la ligne récap travaillées/capacité sous le calendrier */ #agent-status{display:none!important}</style>
 <style id="hide-dash-kpis">/* Masque les 4 cartes KPI du haut du dashboard */ #dash-kpis{display:none!important}</style>
 <style id="hide-dashdetail-v2">/* Supprime le tableau détail redondant (toutes occurrences) + bannière diagnostic */ table:has(#dash-detail), #dash-detail, #dash-recommandation{display:none!important}</style>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 <body class="bg-slate-50 min-h-screen">
 
@@ -329,8 +330,19 @@ tr.gs td:nth-child(3)::after, tr.gs td:nth-child(4)::after { content: '—'; col
 <section id="view-users" class="max-w-[1920px] mx-auto px-6 py-8 hidden">
   <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
     <div class="p-6 border-b border-slate-200">
-      <h2 class="text-xl font-black text-slate-800">👥 Utilisateurs & rôles</h2>
-      <p class="text-sm text-slate-500 mt-1">Comptes, rôles, <strong>ETP</strong>, <strong>taux de rendement</strong> (défaut 0,85), mode de saisie, accès</p>
+      <div class="flex justify-between items-start">
+        <div>
+          <h2 class="text-xl font-black text-slate-800">👥 Utilisateurs & rôles</h2>
+          <p class="text-sm text-slate-500 mt-1">Comptes, rôles, <strong>ETP</strong>, <strong>taux de rendement</strong> (défaut 0,85), mode de saisie, accès</p>
+        </div>
+        <div class="flex flex-col gap-2">
+          <label class="bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold text-sm px-4 py-2 cursor-pointer transition">
+            📥 Importer absences RH
+            <input type="file" id="rh-import-file" accept=".xlsx,.xls" class="hidden" onchange="importRHExcel(event)">
+          </label>
+          <div id="rh-import-status" class="text-[11px] text-slate-500 hidden"></div>
+        </div>
+      </div>
     </div>
     <div class="p-6 bg-slate-50 border-b border-slate-200">
       <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">➕ Créer un compte</h3>
@@ -341,6 +353,7 @@ tr.gs td:nth-child(3)::after, tr.gs td:nth-child(4)::after { content: '—'; col
         <select id="nu-role" class="p-2.5 rounded-lg border border-slate-200 text-sm font-bold outline-none">
           <option value="agent">🟢 Agent</option><option value="manager">🔵 Manager</option><option value="admin">🔴 Admin</option>
         </select>
+        <input type="text" id="nu-matricule" placeholder="Matricule RH" class="p-2.5 rounded-lg border border-slate-200 text-sm font-bold outline-none focus:border-blue-500" title="Matricule RH (ex: 7607201)">
         <input type="number" id="nu-etp" placeholder="ETP" min="0.1" max="1" step="0.1" value="1" class="p-2.5 rounded-lg border border-slate-200 text-sm font-bold outline-none focus:border-blue-500 text-center" title="Équivalent Temps Plein">
         <button onclick="createUser()" class="bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold text-sm">Créer</button>
       </div>
@@ -350,6 +363,7 @@ tr.gs td:nth-child(3)::after, tr.gs td:nth-child(4)::after { content: '—'; col
       <table class="w-full text-sm">
         <thead><tr class="bg-slate-800 text-white">
           <th class="text-left p-3 font-bold text-xs uppercase">Nom</th>
+          <th class="text-left p-3 font-bold text-xs uppercase">Matricule</th>
           <th class="text-left p-3 font-bold text-xs uppercase">Email</th>
           <th class="text-center p-3 font-bold text-xs uppercase">ETP <button type="button" onclick="explainParam('etpUser')" class="text-blue-500 hover:text-blue-700 font-black" title="A quoi sert ce champ ?">ⓘ</button></th>
           <th class="text-center p-3 font-bold text-xs uppercase">Rendement <button type="button" onclick="explainParam('rendUser')" class="text-blue-500 hover:text-blue-700 font-black" title="A quoi sert ce champ ?">ⓘ</button></th>
@@ -487,8 +501,197 @@ const leaveFactor = () => {
   const joursOuvres = Math.max(1, config.weeks * 5);
   return Math.max(0, (joursOuvres - (config.congeDays ?? 46)) / joursOuvres);
 };
-const capWeekOf = uid => config.hoursWeek * etpOf(uid) * rendementOf(uid) * leaveFactor();
+const capWeekOf = uid => {
+  const base = config.hoursWeek * etpOf(uid) * rendementOf(uid) * leaveFactor();
+  const abs = absencesWeekOf(uid, rhNowWeek());
+  return Math.max(0, base - (isFinite(abs) ? abs : 0));
+};
 const capYearOf = uid => capWeekOf(uid) * config.weeks;
+/* ═══════════════════════════════════════════════════════════════
+   IMPORT ABSENCES RH + CAPACITÉ RÉELLE HEBDO
+   ═══════════════════════════════════════════════════════════════ */
+const RH_IGNORED = new Set(['OBX','OBJ','ACB','BAZ','UMH','UAN','ACC','UAC','UAY','BCL','UAR','UDJ','URI','UCU','AOM','APN','APV','UTJ','UTQ','UTC','UTY','UBC']);
+let allAbsences = {};
+
+function rhParseDate(v) {
+  if (v == null || v === '') return null;
+  if (typeof v === 'number') {
+    const d = new Date(Math.round((v - 25569) * 86400000));
+    return isNaN(d.getTime()) ? null : d;
+  }
+  const str = String(v).trim();
+  const m = str.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+  if (m) { const d = new Date(+m[3], +m[2] - 1, +m[1]); return isNaN(d.getTime()) ? null : d; }
+  const d = new Date(str);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+function rhParseTemps(v) {
+  const m = String(v || '').trim().match(/(\d+):(\d{2})/);
+  if (m) return (+m[1]) + (+m[2]) / 60;
+  const f = parseFloat(String(v));
+  return isFinite(f) ? f : 0;
+}
+
+function rhWeekISO(t) {
+  const d = new Date(t);
+  const dn = (d.getDay() + 6) % 7;
+  d.setDate(d.getDate() - dn + 3);
+  const ft = new Date(d.getFullYear(), 0, 4);
+  const fn = (ft.getDay() + 6) % 7;
+  ft.setDate(ft.getDate() - fn + 3);
+  return d.getFullYear() + '-W' + String(1 + Math.round((d - ft) / 604800000)).padStart(2, '0');
+}
+
+function rhNowWeek() { return rhWeekISO(Date.now()); }
+
+function countWorkingDays(start, end) {
+  let days = 0;
+  const cur = new Date(start);
+  cur.setHours(0, 0, 0, 0);
+  const endD = new Date(end);
+  endD.setHours(23, 59, 59, 999);
+  while (cur <= endD) {
+    const dw = cur.getDay();
+    if (dw >= 1 && dw <= 5) days++;
+    cur.setDate(cur.getDate() + 1);
+  }
+  return days;
+}
+
+function absencesWeekOf(uid, weekKey) {
+  const list = allAbsences[uid] || [];
+  const m = String(weekKey).match(/(\d{4})-W(\d+)/);
+  if (!m) return 0;
+  const thu = new Date(+m[1], 0, 4);
+  const thn = (thu.getDay() + 6) % 7;
+  thu.setDate(thu.getDate() - thn + 3);
+  const monday = new Date(thu.getTime() + ((+m[2]) - 1) * 7 * 86400000 - 3 * 86400000);
+  monday.setHours(0, 0, 0, 0);
+  const sunday = new Date(monday.getTime() + 6 * 86400000);
+  sunday.setHours(23, 59, 59, 999);
+  let total = 0;
+  list.forEach(a => {
+    const st = rhParseDate(a.dated);
+    const en = rhParseDate(a.datef != null ? a.datef : a.dated);
+    if (!st || !en || en < monday || st > sunday) return;
+    const os = st > monday ? st : monday;
+    const oe = en < sunday ? en : sunday;
+    const u = String(a.unite || 'J').toUpperCase();
+    if (u === 'H') {
+      if (st >= monday && st <= sunday) total += rhParseTemps(a.temps);
+    } else if (u === 'S' || u === 'M') {
+      total += countWorkingDays(os, oe) * (config.hoursWeek / 10);
+    } else {
+      total += countWorkingDays(os, oe) * (config.hoursWeek / 5);
+    }
+  });
+  return total;
+}
+
+window.importRHExcel = async function(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const status = document.getElementById('rh-import-status');
+  if (status) { status.classList.remove('hidden'); status.textContent = '⏳ Lecture du fichier…'; }
+  try {
+    const data = await file.arrayBuffer();
+    const wb = XLSX.read(data, { raw: true });
+    let processed = 0, ignored = 0;
+    const unknown = {};
+    const byUid = {};
+    
+    wb.SheetNames.forEach(sn => {
+      const rows = XLSX.utils.sheet_to_json(wb.Sheets[sn], { header: 1, raw: true, defval: '' });
+      let lastMat = null, lastUid = null;
+      let headerFound = false;
+      
+      rows.forEach(row => {
+        const cells = (row || []).map(c => c == null ? '' : c);
+        // Détecter l'en-tête
+        if (!headerFound) {
+          if (String(cells[0]).toLowerCase().includes('matric')) {
+            headerFound = true;
+            return;
+          }
+          return;
+        }
+        
+        // Col 0: Matricule
+        const matCell = cells[0];
+        if (matCell && String(matCell).trim().match(/^[0-9]{6,8}[A-Z]?$/i)) {
+          lastMat = String(matCell).trim().toUpperCase();
+          lastUid = Object.keys(allUsers).find(u => String(allUsers[u].matricule || '').trim().toUpperCase() === lastMat) || null;
+        }
+        
+        // Col 2: Date Du
+        const dateDebut = cells[2];
+        if (!dateDebut && dateDebut !== 0) return;
+        const dateDebutParsed = rhParseDate(dateDebut);
+        if (!dateDebutParsed) return;
+        
+        // Col 3: Unité Du, Col 4: Date Au, Col 7: Durée, Col 8: Motif
+        const unite = String(cells[3] || 'J').trim().toUpperCase().charAt(0);
+        const dateFin = cells[4];
+        const dateFinParsed = rhParseDate(dateFin) || dateDebutParsed;
+        const duree = cells[7];
+        const motif = String(cells[8] || '').trim().toUpperCase();
+        
+        if (!motif) return;
+        if (RH_IGNORED.has(motif)) { ignored++; return; }
+        if (!lastUid) {
+          unknown[lastMat || '?'] = (unknown[lastMat || '?'] || 0) + 1;
+          return;
+        }
+        
+        (byUid[lastUid] = byUid[lastUid] || []).push({
+          dated: dateDebut,
+          datef: dateFin || dateDebut,
+          unite: unite,
+          temps: duree,
+          motif: motif
+        });
+        processed++;
+      });
+    });
+    
+    if (!processed) {
+      if (status) status.textContent = '❌ Aucune absence valide détectée.';
+      return;
+    }
+    
+    if (status) status.textContent = '⏳ Enregistrement de ' + processed + ' absences…';
+    const batchId = file.name + '-' + Date.now();
+    
+    for (const uid in byUid) {
+      for (const a of byUid[uid]) {
+        await addDoc(collection(db, 'cc_absences'), {
+          uid: uid,
+          dated: a.dated,
+          datef: a.datef,
+          unite: a.unite,
+          temps: String(a.temps || ''),
+          motif: a.motif,
+          batch: batchId,
+          importedAt: serverTimestamp()
+        });
+      }
+    }
+    
+    const unk = Object.keys(unknown);
+    if (status) {
+      status.textContent = '✅ ' + processed + ' absences importées · ' + ignored + ' ignorées' + (unk.length ? ' · inconnus: ' + unk.slice(0,3).join(',') : '');
+    }
+    refreshAll();
+  } catch (e) {
+    if (status) status.textContent = '❌ Erreur: ' + e.message;
+    console.error('Import RH:', e);
+  }
+  event.target.value = '';
+};
+
+window.changeMatricule = (uid, val) => updateDoc(doc(db, PATHS.users, uid), { matricule: String(val).trim() });
+
 const stdCapWeek = () => config.hoursWeek * 0.85 * leaveFactor();
 const joursTravaillesAn = () => Math.max(0, config.weeks * 5 - (config.congeDays ?? 46));
 
@@ -1389,6 +1592,7 @@ function renderUsers() {
     .sort((a,b) => (a[1].name||'').localeCompare(b[1].name||'')).map(([uid,u]) => `
     <tr class="border-b border-slate-100 hover:bg-slate-50">
       <td class="p-3 font-bold text-slate-800">${esc(u.name)} ${uid === me.uid ? '<span class="text-[10px] text-slate-400">(vous)</span>' : ''}</td>
+      <td class="p-3 text-center"><input type="text" value="${esc(u.matricule || '')}" placeholder="—" onchange="changeMatricule('${uid}', this.value)" class="w-24 p-1.5 rounded-lg border border-slate-200 text-xs font-bold outline-none text-center focus:border-blue-500"></td>
       <td class="p-3 text-slate-500 text-xs">${esc(u.email)}</td>
       <td class="p-3 text-center">${u.saisit === false ? '<span class="text-slate-300 font-black" title="Hors charge : gestion seule">—</span>' : `<input type="number" value="${u.etp || 1.0}" min="0.1" max="1" step="0.1" onchange="changeEtp('${uid}', this.value)" class="w-16 p-1.5 rounded-lg border border-slate-200 text-xs font-bold outline-none text-center focus:border-blue-500">`}</td>
       <td class="p-3 text-center">${u.saisit === false ? '<span class="text-slate-300 font-black" title="Hors charge : gestion seule">—</span>' : `<input type="number" value="${(u.rendement ?? 0.85)}" min="0.1" max="1" step="0.05" onchange="changeRendement('${uid}', this.value)" class="w-16 p-1.5 rounded-lg border border-slate-200 text-xs font-bold outline-none text-center focus:border-blue-500">`}</td>
@@ -2877,15 +3081,18 @@ window.deleteUserClean = async function(uid){
       responsive:true, maintainAspectRatio:false,
       interaction:{ mode:'index', intersect:false },
       layout:{ padding:{ left:56 } }, plugins:{ legend:{ display:false }, tooltip:{ filter:function(item){ return item.parsed.y > 0; }, enabled:false, external:extTip } },
-      onClick:function(evt,activeElements){
-      if(activeElements&&activeElements.length>0){
-        var dsIdx=activeElements[0].datasetIndex;
-        var d=chart.data.datasets[dsIdx];
-        if(d&&d.type==='bar'&&d.label){
-          window.__projSolo=(window.__projSolo===d.label)?null:d.label;
-          render();
+      onClick:function(evt){
+      try{
+        var e=evt.native||evt;
+        var els=chart.getElementsAtEventForMode(e,'nearest',{intersect:true},false);
+        if(els&&els.length){
+          var d=chart.data.datasets[els[0].datasetIndex];
+          if(d&&d.type==='bar'&&d.label){
+            window.__projSolo=(window.__projSolo===d.label)?null:d.label;
+            render();
+          }
         }
-      }
+      }catch(err){}
     },scales:{ x:{ stacked:true }, y:{ stacked:true, min:0, max:M, ticks:{ display:false, stepSize: (M<=60?10: M<=140?20: M<=400?50:100) }, grid:{ color:'rgba(100,116,139,0.15)' } } }
     }});
     drawAxis();
