@@ -2773,6 +2773,61 @@ window.deleteUserClean = async function(uid){
 </script>
 
 <script>
+
+/* ── Graphique mensuel : 4 catégories vs capacité ── */
+(function(){
+var chart=null, sig='';
+function render(){
+var cv=document.getElementById('chart-monthly');
+if(!cv||typeof Chart==='undefined') return;
+var real=allBlocks.filter(function(b){ return weekOf(b)!=='TYPE'; });
+var work=real.filter(function(b){ return b.cat!=='absences'; });
+var users=Object.entries(allUsers).filter(function(e){ return saisit(e[1]); });
+var now=new Date();
+var months=[];
+for(var i=11;i>=0;i--){
+var d=new Date(now.getFullYear(),now.getMonth()-i,1);
+months.push({ key:d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'), label:d.toLocaleDateString('fr-FR',{month:'short',year:'2-digit'}), year:d.getFullYear(), month:d.getMonth() });
+}
+var catColors={ projet:'#2563eb', mco:'#dc2626', support:'#ea580c', transverse:'#475569' };
+var datasets=['projet','mco','support','transverse'].map(function(cat){
+return { label:cat.charAt(0).toUpperCase()+cat.slice(1), data:months.map(function(m){ return work.filter(function(b){ var bd=new Date(mondayOf(b.week||'2026-W01')); return bd.getFullYear()===m.year&&bd.getMonth()===m.month&&b.cat===cat; }).reduce(function(s,b){ return s+b.duration; },0); }), backgroundColor:catColors[cat], stack:'s' };
+});
+var capData=months.map(function(m){
+var monthBlocks=work.filter(function(b){ var bd=new Date(mondayOf(b.week||'2026-W01')); return bd.getFullYear()===m.year&&bd.getMonth()===m.month; });
+var weeksInMonth=new Set(monthBlocks.map(function(b){ return b.week; })).size||4;
+return users.reduce(function(s,e){ return s+capWeekOf(e[0]); },0)*weeksInMonth;
+});
+datasets.push({ type:'line', label:'Capacité équipe', data:capData, borderColor:'#111827', borderWidth:3, pointRadius:0, fill:false });
+var s2=JSON.stringify(datasets.map(function(d){ return d.data; }));
+if(s2===sig && chart) return;
+sig=s2;
+if(chart){ chart.data.labels=months.map(function(m){ return m.label; }); chart.data.datasets=datasets; chart.update(); return; }
+chart=new Chart(cv,{ type:'bar', data:{ labels:months.map(function(m){ return m.label; }), datasets:datasets }, options:{ responsive:true, maintainAspectRatio:false, interaction:{mode:'index',intersect:false}, plugins:{legend:{position:'bottom',labels:{font:{size:11}}}}, scales:{x:{stacked:true},y:{stacked:true,beginAtZero:true,ticks:{callback:function(v){return v+' h';}}}} } });
+}
+function ensureCard(){
+var dash=document.getElementById('view-dashboard');
+if(!dash) return null;
+var c=document.getElementById('monthly-card');
+if(c) return c;
+var projCard=document.getElementById('proj-load-card');
+c=document.createElement('div');
+c.id='monthly-card';
+c.className='bg-slate-50 p-6 rounded-xl mt-8';
+c.innerHTML='<h3 class="font-black text-slate-800 mb-4">📊 Charge par mois (4 catégories) vs capacité équipe</h3>'+
+'<div style="position:relative;height:280px"><canvas id="chart-monthly" style="position:absolute;inset:0"></canvas></div>'+
+'<p class="text-[10px] text-slate-400 mt-1">Barres empilées = heures réelles par catégorie (Projets, MCO, Support, Transverse). Ligne noire = capacité mensuelle de l'équipe.</p>';
+if(projCard && projCard.parentNode){
+projCard.parentNode.insertBefore(c, projCard.nextSibling);
+} else {
+dash.appendChild(c);
+}
+return c;
+}
+var t=null;
+new MutationObserver(function(){ clearTimeout(t); t=setTimeout(function(){ if(ensureCard()) render(); }, 500); }).observe(document.body,{childList:true,subtree:true});
+setInterval(function(){ if(ensureCard()) render(); }, 2000);
+})();
 /* PROJ-LOAD-JS : histogramme empilé charge projets 3 mois + capacité ETP */
 (function(){
   var chart=null, axisChart=null, sig='';
