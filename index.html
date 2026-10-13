@@ -430,7 +430,8 @@ tr.gs td:nth-child(3)::after, tr.gs td:nth-child(4)::after { content: '—'; col
 import {
   db, auth, secondaryAuth, ADMIN_EMAIL, PATHS,
   collection, doc, setDoc, updateDoc, deleteDoc, onSnapshot, query, where, getDocs,
-  signInWithEmailAndPassword, signOut, onAuthStateChanged, createUserWithEmailAndPassword, sendPasswordResetEmail
+  signInWithEmailAndPassword, signOut, onAuthStateChanged, createUserWithEmailAndPassword, sendPasswordResetEmail,
+  addDoc, serverTimestamp
 } from './firebase.js';
 window.addDoc = addDoc; window.collection = collection; window.serverTimestamp = serverTimestamp;
 window.updateDoc = updateDoc; window.doc = doc;
