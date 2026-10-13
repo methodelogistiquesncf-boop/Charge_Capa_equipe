@@ -484,13 +484,12 @@ const rendementOf = uid => {
   return isNaN(r) ? 0.85 : Math.max(0.1, Math.min(1, r));
 };
 const leaveFactor = () => {
-  const joursOuvres = Math.max(1, config.weeks * 5);
-  return Math.max(0, (joursOuvres - (config.congeDays ?? 46)) / joursOuvres);
+  return Math.max(0, (251 - (config.congeDays ?? 46)) / 251);
 };
 const capWeekOf = uid => config.hoursWeek * etpOf(uid) * rendementOf(uid) * leaveFactor();
 const capYearOf = uid => capWeekOf(uid) * config.weeks;
 const stdCapWeek = () => config.hoursWeek * 0.85 * leaveFactor();
-const joursTravaillesAn = () => Math.max(0, config.weeks * 5 - (config.congeDays ?? 46));
+const joursTravaillesAn = () => Math.max(0, 251 - (config.congeDays ?? 46));
 
 /* ---------- ENVELOPPES ---------- */
 const projBlocks = p => {
@@ -546,7 +545,7 @@ const isPrivileged = () => me?.role === 'admin' || me?.role === 'manager';
 const INFOS = {
   hoursWeek: ['Heures contrat / semaine (1 ETP)', "Où mettre la valeur : les heures contractuelles hebdomadaires d'un temps plein (souvent 35). À quoi elle sert : base de TOUTES les capacités. La capacité de chaque personne = cette valeur × son ETP × son rendement, congés déduits."],
   weeks: ['Semaines / an', "Où mettre la valeur : le nombre de semaines payées dans l'année (52, congés inclus). À quoi elle sert : convertit la capacité hebdomadaire en capacité annuelle (capacité hebdo × cette valeur), utilisée par les budgets et le dashboard."],
-  congeDays: ['Jours congés + RTT / an', "Où mettre la valeur : la moyenne de jours de congés + RTT pris par personne et par an (ex : 46). À quoi elle sert : déduit automatiquement ces jours de la capacité — personne n'a à les saisir dans le planning. 260 jours ouvrés − 46 = 214 jours travaillés."],
+  congeDays: ['Jours congés + RTT / an', "Où mettre la valeur : la moyenne de jours de congés + RTT pris par personne et par an (ex : 46). À quoi elle sert : déduit automatiquement ces jours de la capacité — personne n'a à les saisir dans le planning. 251 jours ouvrés − 46 = 205 jours travaillés."],
   etpCible: ['Effectif cible ETP (référence)', "Où mettre la valeur : l'effectif de référence fixé par la direction (pas l'effectif réel). À quoi elle sert : comparé à l'effectif réel dans le dashboard pour montrer la sur- ou sous-charge structurelle."],
   taux: ['Taux horaire (€)', "Où mettre la valeur : le coût chargé d'une heure de travail (ex : 66 €). À quoi elle sert : convertit les enveloppes d'heures en euros et calcule le coût annuel de la surcharge affiché à la direction."],
   etpUser: ['ETP (Équivalent Temps Plein)', "Où mettre la valeur : depuis le contrat de la personne (1 = temps plein, 0,8 = 80 %…). À quoi elle sert : proportionne la capacité de la personne. Masqué pour les comptes « gestion seule » (hors charge)."],
@@ -1329,7 +1328,7 @@ function loadConfigInputs() {
   document.getElementById('cfg-etp').value = config.etp;
   document.getElementById('cfg-taux').value = config.taux;
   document.getElementById('cfg-formule').textContent =
-    'Capacité hebdo = heures contrat × ETP × rendement × ((' + (config.weeks*5) + ' j ouvrés − ' + (config.congeDays??46) + ' j congés) ÷ ' + (config.weeks*5) + ') → ' + joursTravaillesAn() + ' j travaillés/an · soit ' + fmt(stdCapWeek()) + ' h/sem pour 1 ETP à rendement 0,85.';
+    'Capacité hebdo = heures contrat × ETP × rendement × ((251 j ouvrés − ' + (config.congeDays??46) + ' j congés) ÷ 251) → ' + joursTravaillesAn() + ' j travaillés/an · soit ' + fmt(stdCapWeek()) + ' h/sem pour 1 ETP à rendement 0,85.';
 }
 window.saveConfigFromInputs = () => {
   if (!isAdmin()) return;
@@ -1463,7 +1462,7 @@ window.renderManager = function renderManager() {
   document.getElementById('period-stats').innerHTML = `
     <div class="flex justify-between"><span class="text-slate-500">Effectif réel (Σ ETP)</span><strong class="text-blue-600">${sumEtp.toFixed(1)} ETP</strong></div>
     <div class="flex justify-between"><span class="text-slate-500">Rendement moyen</span><strong>${avgRend.toFixed(2)}</strong></div>
-    <div class="flex justify-between"><span class="text-slate-500">Jours travaillés / an</span><strong>${joursTravaillesAn()} j (${config.weeks*5} ouvrés − ${config.congeDays??46} congés)</strong></div>
+    <div class="flex justify-between"><span class="text-slate-500">Jours travaillés / an</span><strong>${joursTravaillesAn()} j travaillés (251 ouvrés − ${config.congeDays??46} congés)</strong></div>
     <div class="flex justify-between"><span class="text-slate-500">Capacité hebdo équipe</span><strong>${fmt(users.reduce((s,[uid]) => s + capWeekOf(uid), 0))} h</strong></div>
     <div class="flex justify-between"><span class="text-slate-500">Capacité annuelle équipe</span><strong>${fmt(users.reduce((s,[uid]) => s + capYearOf(uid), 0))} h</strong></div>
     <div class="flex justify-between"><span class="text-slate-500">Semaines-agent saisies</span><strong>${sumWeeksN} / ${users.length * weeksP}</strong></div>
