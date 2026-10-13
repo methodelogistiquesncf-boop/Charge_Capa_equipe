@@ -432,6 +432,8 @@ import {
   collection, doc, setDoc, updateDoc, deleteDoc, onSnapshot, query, where, getDocs,
   signInWithEmailAndPassword, signOut, onAuthStateChanged, createUserWithEmailAndPassword, sendPasswordResetEmail
 } from './firebase.js';
+window.addDoc = addDoc; window.collection = collection; window.serverTimestamp = serverTimestamp;
+window.updateDoc = updateDoc; window.doc = doc;
 
 const CATS = [
   { key: 'projet',     label: '🚀 Projets',         color: '#2563eb', trace: 'Pilotage_Projet' },
