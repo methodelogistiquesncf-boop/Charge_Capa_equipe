@@ -675,6 +675,20 @@ function switchView(v) {
   if (v === 'users') renderUsers();
 }
 window.switchView = switchView;
+Object.defineProperties(window, {
+allBlocks: { configurable: true, get: () => allBlocks },
+allUsers: { configurable: true, get: () => allUsers },
+allProjects: { configurable: true, get: () => allProjects }
+});
+window.weekOf = weekOf;
+window.mondayOf = mondayOf;
+window.saisit = saisit;
+window.capWeekOf = capWeekOf;
+window.capYearOf = capYearOf;
+window.stdCapWeek = stdCapWeek;
+window.joursTravaillesAn = joursTravaillesAn;
+window.isoWeekKey = isoWeekKey;
+window.shiftWeek = shiftWeek;
 
 function refreshAll() {
   if (!me?.role) return;
