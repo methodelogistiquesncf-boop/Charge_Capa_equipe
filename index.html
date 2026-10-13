@@ -483,9 +483,7 @@ const rendementOf = uid => {
   const r = parseFloat(allUsers[uid]?.rendement);
   return isNaN(r) ? 0.85 : Math.max(0.1, Math.min(1, r));
 };
-const leaveFactor = () => {
-  return Math.max(0, (251 - (config.congeDays ?? 46)) / 251);
-};
+const leaveFactor = () => Math.max(0, (251 - (config.congeDays ?? 46)) / 251);
 const capWeekOf = uid => config.hoursWeek * etpOf(uid) * rendementOf(uid) * leaveFactor();
 const capYearOf = uid => capWeekOf(uid) * config.weeks;
 const stdCapWeek = () => config.hoursWeek * 0.85 * leaveFactor();
