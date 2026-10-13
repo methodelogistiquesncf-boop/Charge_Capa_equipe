@@ -375,41 +375,11 @@ tr.gs td:nth-child(3)::after, tr.gs td:nth-child(4)::after { content: '—'; col
       </div>
     </div>
     <div class="p-8">
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-5 mb-8" id="dash-kpis"></div>
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <div class="bg-slate-50 p-6 rounded-xl"><h3 class="font-black text-slate-800 mb-4">Répartition par catégorie</h3><div id="dash-bars"></div></div>
-        <div class="bg-slate-50 p-6 rounded-xl"><h3 class="font-black text-slate-800 mb-4">📦 Peut-on tenir les échéances projets ? <button type="button" onclick="toggleProjEtpModal()" title="Comment cet indicateur est-il construit ?" class="ml-1 inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 hover:text-blue-800 text-[11px] font-black transition no-print align-middle">i</button></h3><div id="proj-etp-panel" class="text-sm space-y-2"></div></div>
-        <div class="bg-slate-50 p-6 rounded-xl"><h3 class="font-black text-slate-800 mb-4">Charge vs capacité réelle par collaborateur</h3><canvas id="chart-agents" height="250"></canvas></div>
-      </div>
-      <div class="bg-slate-50 p-6 rounded-xl mb-8">
-        <h3 class="font-black text-slate-800 mb-1">📈 Trajectoire charge vs capacité (cumul depuis janvier)</h3>
-        <p class="text-xs text-slate-500 mb-3">Bleue au-dessus de la verte = surcharge structurelle. <span id="cumul-start" class="font-bold text-slate-700"></span></p>
-        <canvas id="chart-cumul" height="110"></canvas>
-      </div>
-      <div class="bg-slate-50 p-6 rounded-xl mb-8">
-        <h3 class="font-black text-slate-800 mb-1">💰 Enveloppes & budgets</h3>
-        <div id="dash-budget-kpis" class="grid grid-cols-2 md:grid-cols-4 gap-3 my-4"></div>
-        <div id="dash-budget-top"></div>
-      </div>
-      <div class="bg-slate-50 p-6 rounded-xl mb-8">
-        <h3 class="font-black text-slate-800 mb-1">✅ Checklists projets : cases en retard</h3>
-        <div id="dash-jalons" class="mt-3"></div>
-      </div>
-      <div class="bg-slate-50 p-6 rounded-xl mb-8">
-        <h3 class="font-black text-slate-800 mb-1">🔥 Top activités consommatrices (équipe)</h3>
-        <div id="dash-top" class="mt-4"></div>
-      </div>
-      <table class="w-full mb-6 border border-slate-200 rounded-lg overflow-hidden">
-        <thead><tr class="bg-slate-900 text-white">
-          <th class="text-left p-3 font-bold text-xs uppercase">Activité</th><th class="text-left p-3 font-bold text-xs uppercase">Traçabilité</th>
-          <th class="text-center p-3 font-bold text-xs uppercase">Moyenne/sem (équipe)</th><th class="text-center p-3 font-bold text-xs uppercase">Charge (h/an)</th>
-          <th class="text-center p-3 font-bold text-xs uppercase">% charge</th><th class="text-center p-3 font-bold text-xs uppercase">Statut</th>
-        </tr></thead>
-        <tbody id="dash-detail"></tbody>
-      </table>
-      <div id="dash-recommandation" class="rounded-xl p-6 border-l-4"></div>
-    </div>
-  </div>
+<!-- Histogramme hebdomadaire : Charge projets par semaine -->
+<div id="proj-load-card" class="bg-slate-50 p-6 rounded-xl mb-8"></div>
+<!-- Graphique mensuel : 4 catégories vs capacité -->
+<div id="monthly-card" class="bg-slate-50 p-6 rounded-xl"></div>
+</div>
 </section>
 
 <script type="module">
