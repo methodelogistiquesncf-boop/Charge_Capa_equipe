@@ -1939,14 +1939,12 @@ import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth
   scanAndInject();
 
   /* ── Événements globaux ── */
-  document.addEventListener('click', (e) => {
+document.addEventListener('click', (e) => {
     const ed = e.target.closest('[data-edit]');
     if (ed) { startEditNote(ed.dataset.edit); return; }
     const del = e.target.closest('[data-del]');
     if (del) { deleteNote(del.dataset.del); return; }
-    const m = modal();
-    if (m && !m.classList.contains('hidden') && e.target === m) closeNotesModal();
-  });
+});
   document.addEventListener('keydown', (e) => {
     const m = modal();
     if (!m || m.classList.contains('hidden')) return;
