@@ -15,6 +15,12 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
+  #notes-list a {
+  word-break: break-all;
+  overflow-wrap: break-word;
+  max-width: 100%;
+  display: inline-block;
+}
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
 body { font-family: 'Inter', sans-serif; }
 .nav-active { background: rgba(255,255,255,0.25); border-bottom: 3px solid white; }
@@ -1758,6 +1764,14 @@ import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth
   const auth = getAuth(app);
 
   const esc = (s) => String(s ?? "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const escWithLinks = (s) => {
+  const escaped = esc(s);
+  const urlRegex = /(https?:\/\/[^\s<>"']+)/gi;
+  return escaped.replace(urlRegex, (url) => {
+    const href = url.replace(/&amp;/g, '&');
+    return '<a href="' + href + '" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 hover:underline" style="word-break: break-all; overflow-wrap: break-word;">' + url + '</a>';
+  });
+};
   const fmtDate = (ts) => { try { return ts?.toDate?.().toLocaleString('fr-FR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' }); } catch(e) { return ''; } };
   const initials = (email) => (email || '?').replace(/@.*$/, '').slice(0, 2).toUpperCase();
 
@@ -1807,7 +1821,7 @@ import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth
             '<span class="text-[11px] text-slate-400">' + (fmtDate(n.at) || 'à l\'instant') + '</span>' + (n.editedAt ? '<span class="text-[10px] text-slate-400 italic">(modifiée)</span>' : '') +
             '<span class="ml-auto flex items-center gap-1">' + ((n.by === myEmail()) ? '<button data-edit="' + d.id + '" class="text-slate-300 hover:text-blue-500 opacity-0 group-hover:opacity-100 transition text-xs" title="Modifier ma note">✏️</button>' : '') + '<button data-del="' + d.id + '" class="text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition text-xs" title="Supprimer">🗑️</button></span>' +
           '</div>' +
-          '<p class="text-sm text-slate-700 whitespace-pre-wrap mt-1">' + esc(n.text) + '</p>' +
+          '<p class="text-sm text-slate-700 whitespace-pre-wrap mt-1" style="overflow-wrap: anywhere; word-break: break-word;">' + escWithLinks(n.text) + '</p>' +
         '</div></div>';
     }).join('');
   }
