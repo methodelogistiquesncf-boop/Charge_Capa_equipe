@@ -1739,7 +1739,7 @@ if ('serviceWorker' in navigator) {
     </div>
     <div id="notes-list" class="p-5 space-y-3 overflow-y-auto flex-1 bg-slate-100/50"></div>
     <div class="p-4 border-t border-slate-200 bg-white rounded-b-2xl">
-      <textarea id="notes-input" rows="3" placeholder="Ajouter une note (point d'avancement, blocage, décision...)" class="w-full border border-slate-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none resize-none"></textarea>
+      <textarea id="notes-input" rows="3" placeholder="Ajouter une note (point d'avancement, blocage, décision...)" class="w-full border border-slate-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none resize-y"></textarea>
       <div class="flex items-center justify-between mt-2 gap-3">
         <span class="text-[11px] text-slate-400">Ctrl + Entrée pour envoyer · note signée avec ton compte</span>
         <button id="notes-add-btn" onclick="addNote()" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-2 px-4 rounded-xl transition shrink-0">➕ Ajouter la note</button>
@@ -1860,7 +1860,7 @@ import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth
     const card = btn.closest('.group');
     const p = card && card.querySelector('p.whitespace-pre-wrap');
     if (!p) return;
-    p.outerHTML = '<textarea id="note-edit-area" rows="3" class="w-full border border-blue-300 rounded-xl p-2 text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none resize-none mt-1">' + esc(note.text) + '</textarea>' +
+    p.outerHTML = '<textarea id="note-edit-area" rows="3" class="w-full border border-blue-300 rounded-xl p-2 text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none resize-y mt-1">' + esc(note.text) + '</textarea>' +
       '<div class="flex gap-2 mt-2 justify-end">' +
       '<button id="note-edit-cancel" class="text-xs font-bold text-slate-500 hover:text-slate-700 px-3 py-1 rounded-lg hover:bg-slate-100 transition">Annuler</button>' +
       '<button id="note-edit-save" class="text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded-lg transition">💾 Enregistrer</button>' +
