@@ -34,7 +34,7 @@ body { font-family: 'Inter', sans-serif; }
 .blk:hover { transform: scale(1.03); box-shadow: 0 4px 10px rgba(0,0,0,0.25); z-index: 30 !important; }
 .blk.dragging { opacity: 0.35; }
 .rz { position: absolute; left: 0; right: 0; height: 6px; cursor: ns-resize; z-index: 6; }
-.rz-t { top: 0; }
+.rz-t { top: 0; }a
 .rz-b { bottom: 0; }
 .rz:hover { background: rgba(255,255,255,0.4); }
 .readonly .rz { display: none; }
@@ -1137,7 +1137,12 @@ function renderJalons() {
     </div>`;
   }).join('') : '<p class="text-xs text-slate-400 italic">Aucune case. Ajoutez la premiere ci-dessous.</p>';
 }
-window.openJalons = id => { editingJalonsId = id; renderJalons(); document.getElementById('jalon-panel').scrollIntoView({ behavior: 'smooth', block: 'center' }); };
+window.openJalons = id => {
+  const y = window.scrollY;          // mémorise la position verticale
+  editingJalonsId = id;
+  renderJalons();
+  window.scrollTo(0, y);             // restaure immédiatement la position
+};
 window.closeJalons = () => { editingJalonsId = null; document.getElementById('jalon-panel').classList.add('hidden'); };
 window.addJalon = () => {
   const p = allProjects.find(x => x.id === editingJalonsId); if (!p) return;
